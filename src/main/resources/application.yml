@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /tirashop
+
+spring:
+  application:
+    name: TiraShop
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tirashop # Thay <HOST>, <PORT>, và <DATABASE_NAME>
+    username: postgres # Tên ng??i dùng PostgreSQL
+    password: 300924 # M?t kh?u c?a ng??i dùng
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Ho?c "create-drop", "validate", "none" tùy m?c ?ích
+    show-sql: true # Hi?n th? câu l?nh SQL trong log
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Dialect phù h?p v?i PostgreSQL
