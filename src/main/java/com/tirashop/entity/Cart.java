@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,11 +26,10 @@ public class Cart {
     private User user;  // Mã người dùng (Khóa ngoại)
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
+
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo giỏ hàng
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime updatedAt;  // Thời gian cập nhật giỏ hàng
 
     @Enumerated(EnumType.STRING)

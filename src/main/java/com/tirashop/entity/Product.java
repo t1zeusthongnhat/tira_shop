@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,11 +41,9 @@ public class Product {
     private int inventory;
 
     @Column(name = "created_at", updatable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate createdAt = LocalDate.now();
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

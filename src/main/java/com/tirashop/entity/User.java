@@ -1,9 +1,9 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
@@ -55,18 +56,14 @@ public class User {
     private List<Order> orders = new ArrayList<>();  // Mối quan hệ One-to-Many với Oder
 
     @Column(name = "birthday")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate birthday;
 
     @Column(name = "created_at", updatable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate createdAt = LocalDate.now();
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate updatedAt;
 
     @Column(name = "deleted_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate deletedAt;
 }

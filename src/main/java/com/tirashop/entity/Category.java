@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,11 +23,9 @@ public class Category {
     private String description;
 
     @Column(name = "created_at", updatable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate createdAt = LocalDate.now();
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "category") // Mối quan hệ One-to-Many

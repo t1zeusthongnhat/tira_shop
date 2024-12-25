@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,11 +38,9 @@ public class Review {
     private String image;  // URL của ảnh (nếu có ảnh đánh giá)
 
     @Column(name = "created_at", updatable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate createdAt = LocalDate.now();  // Thời gian tạo đánh giá
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDate updatedAt;  // Thời gian cập nhật (nếu có thay đổi)
 
 }

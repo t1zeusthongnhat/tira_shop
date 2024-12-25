@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,11 +35,9 @@ public class Shipment {
     private ShipmentStatus status;  // Trạng thái giao hàng
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo vận chuyển
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime updatedAt;  // Thời gian cập nhật vận chuyển
 
     public enum ShipmentStatus {

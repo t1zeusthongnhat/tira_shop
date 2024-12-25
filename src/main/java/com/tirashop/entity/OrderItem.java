@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,10 +35,8 @@ public class OrderItem {
     private double price;  // Giá của sản phẩm tại thời điểm đặt hàng
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian thêm sản phẩm vào đơn hàng
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime updatedAt;  // Thời gian cập nhật sản phẩm trong đơn hàng
 }

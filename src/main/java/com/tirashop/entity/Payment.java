@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,11 +38,9 @@ public class Payment {
     private PaymentStatus status;  // Trạng thái thanh toán
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian thanh toán
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime updatedAt;  // Thời gian cập nhật thanh toán
 
     public enum PaymentMethod {

@@ -1,6 +1,5 @@
 package com.tirashop.entity;
 
-import com.tirashop.validator.LocalDateAttributeConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,11 +42,9 @@ public class Voucher {
     private VoucherStatus status;  // Trạng thái của voucher (active, expired, used)
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo voucher
 
     @Column(name = "updated_at")
-    @Convert(converter = LocalDateAttributeConverter.class)
     private LocalDateTime updatedAt;  // Thời gian cập nhật voucher
 
     public enum DiscountType {

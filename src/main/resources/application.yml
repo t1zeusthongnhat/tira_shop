@@ -8,15 +8,18 @@ spring:
     name: TiraShop
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/tirashop # Thay <HOST>, <PORT>, và <DATABASE_NAME>
-    username: postgres # Tên ng??i dùng PostgreSQL
-    password: 300924 # M?t kh?u c?a ng??i dùng
+    url: jdbc:postgresql://localhost:5432/tirashop # Replace with your <HOST>, <PORT>, and <DATABASE_NAME>
+    username: postgres # Username for PostgreSQL
+    password: 300924 # Password for the PostgreSQL user
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update # Ho?c "create-drop", "validate", "none" tùy m?c ?ích
-    show-sql: true # Hi?n th? câu l?nh SQL trong log
+      ddl-auto: update # You can use "create-drop", "validate", or "none" depending on your need
+    show-sql: true # Display SQL queries in the log
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect # Dialect phù h?p v?i PostgreSQL
+        dialect: org.hibernate.dialect.PostgreSQLDialect # PostgreSQL dialect
+
+
+
