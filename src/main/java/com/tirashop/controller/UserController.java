@@ -3,12 +3,14 @@ package com.tirashop.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tirashop.dto.RoleDTO;
 import com.tirashop.dto.UserDTO;
+import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.entity.User;
 import com.tirashop.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +34,14 @@ public class UserController {
     UserService userService;
 
     @GetMapping("/list")
-    public List<UserDTO> getListUser (){
-        return userService.getListUser();
+    public ApiResponse<List<UserDTO>> getListUser (){
+        List<UserDTO> list =  userService.getListUser();
+        return new ApiResponse<>("success",200,"Operation successful",list);
     }
 
+
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> createUser(
+    public ApiResponse<UserDTO> createUser(
             @RequestParam("username") String username,
             @RequestParam("firstname") String firstname,
             @RequestParam("lastname") String lastname,
@@ -58,9 +62,10 @@ public class UserController {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 parsedBirthday = LocalDate.parse(birthday, formatter);
             } catch (DateTimeParseException e) {
-                throw new RuntimeException("Invalid date format for birthday. Expected format: dd-MM-yyyy");
+                return new ApiResponse<>("error", 400, "Invalid date format for birthday. Expected format: dd-MM-yyyy", null);
             }
         }
+
         // Tạo UserDTO từ các tham số
         UserDTO userDTO = UserDTO.builder()
                 .username(username)
@@ -81,8 +86,10 @@ public class UserController {
         // Gọi service để lưu user
         UserDTO savedUser = userService.createUser(userDTO, avatar);
 
-        return ResponseEntity.created(URI.create("/user/" + savedUser.getId())).body(savedUser);
+        // Trả về ApiResponse với thông tin user đã được tạo
+        return new ApiResponse<>("success", 201, "User created successfully", savedUser);
     }
+
 
 
 }

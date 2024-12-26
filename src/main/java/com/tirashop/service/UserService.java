@@ -36,8 +36,6 @@ public class UserService {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
 
-
-
     public UserDTO createUser(UserDTO userDTO, MultipartFile avatar) {
         log.info("In method create user");
 
