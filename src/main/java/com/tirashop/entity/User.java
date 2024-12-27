@@ -46,15 +46,6 @@ public class User {
     @ManyToMany
     Set<Role> role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();  // Mối quan hệ One-to-Many với Review
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cart> carts = new ArrayList<>();  // Mối quan hệ One-to-Many với Cart
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();  // Mối quan hệ One-to-Many với Oder
-
     @Column(name = "birthday")
     private LocalDate birthday;
 
@@ -66,4 +57,24 @@ public class User {
 
     @Column(name = "deleted_at")
     private LocalDate deletedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();  // Mối quan hệ One-to-Many với Review
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cart> carts = new ArrayList<>();  // Mối quan hệ One-to-Many với Cart
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();  // Mối quan hệ One-to-Many với Oder
+
+    @OneToMany(mappedBy = "buyer")
+    private List<ChatRoom> buyerChatRooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "admin")
+    private List<ChatRoom> adminChatRooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> sentMessages = new ArrayList<>();
+
+
 }

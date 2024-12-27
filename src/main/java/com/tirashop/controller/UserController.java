@@ -91,5 +91,53 @@ public class UserController {
     }
 
 
+    @PutMapping("/update/{id}")
+    public ApiResponse<UserDTO> updateUser(
+            @PathVariable Long id,
+            @RequestParam("username") String username,
+            @RequestParam("firstname") String firstname,
+            @RequestParam("lastname") String lastname,
+            @RequestParam("password") String password,
+            @RequestParam("email") String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "address", required = false) String address,
+            @RequestParam(value = "gender", required = false) String gender,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "birthday", required = false) String birthday,
+            @RequestParam(value = "role", required = false) List<String> roles,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+
+        LocalDate parsedBirthday = null;
+        if (birthday != null && !birthday.isEmpty()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                parsedBirthday = LocalDate.parse(birthday, formatter);
+            } catch (DateTimeParseException e) {
+                return new ApiResponse<>("error", 400, "Invalid date format for birthday. Expected format: dd-MM-yyyy", null);
+            }
+        }
+
+        UserDTO userDTO = UserDTO.builder()
+                .username(username)
+                .firstname(firstname)
+                .lastname(lastname)
+                .password(password)
+                .email(email)
+                .phone(phone)
+                .address(address)
+                .gender(gender)
+                .status(status)
+                .birthday(parsedBirthday)
+                .role(roles != null ? roles.stream()
+                        .map(roleName -> RoleDTO.builder().name(roleName).build())
+                        .collect(Collectors.toSet()) : null)
+                .build();
+
+        return new ApiResponse<>("success", 200, "User updated successfully",
+                userService.updateUser(id, userDTO, avatar));
+    }
+
+
+
 
 }
