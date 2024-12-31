@@ -9,6 +9,7 @@ import com.tirashop.dto.request.IntrospectRequest;
 import com.tirashop.dto.response.AuthenticationResponse;
 import com.nimbusds.jose.*;
 import com.tirashop.dto.response.IntrospectResponse;
+import com.tirashop.entity.User;
 import com.tirashop.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +51,7 @@ public class AuthenticationService {
 
         if(!authenticated) throw new RuntimeException("Cannot authenticate user!");
 
-        var token = generateToken(userLogin.getUsername());
+        var token = generateToken(userLogin);
         return AuthenticationResponse.builder()
                 .token(token)
                 .authenticated(true)
@@ -55,7 +59,7 @@ public class AuthenticationService {
 
     }
 
-    String generateToken(String username){
+    String generateToken(User user){
         // token duoc cau tao nhu sau:
         // 3 phan: JWT- json web token
         // header: chua thuat toan de gen ra mot chuoi token
@@ -65,13 +69,14 @@ public class AuthenticationService {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         //Cần body cho token: subject, issuer, issueTime, expirationTime, claim( tu build), id.
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("duonghoang")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("customClaim","custom")
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope",buildScope(user))
                 .build();
         //Tao payload cho token
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -84,6 +89,19 @@ public class AuthenticationService {
         } catch (JOSEException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // build scope
+    private String buildScope(User user) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        // add role vao scope
+        if (!CollectionUtils.isEmpty(user.getRole()))
+            user.getRole()
+                    .forEach(
+                            role -> {
+                                stringJoiner.add(role.getName());
+                            });
+        return stringJoiner.toString();
     }
 
     public IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException {

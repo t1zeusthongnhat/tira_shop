@@ -30,8 +30,10 @@ import java.net.http.HttpRequest;
 public class SecurityConfig {
 
     public final String[] PUBLIC_ENDPOINT = {
-      "/user/list","/user/register","/auth/login","/auth/introspect"
+      "/auth/login","/auth/introspect"
     };
+
+    public final String[] ADMIN_ROLE = {"/user/list", "/user/register"};
 
     @Value("${jwt.signerKey}")
     @NonFinal
@@ -47,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT)
                         .permitAll()
                         // Cho phép tất cả các yêu cầu POST tới các endpoint công khai.
+//                        .requestMatchers(HttpMethod.GET, ADMIN_ROLE).hasAnyAuthority("ROLE_ADMIN")
+                        //config role trong service
                         .anyRequest()
                         // Yêu cầu tất cả các yêu cầu khác phải được xác thực.
                         .authenticated()

@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -50,9 +51,12 @@ public class UserService {
         log.info("Updated status for user {} to {}", id, status);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<UserDTO> getListUser(){
         return userRepository.findAll().stream().map(this::toDTO).toList();
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public UserDTO createUser(UserDTO userDTO, MultipartFile avatar) {
         log.info("In method create user");
 
@@ -68,7 +72,7 @@ public class UserService {
         userRepository.save(user);
         return toDTO(user);
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public UserDTO updateUser(Long id, UserDTO userDTO, MultipartFile avatar) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot found user has id: " + id));
@@ -104,7 +108,6 @@ public class UserService {
     // Hàm xử lý upload ảnh
     private String handleImageUpload(MultipartFile file) {
         String uploadDir = System.getProperty("user.dir") + "/uploads/avatar";
-
         try {
             // Xử lý tên file
             String originalFileName = file.getOriginalFilename();
