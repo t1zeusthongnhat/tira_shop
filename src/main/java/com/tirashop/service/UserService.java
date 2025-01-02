@@ -36,8 +36,6 @@ public class UserService {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-
-
     public void updateUserStatus(Long id, String status) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot found user has id: " + id));

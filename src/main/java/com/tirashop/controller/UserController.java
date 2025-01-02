@@ -1,24 +1,17 @@
 package com.tirashop.controller;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tirashop.dto.RoleDTO;
 import com.tirashop.dto.UserDTO;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.entity.User;
 import com.tirashop.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -28,12 +21,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/user")
+@Tag(name = "User", description = "APIs for user management")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
 
     @GetMapping("/list")
+    @Operation(summary = "Get user list", description = "Retrieve the list of users")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User list retrieved successfully")
     public ApiResponse<List<UserDTO>> getListUser (){
         List<UserDTO> list =  userService.getListUser();
         return new ApiResponse<>("success",200,"Operation successful",list);
@@ -41,6 +37,8 @@ public class UserController {
 
 
     @PostMapping("/register")
+    @Operation(summary = "Register user", description = "Create a new user")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User created successfully")
     public ApiResponse<UserDTO> createUser(
             @RequestParam("username") String username,
             @RequestParam("firstname") String firstname,

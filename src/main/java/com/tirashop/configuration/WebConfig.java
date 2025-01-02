@@ -11,5 +11,8 @@ public class WebConfig implements WebMvcConfigurer {
         // Chỉ định Spring Boot phục vụ các file trong thư mục uploads/avatar
         registry.addResourceHandler("/uploads/avatar/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/avatar/");
+        // Cấu hình để phục vụ các file trong thư mục uploads/logo
+        registry.addResourceHandler("/uploads/logo/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/logo/");
     }
 }

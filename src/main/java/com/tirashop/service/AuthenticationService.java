@@ -6,10 +6,13 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tirashop.dto.request.AuthenticationRequest;
 import com.tirashop.dto.request.IntrospectRequest;
+import com.tirashop.dto.request.RefreshRequest;
 import com.tirashop.dto.response.AuthenticationResponse;
 import com.nimbusds.jose.*;
 import com.tirashop.dto.response.IntrospectResponse;
+import com.tirashop.entity.InvalidatedToken;
 import com.tirashop.entity.User;
+import com.tirashop.repository.InvalidatedTokenRepository;
 import com.tirashop.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,8 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
+
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     // chuỗi 32-byte bí mật để sử dụng làm khóa ký (256-bit):
@@ -52,12 +57,16 @@ public class AuthenticationService {
         if(!authenticated) throw new RuntimeException("Cannot authenticate user!");
 
         var token = generateToken(userLogin);
+        var refreshToken = generateRefreshToken(userLogin);
+
         return AuthenticationResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .authenticated(true)
                 .build();
 
     }
+
 
     String generateToken(User user){
         // token duoc cau tao nhu sau:
@@ -73,9 +82,10 @@ public class AuthenticationService {
                 .issuer("duonghoang")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(3, ChronoUnit.HOURS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
+                .claim("type", "access")
                 .claim("scope",buildScope(user))
                 .build();
         //Tao payload cho token
@@ -105,19 +115,125 @@ public class AuthenticationService {
     }
 
     public IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException {
-        var token = request.getToken();
-        // Tạo đối tượng verifier với SIGNER_KEY
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-        // Phân tích cú pháp token đã ký
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        // Xác minh token với khóa bí mật
-        boolean verified = signedJWT.verify(verifier);
-        // Kiểm tra xem token đã hết hạn hay chưa
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        boolean isExpired = new Date().after(expirationTime);
-        // Tạo phản hồi dựa trên trạng thái của token
-        boolean active = verified && !isExpired;
-        // Trả về kết quả kiểm tra token
+        String token = request.getToken();
+
+        // Xác thực token (bao gồm cả hết hạn)
+        SignedJWT signedJWT = verifyToken(token, true);
+
+        // Kiểm tra token có nằm trong danh sách đã logout không
+        boolean isBlacklisted = isTokenBlacklisted(signedJWT.getJWTClaimsSet().getJWTID());
+
+        boolean active = !isBlacklisted;
         return new IntrospectResponse(active);
     }
+
+
+
+
+    public void logoutToken(IntrospectRequest request) throws ParseException, JOSEException {
+        String token = request.getToken();
+
+        // Xác thực token (không cần kiểm tra hết hạn)
+        SignedJWT signedJWT = verifyToken(token, false);
+
+        // Lấy thông tin từ token
+        String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        // Lưu token vào danh sách đã vô hiệu hóa
+        InvalidatedToken invalidatedToken =
+                InvalidatedToken.builder()
+                        .token(jwtId)
+                        .expiryTime(expiryTime)
+                        .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+
+    public boolean isTokenBlacklisted(String token) {
+        return invalidatedTokenRepository.findByToken(token).isPresent();
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest refreshRequest) throws ParseException, JOSEException {
+        // Xác thực Refresh Token được gửi lên
+        SignedJWT signedJWT = verifyToken(refreshRequest.getToken(), true);
+
+        // Lấy thông tin từ Refresh Token
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
+
+        // Lưu Refresh Token cũ vào danh sách đã vô hiệu hóa
+        if (!isTokenBlacklisted(jwtId)) {
+            InvalidatedToken invalidatedToken =
+                    InvalidatedToken.builder()
+                            .token(jwtId)
+                            .expiryTime(expiryTime)
+                            .build();
+            invalidatedTokenRepository.save(invalidatedToken);
+        }
+
+        // Lấy username từ Refresh Token
+        String username = signedJWT.getJWTClaimsSet().getSubject();
+
+        // Tìm User dựa trên username
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Cannot find username: " + username));
+
+        // Tạo Access Token mới
+        String newToken = generateToken(user);
+
+        // Tạo Refresh Token mới
+        String newRefreshToken = generateRefreshToken(user);
+
+        // Trả về AuthenticationResponse với Access Token và Refresh Token mới
+        return AuthenticationResponse.builder()
+                .token(newToken)
+                .refreshToken(newRefreshToken)
+                .authenticated(true)
+                .build();
+    }
+
+    // xác nhận hết hạn: validate expiration
+    private SignedJWT verifyToken(String token, boolean validateExpiration) throws ParseException, JOSEException {
+        // Phân tích token
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        // Xác minh chữ ký
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        if (!signedJWT.verify(verifier)) {
+            throw new RuntimeException("Invalid token signature");
+        }
+
+        // Kiểm tra thời gian hết hạn nếu cần
+        if (validateExpiration) {
+            Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            if (new Date().after(expirationTime)) {
+                throw new RuntimeException("Token has expired");
+            }
+        }
+
+        return signedJWT; // Trả về SignedJWT nếu hợp lệ
+    }
+    public String generateRefreshToken(User user) {
+        try {
+            JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+            JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                    .subject(user.getUsername())
+                    .issuer("duonghoang")
+                    .issueTime(new Date())
+                    .expirationTime(Date.from(Instant.now().plus(5, ChronoUnit.DAYS)))
+                    .jwtID(UUID.randomUUID().toString())
+                    .claim("type", "refresh")
+                    .build();
+            SignedJWT signedJWT = new SignedJWT(header, jwtClaimsSet);
+            signedJWT.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return signedJWT.serialize();
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
 }

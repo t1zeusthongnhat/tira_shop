@@ -1,7 +1,13 @@
 package com.tirashop.dto.response;
 
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ApiResponse<T> {
     private String status;
     private int code;
