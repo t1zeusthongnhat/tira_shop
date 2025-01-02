@@ -20,7 +20,6 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String code;
     private String description;
@@ -30,7 +29,7 @@ public class Product {
     private String status;
     private String size;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) //lazy là chỉ tải dữ liệu khi cần thiết tức là có yêu cầu liên quan đến db chứa nó
     @JoinColumn(name = "category_id") // Thiết lập khóa ngoại cho category
     private Category category; // Sử dụng mối quan hệ Many-to-One với Category
 

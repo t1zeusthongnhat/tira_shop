@@ -44,10 +44,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(
                 request -> request
-                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT)
-                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
                         // Cho phép tất cả các yêu cầu POST tới các endpoint công khai.
 //                        .requestMatchers(HttpMethod.GET, ADMIN_ROLE).hasAnyAuthority("ROLE_ADMIN")
                         //config role trong service
