@@ -46,5 +46,5 @@ public class ProductDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate updatedAt;
 
-    private List<String> imageUrls; // Đơn giản hóa quan hệ với Image bằng cách lấy danh sách URL
+    private List<String> imageUrls; // Danh sách URL ảnh
 }
