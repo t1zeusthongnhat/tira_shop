@@ -1,0 +1,65 @@
+package com.tirashop.controller;
+
+import com.tirashop.dto.VoucherDTO;
+import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.service.VoucherService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Slf4j
+@RestController
+@RequestMapping("/voucher")
+@Tag(name = "Voucher", description = "APIs for managing vouchers")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class VoucherController {
+
+    VoucherService voucherService;
+
+    @GetMapping("/list")
+    @Operation(summary = "Get all vouchers", description = "Retrieve all vouchers with their details")
+    public ApiResponse<List<VoucherDTO>> getAllVouchers() {
+        List<VoucherDTO> vouchers = voucherService.getAllVouchers();
+        return new ApiResponse<>("success", 200, "Get Voucher success!", vouchers);
+    }
+
+    @PostMapping("/add")
+    @Operation(summary = "Add new voucher", description = "Add a new voucher with its details")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<VoucherDTO> addVoucher(@RequestBody VoucherDTO voucherDTO) {
+        VoucherDTO response = voucherService.createVoucher(voucherDTO);
+        return new ApiResponse<>("success", 201, "Add Voucher success", response);
+    }
+
+    @PutMapping("/update/{id}")
+    @Operation(summary = "Update voucher", description = "Update voucher details by ID")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<VoucherDTO> updateVoucher(@PathVariable Long id, @RequestBody VoucherDTO voucherDTO) {
+        VoucherDTO response = voucherService.updateVoucher(id, voucherDTO);
+        return new ApiResponse<>("success", 200, "Update Voucher success", response);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Delete voucher", description = "Delete a voucher by its ID")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> deleteVoucher(@PathVariable Long id) {
+        voucherService.deleteVoucher(id);
+        return new ApiResponse<>("success", 200, "Delete Voucher success", null);
+    }
+
+    @GetMapping("/get/{id}")
+    @Operation(summary = "Get voucher by ID", description = "Retrieve voucher details by its ID")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<VoucherDTO> getVoucherById(@PathVariable Long id) {
+        VoucherDTO response = voucherService.getVoucherById(id);
+        return new ApiResponse<>("success", 200, "Get Voucher success", response);
+    }
+}

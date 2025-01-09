@@ -7,13 +7,6 @@ spring:
   application:
     name: TiraShop
 
-
-
-
-
-
-
-
   datasource:
     url: jdbc:postgresql://localhost:5432/tirashop # Replace with your <HOST>, <PORT>, and <DATABASE_NAME>
     username: postgres # Username for PostgreSQL

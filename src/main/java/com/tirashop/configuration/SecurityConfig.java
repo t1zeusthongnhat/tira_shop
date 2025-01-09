@@ -44,7 +44,7 @@ public class SecurityConfig {
                 oauth2 -> oauth2.jwt(
                         jwtConfigurer -> jwtConfigurer
                                 .decoder(customJwtDecoder) // Sử dụng CustomJwtDecoder để giải mã JWT
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()) // Chuyển đổi JWT thành Authentication object
                 )
         );
 
@@ -58,6 +58,8 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10); // Mã hóa mật khẩu với BCrypt
     }
 
+
+    //Chuyển đổi thông tin trong token (claims) thành một Authentication object mà Spring Security hiểu.
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();

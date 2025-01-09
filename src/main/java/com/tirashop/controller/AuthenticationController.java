@@ -5,10 +5,13 @@ import com.nimbusds.jose.JOSEException;
 import com.tirashop.dto.request.AuthenticationRequest;
 import com.tirashop.dto.request.IntrospectRequest;
 import com.tirashop.dto.request.RefreshRequest;
+import com.tirashop.dto.request.UserRegisterRequest;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.dto.response.AuthenticationResponse;
 import com.tirashop.dto.response.IntrospectResponse;
+import com.tirashop.dto.response.UserRegisterResponse;
 import com.tirashop.service.AuthenticationService;
+import com.tirashop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -30,6 +33,7 @@ import java.text.ParseException;
 @Tag(name = "Authentication", description = "APIs for user authentication")
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    UserService userService;
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate user", description = "Authenticate user with username and password")
@@ -37,6 +41,13 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> authenticate (@RequestBody AuthenticationRequest request){
         return new ApiResponse<>
                 ("success",200,"Login Successful",authenticationService.authenticated(request));
+    }
+
+    @PostMapping("/register-new-user")
+    public ApiResponse<UserRegisterResponse> registerAcc(@RequestBody UserRegisterRequest request){
+        UserRegisterResponse response = userService.register(request);
+        return new ApiResponse<>
+                ("success",200,"Register Successful",response);
     }
 
     @PostMapping("/introspect")
