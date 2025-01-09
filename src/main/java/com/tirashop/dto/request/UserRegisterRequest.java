@@ -1,47 +1,36 @@
-package com.tirashop.dto;
+package com.tirashop.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.tirashop.dto.RoleDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Set;
 
-
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserDTO {
+public class UserRegisterRequest {
     private Long id;
 
     @Size(min = 6, message = "Username must be at least 6 characters!")
     private String username;
     private String firstname;
     private String lastname;
+    private String phone;
+    private String gender;
 
-
-    private String password;
     @Email(message = "Email must be in valid format !!!")
     private String email;
-    private String phone;
-    private String address;
-    private String gender;
-    private String status;
-    private  String avatar;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate birthday;
+    private String password;
+    private String confirmPassword;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDate createdAt = LocalDate.now();
-
-    Set<RoleDTO> role;
+     // mac dinh khi dang ki status la Active
+     // role: mac dinh la ROLE_USER
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,20 +33,20 @@ public class Voucher {
     private double discountValue;  // Giá trị giảm giá
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;  // Ngày bắt đầu áp dụng voucher
+    private LocalDate startDate;  // Ngày bắt đầu áp dụng voucher
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;  // Ngày kết thúc áp dụng voucher
+    private LocalDate endDate;  // Ngày kết thúc áp dụng voucher
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private VoucherStatus status;  // Trạng thái của voucher (active, expired, used)
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo voucher
+    private LocalDate createdAt = LocalDate.now();  // Thời gian tạo voucher
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;  // Thời gian cập nhật voucher
+    private LocalDate updatedAt;  // Thời gian cập nhật voucher
 
     public enum DiscountType {
         PERCENTAGE,  // Giảm giá theo phần trăm

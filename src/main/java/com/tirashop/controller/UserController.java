@@ -1,8 +1,10 @@
 package com.tirashop.controller;
 import com.tirashop.dto.RoleDTO;
 import com.tirashop.dto.UserDTO;
+import com.tirashop.dto.UserProfileDTO;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.entity.User;
+import com.tirashop.repository.UserRepository;
 import com.tirashop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +12,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
@@ -26,6 +31,8 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+    UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
 
     @GetMapping("/list")
     @Operation(summary = "Get user list", description = "Retrieve the list of users")
@@ -35,9 +42,61 @@ public class UserController {
         return new ApiResponse<>("success",200,"Operation successful",list);
     }
 
+    @GetMapping("/my-profile")
+    @Operation(summary = "Get user profile", description = "Retrieve the profile information of the authenticated user")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile retrieved successfully")
+    public ApiResponse<UserProfileDTO> getMyProfile() {
+        // Lấy thông tin từ token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
-    @PostMapping("/register")
-    @Operation(summary = "Register user", description = "Create a new user")
+        // Lấy thông tin từ cơ sở dữ liệu
+        UserProfileDTO response = userService.getProfile(username);
+        return new ApiResponse<>("success", 200, "User profile retrieved successfully", response);
+    }
+
+
+    @PutMapping("/update-profile")
+    @Operation(summary = "Update user profile", description = "Update the profile information of the authenticated user")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile updated successfully")
+    public ApiResponse<UserProfileDTO> updateProfileUser(
+            @RequestParam(value = "newUsername", required = false) String newUsername,
+            @RequestParam(value = "firstname", required = false) String firstname,
+            @RequestParam(value = "lastname", required = false) String lastname,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "address", required = false) String address,
+            @RequestParam(value = "gender", required = false) String gender,
+            @RequestParam(value = "birthday", required = false) String birthday,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+
+        // Lấy username hiện tại từ token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        // Gọi service để xử lý cập nhật
+        UserDTO updatedUser = userService.updateUserProfile(currentUsername, newUsername, firstname, lastname, phone, address, gender, birthday, avatar);
+
+        // Chuyển đổi UserDTO sang UserProfileDTO để trả về
+        UserProfileDTO updatedProfile = UserProfileDTO.builder()
+                .username(updatedUser.getUsername())
+                .firstname(updatedUser.getFirstname())
+                .lastname(updatedUser.getLastname())
+                .email(updatedUser.getEmail())
+                .phone(updatedUser.getPhone())
+                .address(updatedUser.getAddress())
+                .gender(updatedUser.getGender())
+                .avatar(updatedUser.getAvatar())
+                .birthday(updatedUser.getBirthday())
+                .build();
+
+        return new ApiResponse<>("success", 200, "User profile updated successfully", updatedProfile);
+    }
+
+
+
+
+    @PostMapping("/create-new-user")
+    @Operation(summary = "Create user", description = "Create a new user")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User created successfully")
     public ApiResponse<UserDTO> createUser(
             @RequestParam("username") String username,

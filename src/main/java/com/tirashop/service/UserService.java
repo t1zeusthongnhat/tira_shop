@@ -2,6 +2,9 @@ package com.tirashop.service;
 
 import com.tirashop.dto.RoleDTO;
 import com.tirashop.dto.UserDTO;
+import com.tirashop.dto.UserProfileDTO;
+import com.tirashop.dto.request.UserRegisterRequest;
+import com.tirashop.dto.response.UserRegisterResponse;
 import com.tirashop.entity.Role;
 import com.tirashop.entity.User;
 import com.tirashop.repository.RoleRepository;
@@ -11,15 +14,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.ap.shaded.freemarker.template.utility.StringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,18 +46,74 @@ public class UserService {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-    public void updateUserStatus(Long id, String status) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cannot found user has id: " + id));
 
-        if (!status.equalsIgnoreCase("Active") && !status.equalsIgnoreCase("Deactive")) {
-            throw new IllegalArgumentException("Invalid status value. Allowed: Active, Deactive");
+    public UserDTO updateUserProfile(String currentUsername, String newUsername, String firstname, String lastname,
+                                     String phone, String address, String gender, String birthday, MultipartFile avatar) {
+        // Tìm user hiện tại trong cơ sở dữ liệu
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("User not found: " + currentUsername));
+
+        // Kiểm tra nếu username mới bị trùng lặp (ngoại trừ user hiện tại)
+        if (newUsername != null && !newUsername.equals(user.getUsername()) && userRepository.existsByUsername(newUsername)) {
+            throw new RuntimeException("Username already exists!");
         }
 
-        user.setStatus(status);
+        // Xử lý format ngày tháng
+        LocalDate parsedBirthday = null;
+        if (birthday != null && !birthday.isEmpty()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                parsedBirthday = LocalDate.parse(birthday, formatter);
+            } catch (DateTimeParseException e) {
+                throw new RuntimeException("Invalid date format for birthday. Expected format: dd-MM-yyyy");
+            }
+        }
+
+        // Cập nhật thông tin user
+        if (newUsername != null) user.setUsername(newUsername);
+        if (firstname != null) user.setFirstname(firstname);
+        if (lastname != null) user.setLastname(lastname);
+        if (phone != null) user.setPhone(phone);
+        if (address != null) user.setAddress(address);
+        if (gender != null) user.setGender(gender);
+        if (parsedBirthday != null) user.setBirthday(parsedBirthday);
+
+        // Xử lý avatar nếu có
+        if (avatar != null && !avatar.isEmpty()) {
+            String avatarUrl = handleImageUpload(avatar);
+            user.setAvatar(avatarUrl);
+        }
+
+        // Lưu user
         userRepository.save(user);
-        log.info("Updated status for user {} to {}", id, status);
+
+
+        // Chuyển đổi User sang UserDTO và trả về
+        return toDTO(user);
     }
+
+
+    public UserProfileDTO getProfile(String username){
+
+       // Tìm user trong cơ sở dữ liệu
+       User user = userRepository.findByUsername(username)
+               .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+       // Chuyển đổi User entity thành UserProfileDTO
+       UserProfileDTO userProfileDTO = UserProfileDTO.builder()
+               .username(user.getUsername())
+               .firstname(user.getFirstname())
+               .lastname(user.getLastname())
+               .email(user.getEmail())
+               .phone(user.getPhone())
+               .address(user.getAddress())
+               .gender(user.getGender())
+               .avatar(user.getAvatar())
+               .birthday(user.getBirthday())
+               .build();
+       return userProfileDTO;
+   }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<UserDTO> getListUser(){
@@ -70,6 +136,62 @@ public class UserService {
         userRepository.save(user);
         return toDTO(user);
     }
+
+    public UserRegisterResponse register(UserRegisterRequest request) {
+        log.info("In method register user");
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new IllegalArgumentException("Username already exists!");
+        }
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new IllegalArgumentException("Email already exists!");
+        }
+        // Validate password confirmation
+        if (!StringUtils.hasText(request.getPassword()) || !request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match or are invalid!");
+        }
+
+        // Lấy role mặc định từ cơ sở dữ liệu
+        Role role = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new IllegalArgumentException("Default role not found!"));
+
+        // Chuyển đổi request sang entity User
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setFirstname(request.getFirstname());
+        user.setLastname(request.getLastname());
+        user.setPhone(request.getPhone());
+        user.setGender(request.getGender());
+        user.setEmail(request.getEmail());
+        user.setBirthday(request.getBirthday());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // Mã hóa mật khẩu
+        user.setStatus("Active"); // Trạng thái mặc định
+        user.setRole(Collections.singleton(role)); // Vai trò mặc định
+        user.setCreatedAt(LocalDate.now());
+
+        // Lưu thông tin user vào cơ sở dữ liệu
+        userRepository.save(user);
+
+        // Chuyển đổi User sang UserRegisterResponse để trả về
+        UserRegisterResponse response = new UserRegisterResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setFirstname(user.getFirstname());
+        response.setLastname(user.getLastname());
+        response.setPhone(user.getPhone());
+        response.setGender(user.getGender());
+        response.setEmail(user.getEmail());
+        response.setBirthday(user.getBirthday());
+        response.setStatus(user.getStatus());
+        response.setAvatar(user.getAvatar());
+        response.setRole(Collections.singleton(new RoleDTO(role.getName(), role.getDescription())));
+        response.setCreatedAt(user.getCreatedAt());
+
+        log.info("User registered and saved successfully: {}", response);
+        return response;
+    }
+
+
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public UserDTO updateUser(Long id, UserDTO userDTO, MultipartFile avatar) {
         User user = userRepository.findById(id)
