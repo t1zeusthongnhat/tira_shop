@@ -1,5 +1,6 @@
 package com.tirashop.controller;
 
+import com.tirashop.dto.ImageDTO;
 import com.tirashop.dto.ProductDTO;
 import com.tirashop.dto.request.ProductRequest;
 import com.tirashop.dto.response.ApiResponse;
@@ -14,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -99,6 +101,47 @@ public class ProductController {
         List<ProductDTO> list = productService.getAllProductsByCategoryName(name);
         return new ApiResponse<>("sucess",200,"Get Product by Category name success",list);
     }
+
+    @PostMapping("/{productId}/images/upload")
+    public ApiResponse<ImageDTO> uploadImageToProduct(
+            @PathVariable Long productId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            ImageDTO imageDTO = productService.uploadImageToProduct(productId, file);
+            return new ApiResponse<>("success", 201, "Image uploaded successfully", imageDTO);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", 500, e.getMessage(), null);
+        }
+    }
+
+    @GetMapping("/{productId}/images")
+    public ApiResponse<List<ImageDTO>> getAllImagesByProductId(@PathVariable Long productId) {
+        List<ImageDTO> images = productService.getAllImagesByProductId(productId);
+        return new ApiResponse<>("success", 200, "Images retrieved successfully", images);
+    }
+
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ApiResponse<Void> deleteImageById(
+            @PathVariable Long productId,
+            @PathVariable Long imageId
+    ) {
+        productService.deleteImageById(productId, imageId);
+        return new ApiResponse<>("success", 200, "Image deleted successfully", null);
+    }
+
+    @PutMapping("/{productId}/images/{imageId}")
+    public ApiResponse<ImageDTO> updateImage(
+            @PathVariable Long productId,
+            @PathVariable Long imageId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        ImageDTO updatedImage = productService.updateImage(productId, imageId, file);
+        return new ApiResponse<>("success", 200, "Image updated successfully", updatedImage);
+    }
+
+
+
 
 
 

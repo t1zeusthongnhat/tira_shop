@@ -1,5 +1,6 @@
 package com.tirashop.service;
 
+import com.tirashop.dto.ImageDTO;
 import com.tirashop.dto.ProductDTO;
 import com.tirashop.dto.request.ProductRequest;
 import com.tirashop.dto.response.ProductResponse;
@@ -9,13 +10,19 @@ import com.tirashop.entity.Image;
 import com.tirashop.entity.Product;
 import com.tirashop.repository.BrandRepository;
 import com.tirashop.repository.CategoryRepository;
+import com.tirashop.repository.ImageRepository;
 import com.tirashop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +36,10 @@ public class ProductService {
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
     BrandRepository brandRepository;
+    ImageRepository imageRepository;
+
+    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/product/image";
+
 
     public List<ProductDTO> getAllProductsWithImages() {
         List<Product> products = productRepository.findAllWithImages();
@@ -250,4 +261,109 @@ public class ProductService {
 
         return product;
     }
+
+    public List<ImageDTO> getAllImagesByProductId(Long productId) {
+        List<Image> images = imageRepository.findByProductId(productId);
+        return images.stream().map(this::toImageDTO).collect(Collectors.toList());
+    }
+
+    // xu li image
+    public ImageDTO uploadImageToProduct(Long productId, MultipartFile file) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Cannot find product with ID: " + productId));
+
+        // Tạo URL tạm thời để kiểm tra (trước khi lưu file)
+        String tempFileName = file.getOriginalFilename();
+        String tempFileUrl = "/uploads/product/image/" + tempFileName;
+
+        // Kiểm tra xem ảnh đã tồn tại chưa
+        boolean imageExists = imageRepository.existsByUrl(tempFileUrl);
+        if (imageExists) {
+            throw new RuntimeException("This image already exists in the database.");
+        }
+
+        // Lưu file vào thư mục
+        String imagePath = handleImageUpload(file, UPLOAD_DIR);
+
+        // Tạo đối tượng Image
+        Image image = new Image();
+        image.setFileName(file.getOriginalFilename());
+        image.setFileType(file.getContentType());
+        image.setUrl(imagePath);
+        image.setProduct(product);
+        image.setCreatedAt(LocalDate.now());
+
+        Image savedImage = imageRepository.save(image);
+        return toImageDTO(savedImage);
+    }
+    public void deleteImageById(Long productId, Long imageId) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("Cannot find image with ID: " + imageId));
+
+        // Kiểm tra xem ảnh có thuộc về sản phẩm không
+        if (!image.getProduct().getId().equals(productId)) {
+            throw new RuntimeException("Image does not belong to the specified product.");
+        }
+
+        // Xóa ảnh
+        imageRepository.delete(image);
+    }
+    public ImageDTO updateImage(Long productId, Long imageId, MultipartFile file) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("Cannot find image with ID: " + imageId));
+
+        // Kiểm tra xem ảnh có thuộc về sản phẩm không
+        if (!image.getProduct().getId().equals(productId)) {
+            throw new RuntimeException("Image does not belong to the specified product.");
+        }
+
+        // Lưu file mới
+        String imagePath = handleImageUpload(file, UPLOAD_DIR);
+
+        // Cập nhật thông tin
+        image.setFileName(file.getOriginalFilename());
+        image.setFileType(file.getContentType());
+        image.setUrl(imagePath);
+
+        Image updatedImage = imageRepository.save(image);
+        return toImageDTO(updatedImage);
+    }
+
+
+    private String handleImageUpload(MultipartFile file, String uploadDir) {
+        try {
+            // Tạo thư mục nếu chưa tồn tại
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Đường dẫn file
+            Path filePath = uploadPath.resolve(file.getOriginalFilename());
+
+            // Lưu file vào thư mục
+            file.transferTo(filePath.toFile());
+
+            // Trả về URL tương đối
+            return "/uploads/product/image/" + file.getOriginalFilename();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload image", e);
+        }
+    }
+
+
+    private ImageDTO toImageDTO(Image image) {
+        return new ImageDTO(
+                image.getId(),
+                image.getFileName(),
+                image.getFileType(),
+                image.getUrl(),
+                image.getProduct().getId(),
+                image.getCreatedAt()
+        );
+    }
+
+
+
 }
