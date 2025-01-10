@@ -35,6 +35,20 @@ public class ProductController {
         List<ProductDTO> products = productService.getAllProductsWithImages();
         return new ApiResponse<>("success", 200, "Get Product success!", products);
     }
+
+    //filter san pham
+    @GetMapping("/filter")
+    public ApiResponse<List<ProductDTO>> getFilteredProducts(
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) Double price,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String brand
+    ) {
+        // Gọi service để xử lý filter
+        List<ProductDTO> products = productService.filterProducts(size, price, category, brand);
+        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", products);
+    }
+
     @PostMapping("/add")
     @Operation(summary = "Add new product", description = "Add a new product with its details")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Product added successfully")
@@ -72,19 +86,21 @@ public class ProductController {
         return new ApiResponse<>("success", 200, "Get Product success", response);
     }
 
-    @GetMapping("/brand/{name}")
-    public ApiResponse<List<ProductDTO>> getProductByBrandName(@PathVariable String name){
+    @GetMapping("/brand")
+    public ApiResponse<List<ProductDTO>> getProductByBrandName(@RequestParam String name){
         log.info("In controller");
         List<ProductDTO> list = productService.getAllProductsByBrandName(name);
         return new ApiResponse<>("sucess",200,"Get Product by Brand name success",list);
     }
 
-    @GetMapping("/category/{name}")
-    public ApiResponse<List<ProductDTO>> getProductByCateName(@PathVariable String name){
+    @GetMapping("/category")
+    public ApiResponse<List<ProductDTO>> getProductByCateName(@RequestParam String name){
         log.info("In controller");
         List<ProductDTO> list = productService.getAllProductsByCategoryName(name);
         return new ApiResponse<>("sucess",200,"Get Product by Category name success",list);
     }
+
+
 
 }
 

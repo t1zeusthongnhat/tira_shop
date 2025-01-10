@@ -46,14 +46,15 @@ public class UserController {
     @Operation(summary = "Get user profile", description = "Retrieve the profile information of the authenticated user")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile retrieved successfully")
     public ApiResponse<UserProfileDTO> getMyProfile() {
-        // Lấy thông tin từ token
+        log.info("Received request for /my-profile");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
+        log.info("Username from token: {}", username);
 
-        // Lấy thông tin từ cơ sở dữ liệu
         UserProfileDTO response = userService.getProfile(username);
         return new ApiResponse<>("success", 200, "User profile retrieved successfully", response);
     }
+
 
 
     @PutMapping("/update-profile")

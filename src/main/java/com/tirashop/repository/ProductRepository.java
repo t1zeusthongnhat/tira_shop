@@ -3,6 +3,7 @@ package com.tirashop.repository;
 import com.tirashop.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,10 +24,19 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
     boolean existsByName(String name);
 
-
-
-
-
-
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN FETCH p.images " +
+            "LEFT JOIN FETCH p.category " +
+            "LEFT JOIN FETCH p.brand " +
+            "WHERE (:size IS NULL OR p.size = :size) " +
+            "AND (:price IS NULL OR p.price = :price) " +
+            "AND (:category IS NULL OR p.category.name = :category) " +
+            "AND (:brand IS NULL OR p.brand.name = :brand)")
+    List<Product> filterProductsWithImages(
+            @Param("size") String size,
+            @Param("price") Double price,
+            @Param("category") String category,
+            @Param("brand") String brand
+    );
 
 }

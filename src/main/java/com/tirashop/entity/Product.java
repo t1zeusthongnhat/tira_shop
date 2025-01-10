@@ -24,7 +24,11 @@ public class Product {
     private String code;
     private String description;
     private String material;
+
     private double price;
+
+    private Double originalPrice;
+
     private int quantity;
     private String status;
     private String size;

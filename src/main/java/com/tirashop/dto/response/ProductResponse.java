@@ -23,6 +23,8 @@ public class ProductResponse {
 
     private double price;
 
+    private Double OriginalPrice;
+
     private int quantity;
 
     private String status;
