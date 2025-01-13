@@ -43,5 +43,9 @@ public class UserDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate createdAt = LocalDate.now();
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate updatedAt = LocalDate.now();
+
+
     Set<RoleDTO> role;
 }

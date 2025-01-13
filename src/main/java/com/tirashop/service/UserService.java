@@ -207,6 +207,7 @@ public class UserService {
         user.setGender(userDTO.getGender());
         user.setStatus(userDTO.getStatus());
         user.setBirthday(userDTO.getBirthday());
+        user.setUpdatedAt(LocalDate.now());
 
         // Xử lý role
         Set<Role> role = userDTO.getRole().stream()
@@ -294,6 +295,7 @@ public class UserService {
                 .status(user.getStatus())
                 .avatar(user.getAvatar())
                 .birthday(user.getBirthday())
+                .updatedAt(user.getUpdatedAt())
                 .createdAt(user.getCreatedAt() != null ? user.getCreatedAt() : LocalDate.now())
                 .role(user.getRole() != null ? user.getRole().stream()
                         .map(role -> RoleDTO.builder()
