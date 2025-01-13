@@ -17,5 +17,12 @@ public class WebConfig implements WebMvcConfigurer {
         // Cấu hình để phục vụ các file trong thư mục uploads/product/image
         registry.addResourceHandler("/uploads/product/image/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/product/image/");
+        // Cấu hình để phục vụ các file trong thư mục uploads/review
+        registry.addResourceHandler("/uploads/review/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/review/");
+
+        // Cấu hình để phục vụ các file trong thư mục uploads/post
+        registry.addResourceHandler("/uploads/post/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/post/");
     }
 }
