@@ -13,14 +13,17 @@ import java.util.List;
 @AllArgsConstructor
 public class CartDTO {
 
-    private Long id;
-    private Long userId;  // Mã người dùng (để tham chiếu)
+    private Long id;  // Mã giỏ hàng
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private Long userId;  // Mã người dùng (null nếu chưa đăng nhập)
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo giỏ hàng
 
     private String status;  // Trạng thái giỏ hàng (ACTIVE hoặc CHECKED_OUT)
 
-    private List<CartItemDTO> cartItems;
+    private List<CartItemDTO> items;  // Danh sách sản phẩm trong giỏ hàng
+
+    private double totalValue;  // Mặc định là 0.0
 
 }

@@ -25,7 +25,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     // Các endpoint công khai không yêu cầu xác thực
-    public final String[] PUBLIC_ENDPOINT = {"/auth/**", "/uploads/**"}; // Thêm /uploads/avatar/** để cho phép truy cập ảnh công khai
+    public final String[] PUBLIC_ENDPOINT = {"/auth/**", "/uploads/**","/cart/**"}; // Thêm /uploads/avatar/** để cho phép truy cập ảnh công khai
     public final String[] SWAGGER_WHITELIST = {"/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
 
     @Autowired

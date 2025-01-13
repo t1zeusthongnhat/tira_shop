@@ -6,29 +6,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemDTO {
+
     private Long id;  // Mã sản phẩm trong giỏ hàng
 
-    private Long cartId;  // Mã giỏ hàng (để tham chiếu)
-    //nested
+    private Long cartId;  // Mã giỏ hàng
+
     private Long productId;  // Mã sản phẩm
 
-    private String productName;
+    private String productName;  // Tên sản phẩm
 
-    private String productCategory;
+    private String productCategory;  // Tên danh mục sản phẩm
 
-    private String productSize;
+    private String productSize;  // Kích thước sản phẩm
 
-    private double productPrice;
+    private double productPrice;  // Giá sản phẩm
 
-    private String productImage;
+    private String productImage;  // URL ảnh sản phẩm
 
     private int quantity;  // Số lượng sản phẩm
 
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDateTime createdAt;  // Thời gian thêm sản phẩm vào giỏ hàng
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime createdAt;  // Thời gian thêm vào giỏ hàng
 }

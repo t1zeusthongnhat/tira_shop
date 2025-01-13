@@ -87,6 +87,7 @@ public class AuthenticationService {
                 .jwtID(UUID.randomUUID().toString())
                 .claim("type", "access")
                 .claim("scope",buildScope(user))
+                .claim("userId", user.getId()) // Thêm userId vào claims
                 .build();
         //Tao payload cho token
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
