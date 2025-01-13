@@ -24,6 +24,10 @@ public class Shipment {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;  // Mã đơn hàng (Khóa ngoại)
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id", nullable = true)
+    private OrderItem orderItem; // Mã sản phẩm trong đơn hàng (có thể NULL nếu shipment chung cho cả đơn hàng)
+
     @Column(name = "tracking_number", nullable = false)
     private String trackingNumber;  // Số theo dõi vận chuyển
 
@@ -37,8 +41,6 @@ public class Shipment {
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo vận chuyển
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;  // Thời gian cập nhật vận chuyển
 
     public enum ShipmentStatus {
         PENDING,  // Vận chuyển đang chờ

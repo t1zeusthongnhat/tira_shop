@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -61,12 +62,13 @@ public class Order {
         FAILED  // Thanh toán thất bại
     }
 
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>(); // Khởi tạo danh sách rỗng
 
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Shipment> shipments;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Shipment> shipments = new ArrayList<>(); // Khởi tạo danh sách rỗng
 
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Payment> payments;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments = new ArrayList<>(); // Khởi tạo danh sách rỗng
+
 }

@@ -186,11 +186,10 @@ public class CartService {
             cartDTO.setItems(cart.getCartItems().stream()
                     .map(this::toCartItemDTO)
                     .collect(Collectors.toList()));
-
             double totalValue = cart.getCartItems().stream()
                     .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                     .sum();
-            cartDTO.setTotalValue(totalValue); // Thêm trường tổng giá trị đơn hàng
+            cartDTO.setTotalValue(totalValue); // Thêm tổng giá trị giỏ hàng
         } else {
             cartDTO.setItems(new ArrayList<>());
             cartDTO.setTotalValue(0.0);
@@ -198,6 +197,7 @@ public class CartService {
 
         return cartDTO;
     }
+
 
 
 

@@ -82,7 +82,7 @@ public class AuthenticationService {
                 .issuer("duonghoang")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(3, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(5, ChronoUnit.HOURS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("type", "access")

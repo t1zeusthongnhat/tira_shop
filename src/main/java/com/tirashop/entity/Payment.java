@@ -40,8 +40,6 @@ public class Payment {
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian thanh toán
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;  // Thời gian cập nhật thanh toán
 
     public enum PaymentMethod {
         CREDIT_CARD,  // Thanh toán qua thẻ tín dụng
