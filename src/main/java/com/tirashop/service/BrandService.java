@@ -1,8 +1,8 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.BrandDTO;
-import com.tirashop.entity.Brand;
-import com.tirashop.repository.BrandRepository;
+import com.tirashop.persitence.entity.Brand;
+import com.tirashop.persitence.repository.BrandRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

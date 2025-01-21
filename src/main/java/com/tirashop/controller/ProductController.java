@@ -5,7 +5,7 @@ import com.tirashop.dto.ProductDTO;
 import com.tirashop.dto.request.ProductRequest;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.dto.response.ProductResponse;
-import com.tirashop.entity.Product;
+import com.tirashop.model.PagedData;
 import com.tirashop.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -30,26 +30,24 @@ public class ProductController {
 
     ProductService productService;
 
-    @GetMapping("/list")
-    @Operation(summary = "Get all products", description = "Retrieve all products with their details")
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products retrieved successfully")
-    public ApiResponse<List<ProductDTO>> getAllProducts() {
-        List<ProductDTO> products = productService.getAllProductsWithImages();
-        return new ApiResponse<>("success", 200, "Get Product success!", products);
+    @GetMapping()
+    @Operation(summary = "Filter products with pagination", description = "Filter products by size, price range, category, and brand with pagination support")
+    public ApiResponse<PagedData<ProductDTO>> getFilteredProducts(
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String brand,
+            @RequestParam(defaultValue = "1") int pageNo, // Mặc định bắt đầu từ trang 1
+            @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
+    ) {
+        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(size, minPrice, maxPrice, category, brand, pageNo, elementPerPage);
+        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", pagedData);
     }
 
+
+    //getAllProductsWithImages
     //filter san pham
-    @GetMapping("/filter")
-    public ApiResponse<List<ProductDTO>> getFilteredProducts(
-            @RequestParam(required = false) String size,
-            @RequestParam(required = false) Double price,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String brand
-    ) {
-        // Gọi service để xử lý filter
-        List<ProductDTO> products = productService.filterProducts(size, price, category, brand);
-        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", products);
-    }
 
     @PostMapping("/add")
     @Operation(summary = "Add new product", description = "Add a new product with its details")
@@ -88,19 +86,6 @@ public class ProductController {
         return new ApiResponse<>("success", 200, "Get Product success", response);
     }
 
-    @GetMapping("/brand")
-    public ApiResponse<List<ProductDTO>> getProductByBrandName(@RequestParam String name){
-        log.info("In controller");
-        List<ProductDTO> list = productService.getAllProductsByBrandName(name);
-        return new ApiResponse<>("sucess",200,"Get Product by Brand name success",list);
-    }
-
-    @GetMapping("/category")
-    public ApiResponse<List<ProductDTO>> getProductByCateName(@RequestParam String name){
-        log.info("In controller");
-        List<ProductDTO> list = productService.getAllProductsByCategoryName(name);
-        return new ApiResponse<>("sucess",200,"Get Product by Category name success",list);
-    }
 
     @PostMapping("/{productId}/images/upload")
     public ApiResponse<ImageDTO> uploadImageToProduct(
@@ -139,11 +124,5 @@ public class ProductController {
         ImageDTO updatedImage = productService.updateImage(productId, imageId, file);
         return new ApiResponse<>("success", 200, "Image updated successfully", updatedImage);
     }
-
-
-
-
-
-
 }
 

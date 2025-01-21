@@ -1,10 +1,10 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.PostDTO;
-import com.tirashop.entity.Post;
-import com.tirashop.entity.User;
-import com.tirashop.repository.PostRepository;
-import com.tirashop.repository.UserRepository;
+import com.tirashop.persitence.entity.Post;
+import com.tirashop.persitence.entity.User;
+import com.tirashop.persitence.repository.PostRepository;
+import com.tirashop.persitence.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

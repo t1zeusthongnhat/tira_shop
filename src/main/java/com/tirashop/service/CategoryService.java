@@ -1,20 +1,17 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.CategoryDTO;
-import com.tirashop.dto.ProductDTO;
-import com.tirashop.entity.Category;
+import com.tirashop.persitence.entity.Category;
 
-import com.tirashop.repository.CategoryRepository;
+import com.tirashop.persitence.repository.CategoryRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

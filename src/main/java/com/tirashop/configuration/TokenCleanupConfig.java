@@ -1,13 +1,11 @@
 package com.tirashop.configuration;
 
-import com.tirashop.repository.InvalidatedTokenRepository;
+import com.tirashop.persitence.repository.InvalidatedTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Slf4j

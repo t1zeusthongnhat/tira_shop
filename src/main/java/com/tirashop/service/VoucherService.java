@@ -1,8 +1,8 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.VoucherDTO;
-import com.tirashop.entity.Voucher;
-import com.tirashop.repository.VoucherRepository;
+import com.tirashop.persitence.entity.Voucher;
+import com.tirashop.persitence.repository.VoucherRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 

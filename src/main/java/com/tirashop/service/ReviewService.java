@@ -1,12 +1,12 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.ReviewDTO;
-import com.tirashop.entity.Product;
-import com.tirashop.entity.Review;
-import com.tirashop.entity.User;
-import com.tirashop.repository.ProductRepository;
-import com.tirashop.repository.ReviewRepository;
-import com.tirashop.repository.UserRepository;
+import com.tirashop.persitence.entity.Product;
+import com.tirashop.persitence.entity.Review;
+import com.tirashop.persitence.entity.User;
+import com.tirashop.persitence.repository.ProductRepository;
+import com.tirashop.persitence.repository.ReviewRepository;
+import com.tirashop.persitence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

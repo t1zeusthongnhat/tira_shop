@@ -3,8 +3,8 @@ import com.tirashop.dto.RoleDTO;
 import com.tirashop.dto.UserDTO;
 import com.tirashop.dto.UserProfileDTO;
 import com.tirashop.dto.response.ApiResponse;
-import com.tirashop.entity.User;
-import com.tirashop.repository.UserRepository;
+import com.tirashop.model.PagedData;
+import com.tirashop.persitence.repository.UserRepository;
 import com.tirashop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,23 @@ public class UserController {
     UserService userService;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+
+
+
+
+    @GetMapping()
+    @Operation(summary = "Filter users with pagination", description = "Filter users by username, address, and status with pagination support")
+    public ApiResponse<PagedData<UserDTO>> filterUsers(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") int pageNo, // Mặc định là trang 1
+            @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
+    ) {
+        PagedData<UserDTO> pagedData = userService.filterUser(username, address, status, pageNo, elementPerPage);
+        return new ApiResponse<>("success", 200, "Filtered users retrieved successfully", pagedData);
+    }
+
 
     @GetMapping("/list")
     @Operation(summary = "Get user list", description = "Retrieve the list of users")

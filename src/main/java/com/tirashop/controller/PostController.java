@@ -2,15 +2,12 @@ package com.tirashop.controller;
 
 import com.tirashop.dto.PostDTO;
 import com.tirashop.dto.response.ApiResponse;
-import com.tirashop.entity.User;
-import com.tirashop.repository.UserRepository;
 import com.tirashop.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

@@ -4,21 +4,26 @@ import com.tirashop.dto.ImageDTO;
 import com.tirashop.dto.ProductDTO;
 import com.tirashop.dto.request.ProductRequest;
 import com.tirashop.dto.response.ProductResponse;
-import com.tirashop.entity.Brand;
-import com.tirashop.entity.Category;
-import com.tirashop.entity.Image;
-import com.tirashop.entity.Product;
-import com.tirashop.repository.BrandRepository;
-import com.tirashop.repository.CategoryRepository;
-import com.tirashop.repository.ImageRepository;
-import com.tirashop.repository.ProductRepository;
+import com.tirashop.model.PagedData;
+import com.tirashop.persitence.entity.Brand;
+import com.tirashop.persitence.entity.Category;
+import com.tirashop.persitence.entity.Image;
+import com.tirashop.persitence.entity.Product;
+import com.tirashop.persitence.repository.BrandRepository;
+import com.tirashop.persitence.repository.CategoryRepository;
+import com.tirashop.persitence.repository.ImageRepository;
+import com.tirashop.persitence.repository.ProductRepository;
+import com.tirashop.persitence.specification.ProductSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,53 +46,29 @@ public class ProductService {
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/product/image";
 
 
-    public List<ProductDTO> getAllProductsWithImages() {
-        List<Product> products = productRepository.findAllWithImages();
-        return products.stream()
-                .map(this::toDTO) // Sử dụng phương thức toDTO để map
+
+    public PagedData<ProductDTO> filterProductsWithPaging(String size, Double minPrice, Double maxPrice, String category, String brand, int pageNo, int elementPerPage) {
+        // Chuyển đổi pageNo từ 1-based về 0-based để phù hợp với Pageable của Spring
+        Pageable pageable = PageRequest.of(pageNo - 1, elementPerPage);
+        Specification<Product> spec = ProductSpecification.filterProducts(size, minPrice, maxPrice, category, brand);
+
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+        List<ProductDTO> productDTOs = productPage.getContent()
+                .stream()
+                .map(this::toDTO)
                 .collect(Collectors.toList());
-    }
 
-    public List<ProductDTO> filterProducts(String size, Double price, String category, String brand) {
-        // Gọi repository để lấy danh sách sản phẩm
-        List<Product> products = productRepository.filterProductsWithImages(size, price, category, brand);
-
-        // Kiểm tra nếu không có sản phẩm nào
-        if (products.isEmpty()) {
-            log.info("No products found for the given filter: size={}, price={}, category={}, brand={}", size, price, category, brand);
-            throw new RuntimeException("No products found for the given filter criteria.");
-        }
-        // Chuyển đổi từ Product sang ProductDTO
-        return products.stream().map(this::toDTO).collect(Collectors.toList());
+        return PagedData.<ProductDTO>builder()
+                .pageNo(productPage.getNumber() + 1) // Chuyển pageNo từ 0-based về 1-based
+                .elementPerPage(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .elementList(productDTOs)
+                .build();
     }
 
 
-    public List<ProductDTO> getAllProductsByBrandName(String brandName){
-        log.info("In service");
-        // Kiểm tra xem brand có tồn tại không
-        Brand brand = brandRepository.findByName(brandName)
-                .orElseThrow(() -> new RuntimeException("Brand with name '" + brandName + "' does not exist"));
-
-        // Lấy danh sách sản phẩm theo brand name
-        List<Product> products = productRepository.findAllByBrandName(brandName);
-        return products.stream().map(this::toDTO).toList();
-    }
-
-
-    public List<ProductDTO> getAllProductsByCategoryName(String cateName){
-        log.info("In service");
-        // Kiểm tra xem brand có tồn tại không
-        Category cate = categoryRepository.findByName(cateName)
-                .orElseThrow(() -> new RuntimeException("Brand with name '" + cateName + "' does not exist"));
-
-        // Lấy danh sách sản phẩm theo cate name
-        List<Product> products = productRepository.findAllByCateName(cateName);
-        return products.stream().map(this::toDTO).toList();
-    }
-
-//    getAllProductsByCategoryName
-//    getAllProductsPriceAtoZ
-//    getAllProductsPriceZtoA
 
 
     public ProductResponse createProduct(ProductRequest request) {

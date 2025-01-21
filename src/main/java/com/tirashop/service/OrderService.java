@@ -2,12 +2,12 @@ package com.tirashop.service;
 
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
-import com.tirashop.entity.Order;
-import com.tirashop.entity.OrderItem;
-import com.tirashop.entity.Product;
-import com.tirashop.entity.Shipment;
-import com.tirashop.repository.OrderRepository;
-import com.tirashop.repository.ShipmentRepository;
+import com.tirashop.persitence.entity.Order;
+import com.tirashop.persitence.entity.OrderItem;
+import com.tirashop.persitence.entity.Product;
+import com.tirashop.persitence.entity.Shipment;
+import com.tirashop.persitence.repository.OrderRepository;
+import com.tirashop.persitence.repository.ShipmentRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

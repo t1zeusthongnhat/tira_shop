@@ -1,7 +1,5 @@
 package com.tirashop.dto;
 
-import com.tirashop.entity.User;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;

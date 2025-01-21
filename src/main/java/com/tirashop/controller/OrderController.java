@@ -3,7 +3,7 @@ package com.tirashop.controller;
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
 import com.tirashop.dto.response.ApiResponse;
-import com.tirashop.entity.Shipment;
+import com.tirashop.persitence.entity.Shipment;
 import com.tirashop.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;

@@ -1,15 +1,14 @@
 package com.tirashop.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tirashop.entity.Voucher.DiscountType;
-import com.tirashop.entity.Voucher.VoucherStatus;
+import com.tirashop.persitence.entity.Voucher.DiscountType;
+import com.tirashop.persitence.entity.Voucher.VoucherStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

@@ -5,20 +5,22 @@ import com.tirashop.dto.UserDTO;
 import com.tirashop.dto.UserProfileDTO;
 import com.tirashop.dto.request.UserRegisterRequest;
 import com.tirashop.dto.response.UserRegisterResponse;
-import com.tirashop.entity.Role;
-import com.tirashop.entity.User;
-import com.tirashop.repository.RoleRepository;
-import com.tirashop.repository.UserRepository;
+import com.tirashop.model.PagedData;
+import com.tirashop.persitence.entity.Product;
+import com.tirashop.persitence.entity.Role;
+import com.tirashop.persitence.entity.User;
+import com.tirashop.persitence.repository.RoleRepository;
+import com.tirashop.persitence.repository.UserRepository;
+import com.tirashop.persitence.specification.UserSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.ap.shaded.freemarker.template.utility.StringUtil;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -119,6 +121,34 @@ public class UserService {
     public List<UserDTO> getListUser(){
         return userRepository.findAll().stream().map(this::toDTO).toList();
     }
+
+
+    public PagedData<UserDTO> filterUser(String username, String address, String status, int pageNo, int elementPerPage) {
+        // Chuyển pageNo từ 1-based về 0-based
+        Pageable pageable = PageRequest.of(pageNo - 1, elementPerPage);
+
+        // Tạo Specification từ các tiêu chí lọc
+        Specification<User> spec = UserSpecification.filterUsers(username, address, status);
+
+        // Truy vấn dữ liệu với phân trang
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+
+        // Chuyển đổi danh sách User entity sang UserDTO
+        List<UserDTO> userDTOs = userPage.getContent()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+
+        // Trả về PagedData
+        return PagedData.<UserDTO>builder()
+                .pageNo(userPage.getNumber() + 1) // Chuyển pageNo từ 0-based về 1-based
+                .elementPerPage(userPage.getSize())
+                .totalElements(userPage.getTotalElements())
+                .totalPages(userPage.getTotalPages())
+                .elementList(userDTOs)
+                .build();
+    }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public UserDTO createUser(UserDTO userDTO, MultipartFile avatar) {
