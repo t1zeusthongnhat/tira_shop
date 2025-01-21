@@ -1,12 +1,18 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.BrandDTO;
+import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Brand;
 import com.tirashop.persitence.repository.BrandRepository;
+import com.tirashop.persitence.specification.BrandSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +36,32 @@ public class BrandService {
     public List<BrandDTO> getAllBrands() {
         return brandRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
+
+    public PagedData<BrandDTO> filterBrands(String name, int pageNo, int elementPerPage) {
+        // Chuyển pageNo từ 1-based về 0-based
+        Pageable pageable = PageRequest.of(pageNo - 1, elementPerPage);
+
+        // Tạo Specification từ tiêu chí lọc
+        Specification<Brand> spec = BrandSpecification.filterBrand(name);
+
+        // Thực hiện truy vấn với phân trang
+        Page<Brand> brandPage = brandRepository.findAll(spec, pageable);
+
+        // Chuyển đổi danh sách Brand entity sang BrandDTO
+        List<BrandDTO> brandDTOs = brandPage.getContent()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        // Trả về PagedData
+        return PagedData.<BrandDTO>builder()
+                .pageNo(brandPage.getNumber() + 1) // Chuyển pageNo từ 0-based về 1-based
+                .elementPerPage(brandPage.getSize())
+                .totalElements(brandPage.getTotalElements())
+                .totalPages(brandPage.getTotalPages())
+                .elementList(brandDTOs)
+                .build();
+    }
+
 
     public BrandDTO createBrand(String name, String description, MultipartFile logoFile) {
         if (brandRepository.existsByName(name))

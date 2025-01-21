@@ -2,6 +2,7 @@ package com.tirashop.controller;
 
 import com.tirashop.dto.BrandDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.model.PagedData;
 import com.tirashop.service.BrandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,19 @@ import java.util.List;
 public class BrandController {
 
     BrandService brandService;
+
+
+    @GetMapping()
+    @Operation(summary = "Filter brands with pagination", description = "Filter brands by name with pagination support")
+    public ApiResponse<PagedData<BrandDTO>> filterBrands(
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "1") int pageNo, // Mặc định là trang 1
+            @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
+    ) {
+        PagedData<BrandDTO> pagedData = brandService.filterBrands(name, pageNo, elementPerPage);
+        return new ApiResponse<>("success", 200, "Filtered brands retrieved successfully", pagedData);
+    }
+
 
     @GetMapping("/list")
     @Operation(summary = "Get all brands", description = "Retrieve all brands with their details")
