@@ -1,12 +1,15 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.VoucherDTO;
+import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Voucher;
 import com.tirashop.persitence.repository.VoucherRepository;
+import com.tirashop.persitence.specification.VoucherSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,6 +24,25 @@ public class VoucherService {
 
 
     VoucherRepository voucherRepository;
+
+
+    public PagedData<VoucherDTO> seachVoucher(String code, String status, Pageable pageable){
+
+        var voucherSpec = VoucherSpecification.searchVoucher(code,status);
+        var voucherPage = voucherRepository.findAll(voucherSpec, pageable);
+
+        var voucherItem = voucherPage.getContent().stream().map(
+                this::mapToDto
+        ).toList();
+
+        return PagedData.<VoucherDTO>builder()
+                .pageNo(voucherPage.getNumber())
+                .elementPerPage(voucherPage.getSize())
+                .totalElements(voucherPage.getTotalElements())
+                .totalPages(voucherPage.getTotalPages())
+                .elementList(voucherItem)
+                .build();
+    }
 
     public List<VoucherDTO> getAllVouchers() {
         return voucherRepository.findAll()

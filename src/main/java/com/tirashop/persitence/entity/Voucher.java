@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.experimental.FieldNameConstants;
 
 @Entity
 @Getter
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "voucher")
+@FieldNameConstants
 public class Voucher {
 
     @Id

@@ -33,6 +33,7 @@ public class ProductController {
     @GetMapping()
     @Operation(summary = "Filter products with pagination", description = "Filter products by size, price range, category, and brand with pagination support")
     public ApiResponse<PagedData<ProductDTO>> getFilteredProducts(
+            @RequestParam(required = false) String  name,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
@@ -41,7 +42,7 @@ public class ProductController {
             @RequestParam(defaultValue = "1") int pageNo, // Mặc định bắt đầu từ trang 1
             @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
     ) {
-        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(size, minPrice, maxPrice, category, brand, pageNo, elementPerPage);
+        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name,size, minPrice, maxPrice, category, brand, pageNo, elementPerPage);
         return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", pagedData);
     }
 

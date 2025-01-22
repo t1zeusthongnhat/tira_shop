@@ -2,6 +2,7 @@ package com.tirashop.controller;
 
 import com.tirashop.dto.VoucherDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.model.PagedData;
 import com.tirashop.service.VoucherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,18 @@ import java.util.List;
 public class VoucherController {
 
     VoucherService voucherService;
+
+
+    @GetMapping()
+    @Operation(summary = "Get list and filter voucher by code and status")
+    public ApiResponse<PagedData<VoucherDTO>> searchVoucher(
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "status",required = false) String status,
+            Pageable pageable
+    ){
+        var voucherItems = voucherService.seachVoucher(code,status,pageable);
+        return new ApiResponse<>("success",200,"Filter voucher success",voucherItems);
+    }
 
     @GetMapping("/list")
     @Operation(summary = "Get all vouchers", description = "Retrieve all vouchers with their details")
