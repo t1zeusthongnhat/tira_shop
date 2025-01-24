@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import lombok.experimental.FieldNameConstants;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldNameConstants
 @Table(name = "post")
 public class Post {
     @Id

@@ -1,14 +1,17 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.PostDTO;
+import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Post;
 import com.tirashop.persitence.entity.User;
 import com.tirashop.persitence.repository.PostRepository;
 import com.tirashop.persitence.repository.UserRepository;
+import com.tirashop.persitence.specification.PostSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,9 +35,28 @@ public class PostService {
 
     private static final String POST_IMAGE_DIR = System.getProperty("user.dir") + "/uploads/post";
 
+
+    public PagedData<PostDTO> searchPost(String name, String topic, String author,
+            Pageable pageable) {
+        var postSpec = PostSpecification.searchPost(name, topic, author);
+        var postPage = postRepository.findAll(postSpec, pageable);
+
+        var postItem = postPage.stream().map(
+                this::toDTO
+        ).toList();
+        return PagedData.<PostDTO>builder()
+                .pageNo(postPage.getNumber())
+                .totalPages(postPage.getTotalPages())
+                .totalElements(postPage.getTotalElements())
+                .elementPerPage(postPage.getSize())
+                .elementList(postItem)
+                .build();
+    }
+
     // Tạo bài viết mới
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public PostDTO createPost(String name, String topic, String shortDescription, String content, MultipartFile image, String username) {
+    public PostDTO createPost(String name, String topic, String shortDescription, String content,
+            MultipartFile image, String username) {
         // Tìm người dùng theo username
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
@@ -62,7 +84,8 @@ public class PostService {
 
     // Cập nhật bài viết
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public PostDTO updatePost(Long postId, String name, String topic, String shortDescription, String content, MultipartFile image, String username) {
+    public PostDTO updatePost(Long postId, String name, String topic, String shortDescription,
+            String content, MultipartFile image, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
@@ -72,10 +95,18 @@ public class PostService {
         }
 
         // Cập nhật thông tin bài viết
-        if (name != null) post.setName(name);
-        if (topic != null) post.setTopic(topic);
-        if (shortDescription != null) post.setShort_description(shortDescription);
-        if (content != null) post.setContent(content);
+        if (name != null) {
+            post.setName(name);
+        }
+        if (topic != null) {
+            post.setTopic(topic);
+        }
+        if (shortDescription != null) {
+            post.setShort_description(shortDescription);
+        }
+        if (content != null) {
+            post.setContent(content);
+        }
 
         // Xử lý ảnh (nếu có)
         if (image != null && !image.isEmpty()) {

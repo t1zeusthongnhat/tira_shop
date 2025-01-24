@@ -2,17 +2,21 @@ package com.tirashop.persitence.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import lombok.experimental.FieldNameConstants;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@FieldNameConstants
 @AllArgsConstructor
+@Builder
 @Table(name = "review")
 public class Review {
 

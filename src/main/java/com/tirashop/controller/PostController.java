@@ -2,12 +2,14 @@ package com.tirashop.controller;
 
 import com.tirashop.dto.PostDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.model.PagedData;
 import com.tirashop.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +24,18 @@ import java.util.List;
 public class PostController {
 
     PostService postService;
+
+    @GetMapping("")
+    @Operation(summary = "Filter and Listing all posts", description = "Retrieve all posts")
+    public ApiResponse<PagedData<PostDTO>> getAllPosts(
+            @RequestParam(value = "name",required = false) String name,
+            @RequestParam(value = "topic",required = false) String topic,
+            @RequestParam(value = "author",required = false) String author,
+            Pageable pageable
+    ) {
+        var posts = postService.searchPost(name,topic,author,pageable);
+        return new ApiResponse<>("success", 200, "All posts retrieved successfully", posts);
+    }
 
 
     @PostMapping("/create")
