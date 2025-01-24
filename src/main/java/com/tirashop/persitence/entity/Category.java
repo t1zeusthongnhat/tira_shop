@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.experimental.FieldNameConstants;
 
 @Entity
 @Getter
@@ -13,6 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @Table(name = "category")
+@FieldNameConstants
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

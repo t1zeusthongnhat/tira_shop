@@ -71,7 +71,7 @@ public class BrandController {
     }
 
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Get brand by ID", description = "Retrieve brand details by ID")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<BrandDTO> getBrandById(@PathVariable Long id) {

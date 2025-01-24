@@ -1,13 +1,16 @@
 package com.tirashop.service;
 
 import com.tirashop.dto.CategoryDTO;
+import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Category;
 
 import com.tirashop.persitence.repository.CategoryRepository;
+import com.tirashop.persitence.specification.CategorySpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,6 +23,25 @@ import java.util.List;
 public class CategoryService {
 
     CategoryRepository categoryRepository;
+
+
+
+    public PagedData<CategoryDTO> searchCate(String name, Pageable pageable){
+        var categorySpec = CategorySpecification.searchCate(name);
+        var catePage = categoryRepository.findAll(categorySpec,pageable);
+
+        var categoryItem = catePage.stream().map(
+                this::toDTO
+        ).toList();
+
+        return PagedData.<CategoryDTO>builder()
+                .pageNo(catePage.getNumber())
+                .elementPerPage(catePage.getSize())
+                .totalElements(catePage.getTotalElements())
+                .totalPages(catePage.getTotalPages())
+                .elementList(categoryItem)
+                .build();
+    }
 
     public List<CategoryDTO> getAllCate(){
         List<Category> listCate = categoryRepository.findAll();

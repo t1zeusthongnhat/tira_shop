@@ -2,6 +2,7 @@ package com.tirashop.controller;
 
 import com.tirashop.dto.CategoryDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.model.PagedData;
 import com.tirashop.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,17 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryController {
     CategoryService categoryService;
+
+    @GetMapping("")
+    @Operation(summary = "Filter and Listing all categories", description = "Get a list and search of all available categories")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list of categories")
+    public ApiResponse<PagedData<CategoryDTO>> filterCategory(
+            @RequestParam(value = "name", required = false) String name,
+            Pageable pageable
+    ) {
+        var cateData = categoryService.searchCate(name,pageable);
+        return new ApiResponse<>("success", 200, "Get data from category success", cateData);
+    }
 
     @GetMapping("/list")
     @Operation(summary = "Retrieve all categories", description = "Get a list of all available categories")
