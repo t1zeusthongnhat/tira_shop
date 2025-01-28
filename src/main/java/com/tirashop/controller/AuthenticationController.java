@@ -25,7 +25,7 @@ import java.text.ParseException;
 
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/tirashop/auth")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "APIs for user authentication")

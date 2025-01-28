@@ -19,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/brand")
+@RequestMapping("/tirashop/brand")
 @Tag(name = "Brand", description = "APIs for managing brands")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

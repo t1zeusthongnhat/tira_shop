@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("/tirashop/cart")
 @RequiredArgsConstructor
 @Tag(name = "Cart", description = "APIs for cart")
 public class CartController {

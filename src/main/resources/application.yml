@@ -1,28 +1,13 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /tirashop
-
 spring:
   application:
     name: TiraShop
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/tirashop # Replace with your <HOST>, <PORT>, and <DATABASE_NAME>
-    username: postgres # Username for PostgreSQL
-    password: 300924 # Password for the PostgreSQL user
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update # You can use "create-drop", "validate", or "none" depending on your need
-    show-sql: true # Display SQL queries in the log
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect # PostgreSQL dialect
-
-jwt:
-  signerKey: "6/hkeUzorg7w6sejPQzsD5++k9QqXumpahrG2vDhoQAbgiEIoUNSBUlKWl7KL4zA"
-
-
-
+  config:
+    import:
+      - classpath:application-db.yml
+      - classpath:application-jwt.yml
+      - classpath:application-security.yml
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE

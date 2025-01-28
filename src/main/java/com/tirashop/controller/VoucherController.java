@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/voucher")
+@RequestMapping("/tirashop/voucher")
 @Tag(name = "Voucher", description = "APIs for managing vouchers")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

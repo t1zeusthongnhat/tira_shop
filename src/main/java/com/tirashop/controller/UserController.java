@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/tirashop/user")
 @Tag(name = "User", description = "APIs for user management")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/reviews")
+@RequestMapping("/tirashop/reviews")
 @Tag(name = "Review", description = "APIs for managing reviews")
 @RequiredArgsConstructor
 public class ReviewController {

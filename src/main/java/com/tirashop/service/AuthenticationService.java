@@ -47,6 +47,17 @@ public class AuthenticationService {
     @NonFinal
     private String SIGNER_KEY;
 
+    public AuthenticationResponse authenticatedGoogleUser(User user) {
+        var token = generateToken(user);
+        var refreshToken = generateRefreshToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .refreshToken(refreshToken)
+                .authenticated(true)
+                .build();
+    }
+
     public AuthenticationResponse authenticated(AuthenticationRequest request){
 
         var userLogin = userRepository.findByUsername(request.getUsername())
