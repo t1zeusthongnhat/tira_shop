@@ -32,7 +32,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final ObjectMapper objectMapper;
 
     @Override
-    @Transactional // Đảm bảo Hibernate giữ session mở khi lấy danh sách role
+    @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
@@ -57,6 +57,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             user.setUsername(username);
             user.setAvatar(avatar);
             user.setStatus("Active");
+            user.setProvider("google");
 
             // Gán role mặc định
             Role roleUser = roleRepository.findByName("ROLE_USER")

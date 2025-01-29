@@ -49,14 +49,16 @@ public class UserService {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
 
-    public UserDTO updateUserProfile(String currentUsername, String newUsername, String firstname, String lastname,
-                                     String phone, String address, String gender, String birthday, MultipartFile avatar) {
+    public UserDTO updateUserProfile(String currentUsername, String newUsername, String firstname,
+            String lastname,
+            String phone, String address, String gender, String birthday, MultipartFile avatar) {
         // Tìm user hiện tại trong cơ sở dữ liệu
         User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found: " + currentUsername));
 
         // Kiểm tra nếu username mới bị trùng lặp (ngoại trừ user hiện tại)
-        if (newUsername != null && !newUsername.equals(user.getUsername()) && userRepository.existsByUsername(newUsername)) {
+        if (newUsername != null && !newUsername.equals(user.getUsername())
+                && userRepository.existsByUsername(newUsername)) {
             throw new RuntimeException("Username already exists!");
         }
 
@@ -67,18 +69,33 @@ public class UserService {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 parsedBirthday = LocalDate.parse(birthday, formatter);
             } catch (DateTimeParseException e) {
-                throw new RuntimeException("Invalid date format for birthday. Expected format: dd-MM-yyyy");
+                throw new RuntimeException(
+                        "Invalid date format for birthday. Expected format: dd-MM-yyyy");
             }
         }
 
         // Cập nhật thông tin user
-        if (newUsername != null) user.setUsername(newUsername);
-        if (firstname != null) user.setFirstname(firstname);
-        if (lastname != null) user.setLastname(lastname);
-        if (phone != null) user.setPhone(phone);
-        if (address != null) user.setAddress(address);
-        if (gender != null) user.setGender(gender);
-        if (parsedBirthday != null) user.setBirthday(parsedBirthday);
+        if (newUsername != null) {
+            user.setUsername(newUsername);
+        }
+        if (firstname != null) {
+            user.setFirstname(firstname);
+        }
+        if (lastname != null) {
+            user.setLastname(lastname);
+        }
+        if (phone != null) {
+            user.setPhone(phone);
+        }
+        if (address != null) {
+            user.setAddress(address);
+        }
+        if (gender != null) {
+            user.setGender(gender);
+        }
+        if (parsedBirthday != null) {
+            user.setBirthday(parsedBirthday);
+        }
 
         // Xử lý avatar nếu có
         if (avatar != null && !avatar.isEmpty()) {
@@ -89,43 +106,41 @@ public class UserService {
         // Lưu user
         userRepository.save(user);
 
-
         // Chuyển đổi User sang UserDTO và trả về
         return toDTO(user);
     }
 
 
-    public UserProfileDTO getProfile(String username){
+    public UserProfileDTO getProfile(String username) {
 
-       // Tìm user trong cơ sở dữ liệu
-       User user = userRepository.findByUsername(username)
-               .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        // Tìm user trong cơ sở dữ liệu
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-       // Chuyển đổi User entity thành UserProfileDTO
-       UserProfileDTO userProfileDTO = UserProfileDTO.builder()
-               .username(user.getUsername())
-               .firstname(user.getFirstname())
-               .lastname(user.getLastname())
-               .email(user.getEmail())
-               .phone(user.getPhone())
-               .address(user.getAddress())
-               .gender(user.getGender())
-               .avatar(user.getAvatar())
-               .birthday(user.getBirthday())
-               .build();
-       return userProfileDTO;
-   }
+        // Chuyển đổi User entity thành UserProfileDTO
+        UserProfileDTO userProfileDTO = UserProfileDTO.builder()
+                .username(user.getUsername())
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .gender(user.getGender())
+                .avatar(user.getAvatar())
+                .birthday(user.getBirthday())
+                .build();
+        return userProfileDTO;
+    }
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<UserDTO> getListUser(){
+    public List<UserDTO> getListUser() {
         return userRepository.findAll().stream().map(this::toDTO).toList();
     }
 
 
-    public PagedData<UserDTO> filterUser(String username, String address, String status, int pageNo, int elementPerPage) {
-        // Chuyển pageNo từ 1-based về 0-based
-        Pageable pageable = PageRequest.of(pageNo - 1, elementPerPage);
+    public PagedData<UserDTO> filterUser(String username, String address, String status,
+            Pageable pageable) {
 
         // Tạo Specification từ các tiêu chí lọc
         Specification<User> spec = UserSpecification.filterUsers(username, address, status);
@@ -141,7 +156,7 @@ public class UserService {
 
         // Trả về PagedData
         return PagedData.<UserDTO>builder()
-                .pageNo(userPage.getNumber() + 1) // Chuyển pageNo từ 0-based về 1-based
+                .pageNo(userPage.getNumber()) // Chuyển pageNo từ 0-based về 1-based
                 .elementPerPage(userPage.getSize())
                 .totalElements(userPage.getTotalElements())
                 .totalPages(userPage.getTotalPages())
@@ -169,14 +184,15 @@ public class UserService {
 
     public UserRegisterResponse register(UserRegisterRequest request) {
         log.info("In method register user");
-        if(userRepository.existsByUsername(request.getUsername())){
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists!");
         }
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists!");
         }
         // Validate password confirmation
-        if (!StringUtils.hasText(request.getPassword()) || !request.getPassword().equals(request.getConfirmPassword())) {
+        if (!StringUtils.hasText(request.getPassword()) || !request.getPassword()
+                .equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match or are invalid!");
         }
 
@@ -219,7 +235,6 @@ public class UserService {
         log.info("User registered and saved successfully: {}", response);
         return response;
     }
-
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -268,7 +283,8 @@ public class UserService {
             // Tạo thư mục nếu chưa tồn tại
             java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
             if (!java.nio.file.Files.exists(uploadPath)) {
-                java.nio.file.Files.createDirectories(uploadPath); // Tạo thư mục uploads/avatar nếu chưa có
+                java.nio.file.Files.createDirectories(
+                        uploadPath); // Tạo thư mục uploads/avatar nếu chưa có
             }
 
             // Đường dẫn file
@@ -289,12 +305,14 @@ public class UserService {
     private User toEntity(UserDTO userDTO) {
         Set<Role> roles = userDTO.getRole() != null ? userDTO.getRole().stream()
                 .map(roleDTO -> roleRepository.findByName(roleDTO.getName())
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleDTO.getName())))
+                        .orElseThrow(
+                                () -> new RuntimeException("Role not found: " + roleDTO.getName())))
                 .collect(Collectors.toSet())
                 : new HashSet<>();
 
         return User.builder()
                 .id(userDTO.getId())
+                .provider(userDTO.getProvider())
                 .username(userDTO.getUsername())
                 .firstname(userDTO.getFirstname())
                 .lastname(userDTO.getLastname())
@@ -306,7 +324,8 @@ public class UserService {
                 .status(userDTO.getStatus())
                 .avatar(userDTO.getAvatar())
                 .birthday(userDTO.getBirthday())
-                .createdAt(userDTO.getCreatedAt() != null ? userDTO.getCreatedAt() : LocalDate.now())
+                .createdAt(
+                        userDTO.getCreatedAt() != null ? userDTO.getCreatedAt() : LocalDate.now())
                 .role(roles)
                 .build();
     }
@@ -323,6 +342,7 @@ public class UserService {
                 .address(user.getAddress())
                 .gender(user.getGender())
                 .status(user.getStatus())
+                .provider(user.getProvider())
                 .avatar(user.getAvatar())
                 .birthday(user.getBirthday())
                 .updatedAt(user.getUpdatedAt())

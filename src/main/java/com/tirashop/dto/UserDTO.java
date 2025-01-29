@@ -13,13 +13,12 @@ import java.time.LocalDate;
 import java.util.Set;
 
 
-
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class UserDTO {
+
     private Long id;
 
     @Size(min = 6, message = "Username must be at least 6 characters!")
@@ -35,7 +34,8 @@ public class UserDTO {
     private String address;
     private String gender;
     private String status;
-    private  String avatar;
+    private String avatar;
+    private String provider;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate birthday;

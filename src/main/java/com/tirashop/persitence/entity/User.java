@@ -37,7 +37,7 @@ public class User {
     private String address;
     private String gender;
     private String status;
-
+    private String provider; //local, google, facebook
 
     private String avatar; // URL của avatar trong file system
 
@@ -55,9 +55,6 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDate updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDate deletedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();  // Mối quan hệ One-to-Many với Review

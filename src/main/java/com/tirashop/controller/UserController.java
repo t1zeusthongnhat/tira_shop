@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,11 +33,6 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
-    UserRepository userRepository;
-    PasswordEncoder passwordEncoder;
-
-
-
 
     @GetMapping()
     @Operation(summary = "Filter users with pagination", description = "Filter users by username, address, and status with pagination support")
@@ -44,10 +40,9 @@ public class UserController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") int pageNo, // Mặc định là trang 1
-            @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
+            Pageable pageable
     ) {
-        PagedData<UserDTO> pagedData = userService.filterUser(username, address, status, pageNo, elementPerPage);
+        PagedData<UserDTO> pagedData = userService.filterUser(username, address, status, pageable);
         return new ApiResponse<>("success", 200, "Filtered users retrieved successfully", pagedData);
     }
 
@@ -153,6 +148,7 @@ public class UserController {
                 .address(address)
                 .gender(gender)
                 .status(status)
+                .provider("local")
                 .birthday(parsedBirthday) // Parse String thành LocalDate
                 .role(roles != null ? roles.stream()
                         .map(roleName -> RoleDTO.builder().name(roleName).build())
