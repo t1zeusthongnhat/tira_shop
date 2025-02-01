@@ -13,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,10 +41,10 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
-            @RequestParam(defaultValue = "1") int pageNo, // Mặc định bắt đầu từ trang 1
-            @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
+            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+
     ) {
-        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name,size, minPrice, maxPrice, category, brand, pageNo, elementPerPage);
+        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name,size, minPrice, maxPrice, category, brand, pageable);
         return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", pagedData);
     }
 

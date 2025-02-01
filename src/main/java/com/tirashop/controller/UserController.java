@@ -42,7 +42,7 @@ public class UserController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String status,
-            @PageableDefault(page = 0,size = 25,direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
     ) {
         PagedData<UserDTO> pagedData = userService.filterUser(username, address, status, pageable);
         return new ApiResponse<>("success", 200, "Filtered users retrieved successfully", pagedData);

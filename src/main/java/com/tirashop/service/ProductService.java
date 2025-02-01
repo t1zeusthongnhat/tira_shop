@@ -47,9 +47,8 @@ public class ProductService {
 
 
 
-    public PagedData<ProductDTO> filterProductsWithPaging(String name,String size, Double minPrice, Double maxPrice, String category, String brand, int pageNo, int elementPerPage) {
-        // Chuyển đổi pageNo từ 1-based về 0-based để phù hợp với Pageable của Spring
-        Pageable pageable = PageRequest.of(pageNo - 1, elementPerPage);
+    public PagedData<ProductDTO> filterProductsWithPaging(String name,String size, Double minPrice, Double maxPrice, String category, String brand, Pageable pageable) {
+
         Specification<Product> spec = ProductSpecification.filterProducts(name,size, minPrice, maxPrice, category, brand);
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
@@ -60,7 +59,7 @@ public class ProductService {
                 .collect(Collectors.toList());
 
         return PagedData.<ProductDTO>builder()
-                .pageNo(productPage.getNumber() + 1) // Chuyển pageNo từ 0-based về 1-based
+                .pageNo(productPage.getNumber())
                 .elementPerPage(productPage.getSize())
                 .totalElements(productPage.getTotalElements())
                 .totalPages(productPage.getTotalPages())

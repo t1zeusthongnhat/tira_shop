@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +34,7 @@ public class VoucherController {
     public ApiResponse<PagedData<VoucherDTO>> searchVoucher(
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "status",required = false) String status,
-            Pageable pageable
+            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
     ){
         var voucherItems = voucherService.seachVoucher(code,status,pageable);
         return new ApiResponse<>("success",200,"Filter voucher success",voucherItems);

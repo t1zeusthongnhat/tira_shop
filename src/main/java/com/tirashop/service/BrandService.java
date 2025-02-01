@@ -37,24 +37,17 @@ public class BrandService {
         return brandRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    public PagedData<BrandDTO> filterBrands(String name, int pageNo, int elementPerPage) {
-        // Chuyển pageNo từ 1-based về 0-based
-        Pageable pageable = PageRequest.of(pageNo - 1, elementPerPage);
-
-        // Tạo Specification từ tiêu chí lọc
+    public PagedData<BrandDTO> filterBrands(String name, Pageable pageable) {
         Specification<Brand> spec = BrandSpecification.filterBrand(name);
-
-        // Thực hiện truy vấn với phân trang
         Page<Brand> brandPage = brandRepository.findAll(spec, pageable);
 
-        // Chuyển đổi danh sách Brand entity sang BrandDTO
         List<BrandDTO> brandDTOs = brandPage.getContent()
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
-        // Trả về PagedData
+
         return PagedData.<BrandDTO>builder()
-                .pageNo(brandPage.getNumber() + 1) // Chuyển pageNo từ 0-based về 1-based
+                .pageNo(brandPage.getNumber())
                 .elementPerPage(brandPage.getSize())
                 .totalElements(brandPage.getTotalElements())
                 .totalPages(brandPage.getTotalPages())
@@ -64,8 +57,9 @@ public class BrandService {
 
 
     public BrandDTO createBrand(String name, String description, MultipartFile logoFile) {
-        if (brandRepository.existsByName(name))
+        if (brandRepository.existsByName(name)) {
             throw new IllegalArgumentException("Brand name already exists");
+        }
         Brand brand = new Brand();
         brand.setName(name);
         brand.setDescription(description);
@@ -103,10 +97,12 @@ public class BrandService {
                 .orElseThrow(() -> new RuntimeException("Cannot find brand with id: " + id));
         return toDTO(brand);
     }
-     public void deleteBrand(Long id){
-        brandRepository.findById(id).orElseThrow(()-> new RuntimeException("Cannot found this brand has id: "+id));
+
+    public void deleteBrand(Long id) {
+        brandRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cannot found this brand has id: " + id));
         brandRepository.deleteById(id);
-     }
+    }
 
     private String handleImageUpload(MultipartFile file, String uploadDir) {
         try {

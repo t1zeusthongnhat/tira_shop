@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +33,7 @@ public class PostController {
             @RequestParam(value = "name",required = false) String name,
             @RequestParam(value = "topic",required = false) String topic,
             @RequestParam(value = "author",required = false) String author,
-            Pageable pageable
+            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
     ) {
         var posts = postService.searchPost(name,topic,author,pageable);
         return new ApiResponse<>("success", 200, "All posts retrieved successfully", posts);

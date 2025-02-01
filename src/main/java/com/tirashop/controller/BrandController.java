@@ -10,6 +10,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -32,10 +35,9 @@ public class BrandController {
     @Operation(summary = "Filter brands with pagination", description = "Filter brands by name with pagination support")
     public ApiResponse<PagedData<BrandDTO>> filterBrands(
             @RequestParam(required = false) String name,
-            @RequestParam(defaultValue = "1") int pageNo, // Mặc định là trang 1
-            @RequestParam(defaultValue = "10") int elementPerPage // Mặc định 10 phần tử/trang
+            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
     ) {
-        PagedData<BrandDTO> pagedData = brandService.filterBrands(name, pageNo, elementPerPage);
+        PagedData<BrandDTO> pagedData = brandService.filterBrands(name, pageable);
         return new ApiResponse<>("success", 200, "Filtered brands retrieved successfully", pagedData);
     }
 

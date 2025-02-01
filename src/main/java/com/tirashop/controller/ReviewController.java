@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +30,7 @@ public class ReviewController {
     public ApiResponse<PagedData<ReviewDTO>> getAllReviews(
             @RequestParam(value = "rating", required = false) Integer rating,
             @RequestParam(value = "username", required = false) String username,
-            Pageable pageable
+            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
     ) {
         var reviews = reviewService.searchReview(rating, username, pageable);
         return new ApiResponse<>("success", 200, "All reviews retrieved successfully", reviews);
