@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -35,12 +36,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException {
-        OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        log.info("Google User Info: {}", oauthUser.getAttributes());
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2User oauthUser = oauthToken.getPrincipal();
+
+        log.info("OAuth2 User Info: {}", oauthUser.getAttributes());
 
         String email = oauthUser.getAttribute("email");
         String username = oauthUser.getAttribute("name");
-        String avatar = oauthUser.getAttribute("picture");
+        String provider = oauthToken.getAuthorizedClientRegistrationId();
 
         Optional<User> existingUser = userRepository.findByEmail(email);
 
@@ -51,15 +54,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             log.info("Existing user logged in: ID={}, Username={}, Email={}", user.getId(),
                     user.getUsername(), user.getEmail());
         } else {
-            // Nếu là user mới, tạo mới trong DB
             user = new User();
             user.setEmail(email);
             user.setUsername(username);
-            user.setAvatar(avatar);
             user.setStatus("Active");
-            user.setProvider("google");
+            user.setProvider(provider);
 
-            // Gán role mặc định
             Role roleUser = roleRepository.findByName("ROLE_USER")
                     .orElseThrow(() -> new RuntimeException("Default role ROLE_USER not found!"));
             user.setRole(Collections.singleton(roleUser));

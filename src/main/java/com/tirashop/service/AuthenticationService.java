@@ -42,7 +42,6 @@ public class AuthenticationService {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-    // chuỗi 32-byte bí mật để sử dụng làm khóa ký (256-bit):
     @Value("${jwt.signerKey}")
     @NonFinal
     private String SIGNER_KEY;

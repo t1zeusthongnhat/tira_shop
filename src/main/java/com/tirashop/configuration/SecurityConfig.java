@@ -1,12 +1,8 @@
 package com.tirashop.configuration;
 
-import com.tirashop.configuration.CustomJwtDecoder;
-import com.tirashop.persitence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -31,7 +27,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 
-    public final String[] PUBLIC_ENDPOINT = {"/tirashop/auth/**", "tirashop/uploads/**","tirashop/cart/**"};
+    public final String[] PUBLIC_ENDPOINT = {"/tirashop/auth/**", "tirashop/uploads/**","tirashop/cart/**","/oauth2/authorization/facebook"};
     public final String[] SWAGGER_WHITELIST = {"/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
 
     @Autowired
@@ -47,9 +43,12 @@ public class SecurityConfig {
         );
 
         httpSecurity.oauth2Login(oauth2 -> oauth2
-                .loginPage("/oauth2/authorization/google")
+                //front -end se redirect den
+//                .loginPage("/oauth2/authorization/google")
+//                .loginPage("/oauth2/authorization/facebook")
                 .successHandler(oAuth2LoginSuccessHandler)
         );
+
 
         httpSecurity.oauth2ResourceServer(
                 oauth2 -> oauth2.jwt(
