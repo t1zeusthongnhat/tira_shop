@@ -30,7 +30,7 @@ public class ReviewController {
     public ApiResponse<PagedData<ReviewDTO>> getAllReviews(
             @RequestParam(value = "rating", required = false) Integer rating,
             @RequestParam(value = "username", required = false) String username,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
         var reviews = reviewService.searchReview(rating, username, pageable);
         return new ApiResponse<>("success", 200, "All reviews retrieved successfully", reviews);

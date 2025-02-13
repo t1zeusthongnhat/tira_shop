@@ -35,10 +35,11 @@ public class BrandController {
     @Operation(summary = "Filter brands with pagination", description = "Filter brands by name with pagination support")
     public ApiResponse<PagedData<BrandDTO>> filterBrands(
             @RequestParam(required = false) String name,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
         PagedData<BrandDTO> pagedData = brandService.filterBrands(name, pageable);
-        return new ApiResponse<>("success", 200, "Filtered brands retrieved successfully", pagedData);
+        return new ApiResponse<>("success", 200, "Filtered brands retrieved successfully",
+                pagedData);
     }
 
 

@@ -30,12 +30,12 @@ public class PostController {
     @GetMapping("")
     @Operation(summary = "Filter and Listing all posts", description = "Retrieve all posts")
     public ApiResponse<PagedData<PostDTO>> getAllPosts(
-            @RequestParam(value = "name",required = false) String name,
-            @RequestParam(value = "topic",required = false) String topic,
-            @RequestParam(value = "author",required = false) String author,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "topic", required = false) String topic,
+            @RequestParam(value = "author", required = false) String author,
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
-        var posts = postService.searchPost(name,topic,author,pageable);
+        var posts = postService.searchPost(name, topic, author, pageable);
         return new ApiResponse<>("success", 200, "All posts retrieved successfully", posts);
     }
 
@@ -52,7 +52,8 @@ public class PostController {
 
         String username = authentication.getName();  // Get username from authentication
 
-        PostDTO postDTO = postService.createPost(name, topic, shortDescription, content, image, username);
+        PostDTO postDTO = postService.createPost(name, topic, shortDescription, content, image,
+                username);
         return new ApiResponse<>("success", 200, "Post created successfully", postDTO);
     }
 
@@ -69,7 +70,8 @@ public class PostController {
             Authentication authentication) {
 
         String username = authentication.getName();  // Get username from authentication
-        PostDTO postDTO = postService.updatePost(postId, name, topic, shortDescription, content, image, username);
+        PostDTO postDTO = postService.updatePost(postId, name, topic, shortDescription, content,
+                image, username);
         return new ApiResponse<>("success", 200, "Post updated successfully", postDTO);
     }
 

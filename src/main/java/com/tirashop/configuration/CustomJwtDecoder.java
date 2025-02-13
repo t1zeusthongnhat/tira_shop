@@ -18,15 +18,24 @@ import java.util.Objects;
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
 
-    @Value("${jwt.signerKey}")
-    private String signerKey;
-
     private final AuthenticationService authenticationService;
+    private final NimbusJwtDecoder nimbusJwtDecoder;
 
-    private NimbusJwtDecoder nimbusJwtDecoder;
-
-    public CustomJwtDecoder(AuthenticationService authenticationService) {
+    public CustomJwtDecoder(@Value("${jwt.signerKey}") String signerKey,
+            AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
+
+        // Kiểm tra nếu signerKey không hợp lệ
+        if (signerKey == null || signerKey.trim().isEmpty()) {
+            throw new IllegalArgumentException("JWT Signer Key must not be null or empty");
+        }
+
+        // Khởi tạo NimbusJwtDecoder một lần duy nhất
+        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HmacSHA512");
+        this.nimbusJwtDecoder = NimbusJwtDecoder
+                .withSecretKey(secretKeySpec)
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
     }
 
     @Override
@@ -45,17 +54,9 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
 
         // Giải mã token nếu hợp lệ
-        if (Objects.isNull(nimbusJwtDecoder)) {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder
-                    .withSecretKey(secretKeySpec)
-                    .macAlgorithm(MacAlgorithm.HS512)
-                    .build();
-        }
-
         Jwt jwt = nimbusJwtDecoder.decode(token);
 
-        // Kiểm tra token có trong danh sách bị vô hiệu hóa không
+        // Kiểm tra token có bị vô hiệu hóa không
         String jwtId = jwt.getId();
         if (authenticationService.isTokenBlacklisted(jwtId)) {
             throw new JwtException("Token has been invalidated");
@@ -69,6 +70,4 @@ public class CustomJwtDecoder implements JwtDecoder {
 
         return jwt;
     }
-
-
 }

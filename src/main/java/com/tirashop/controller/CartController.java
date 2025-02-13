@@ -24,15 +24,13 @@ public class CartController {
     @PostMapping("/add")
     @Operation(summary = "Add product to cart", description = "Add product to user's cart or temporary cart")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product added successfully")
-    public ApiResponse<CartDTO> addToCart(@RequestBody AddToCartRequest request, Authentication authentication) {
+    public ApiResponse<CartDTO> addToCart(@RequestBody AddToCartRequest request,
+            Authentication authentication) {
         String username = null;
 
-        // Lấy username từ Authentication
         if (authentication != null && authentication.isAuthenticated()) {
-            username = authentication.getName(); // Lấy username từ getName()
+            username = authentication.getName();
         }
-
-        // Gọi CartService với username
         CartDTO cart = cartService.addToCartByUsername(request, username);
         return new ApiResponse<>("success", 200, "Product added to cart", cart);
     }
@@ -52,7 +50,8 @@ public class CartController {
 
     @DeleteMapping("/remove/{itemId}")
     @Operation(summary = "Remove item from cart", description = "Remove a specific item from the cart")
-    public ApiResponse<CartDTO> removeItem(@PathVariable Long itemId, Authentication authentication) {
+    public ApiResponse<CartDTO> removeItem(@PathVariable Long itemId,
+            Authentication authentication) {
         String username = null;
 
         if (authentication != null && authentication.isAuthenticated()) {
@@ -78,7 +77,8 @@ public class CartController {
 
     @PutMapping("/update")
     @Operation(summary = "Update item quantity/size", description = "Update quantity or size of an item in the cart")
-    public ApiResponse<CartDTO> updateItem(@RequestBody CartItemDTO request, Authentication authentication) {
+    public ApiResponse<CartDTO> updateItem(@RequestBody CartItemDTO request,
+            Authentication authentication) {
         String username = null;
 
         // Lấy username từ Authentication

@@ -24,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryController {
+
     CategoryService categoryService;
 
     @GetMapping("")
@@ -31,9 +32,9 @@ public class CategoryController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list of categories")
     public ApiResponse<PagedData<CategoryDTO>> filterCategory(
             @RequestParam(value = "name", required = false) String name,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
-        var cateData = categoryService.searchCate(name,pageable);
+        var cateData = categoryService.searchCate(name, pageable);
         return new ApiResponse<>("success", 200, "Get data from category success", cateData);
     }
 

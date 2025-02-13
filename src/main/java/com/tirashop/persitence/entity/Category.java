@@ -28,6 +28,6 @@ public class Category {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "category") // Mối quan hệ One-to-Many
-    private List<Product> products; // Danh sách sản phẩm thuộc danh mục này
+    @OneToMany(mappedBy = "category")
+    private List<Product> products;
 }

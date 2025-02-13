@@ -1,4 +1,5 @@
 package com.tirashop.controller;
+
 import com.tirashop.dto.RoleDTO;
 import com.tirashop.dto.UserDTO;
 import com.tirashop.dto.UserProfileDTO;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
+
     UserService userService;
 
     @GetMapping()
@@ -42,19 +44,20 @@ public class UserController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String status,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
         PagedData<UserDTO> pagedData = userService.filterUser(username, address, status, pageable);
-        return new ApiResponse<>("success", 200, "Filtered users retrieved successfully", pagedData);
+        return new ApiResponse<>("success", 200, "Filtered users retrieved successfully",
+                pagedData);
     }
 
 
     @GetMapping("/list")
     @Operation(summary = "Get user list", description = "Retrieve the list of users")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User list retrieved successfully")
-    public ApiResponse<List<UserDTO>> getListUser (){
-        List<UserDTO> list =  userService.getListUser();
-        return new ApiResponse<>("success",200,"Operation successful",list);
+    public ApiResponse<List<UserDTO>> getListUser() {
+        List<UserDTO> list = userService.getListUser();
+        return new ApiResponse<>("success", 200, "Operation successful", list);
     }
 
     @GetMapping("/my-profile")
@@ -69,7 +72,6 @@ public class UserController {
         UserProfileDTO response = userService.getProfile(username);
         return new ApiResponse<>("success", 200, "User profile retrieved successfully", response);
     }
-
 
 
     @PutMapping("/update-profile")
@@ -90,7 +92,8 @@ public class UserController {
         String currentUsername = authentication.getName();
 
         // Gọi service để xử lý cập nhật
-        UserDTO updatedUser = userService.updateUserProfile(currentUsername, newUsername, firstname, lastname, phone, address, gender, birthday, avatar);
+        UserDTO updatedUser = userService.updateUserProfile(currentUsername, newUsername, firstname,
+                lastname, phone, address, gender, birthday, avatar);
 
         // Chuyển đổi UserDTO sang UserProfileDTO để trả về
         UserProfileDTO updatedProfile = UserProfileDTO.builder()
@@ -105,10 +108,9 @@ public class UserController {
                 .birthday(updatedUser.getBirthday())
                 .build();
 
-        return new ApiResponse<>("success", 200, "User profile updated successfully", updatedProfile);
+        return new ApiResponse<>("success", 200, "User profile updated successfully",
+                updatedProfile);
     }
-
-
 
 
     @PostMapping("/create-new-user")
@@ -125,7 +127,8 @@ public class UserController {
             @RequestParam(value = "gender", required = false) String gender,
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "birthday", required = false) String birthday,
-            @RequestParam(value = "role", required = false) List<String> roles, // Truyền danh sách role
+            @RequestParam(value = "role", required = false) List<String> roles,
+            // Truyền danh sách role
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
 
         // Xử lý format ngày tháng
@@ -135,7 +138,8 @@ public class UserController {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 parsedBirthday = LocalDate.parse(birthday, formatter);
             } catch (DateTimeParseException e) {
-                return new ApiResponse<>("error", 400, "Invalid date format for birthday. Expected format: dd-MM-yyyy", null);
+                return new ApiResponse<>("error", 400,
+                        "Invalid date format for birthday. Expected format: dd-MM-yyyy", null);
             }
         }
 
@@ -187,7 +191,8 @@ public class UserController {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 parsedBirthday = LocalDate.parse(birthday, formatter);
             } catch (DateTimeParseException e) {
-                return new ApiResponse<>("error", 400, "Invalid date format for birthday. Expected format: dd-MM-yyyy", null);
+                return new ApiResponse<>("error", 400,
+                        "Invalid date format for birthday. Expected format: dd-MM-yyyy", null);
             }
         }
 
@@ -210,8 +215,6 @@ public class UserController {
         return new ApiResponse<>("success", 200, "User updated successfully",
                 userService.updateUser(id, userDTO, avatar));
     }
-
-
 
 
 }

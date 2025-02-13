@@ -35,19 +35,20 @@ public class ProductController {
     @GetMapping()
     @Operation(summary = "Filter products with pagination", description = "Filter products by size, price range, category, and brand with pagination support")
     public ApiResponse<PagedData<ProductDTO>> getFilteredProducts(
-            @RequestParam(required = false) String  name,
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
 
     ) {
-        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name,size, minPrice, maxPrice, category, brand, pageable);
-        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", pagedData);
+        PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name, size,
+                minPrice, maxPrice, category, brand, pageable);
+        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully",
+                pagedData);
     }
-
 
     //getAllProductsWithImages
     //filter san pham
@@ -65,7 +66,8 @@ public class ProductController {
     @Operation(summary = "Update product", description = "Update product details by ID")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product updated successfully")
     @ResponseStatus(HttpStatus.OK) // Trả về mã 200 (OK)
-    public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
+    public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id,
+            @RequestBody ProductRequest request) {
         ProductResponse response = productService.updateProduct(request, id);
         return new ApiResponse<>("success", 200, "Update Product success", response);
     }

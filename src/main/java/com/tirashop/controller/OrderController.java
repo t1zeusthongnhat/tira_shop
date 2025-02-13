@@ -22,8 +22,6 @@ public class OrderController {
 
     OrderService orderService;
 
-    // OrderController.java
-
     @PutMapping("/{orderId}/status")
     @Operation(summary = "Update order status", description = "Update the status of an order (PENDING, COMPLETED, CANCELLED)")
     public ApiResponse<String> updateOrderStatus(
@@ -35,6 +33,7 @@ public class OrderController {
         orderService.updateOrderStatus(orderId, username, status);
         return new ApiResponse<>("success", 200, "Order status updated to " + status, null);
     }
+
     @GetMapping("/pending")
     @Operation(summary = "Get pending products", description = "Retrieve all products in PENDING orders by the user")
     public ApiResponse<List<OrderItemDTO>> getPendingProducts(Authentication authentication) {
@@ -47,7 +46,8 @@ public class OrderController {
     @Operation(summary = "Get cancelled products", description = "Retrieve all products in CANCELLED orders by the user")
     public ApiResponse<List<OrderItemDTO>> getCancelledProducts(Authentication authentication) {
         String username = authentication != null ? authentication.getName() : null;
-        List<OrderItemDTO> cancelledProducts = orderService.getProductsByStatus(username, "CANCELLED");
+        List<OrderItemDTO> cancelledProducts = orderService.getProductsByStatus(username,
+                "CANCELLED");
         return new ApiResponse<>("success", 200, "Cancelled products retrieved", cancelledProducts);
     }
 
@@ -58,7 +58,8 @@ public class OrderController {
             @PathVariable Long orderId,
             Authentication authentication) {
         String username = authentication != null ? authentication.getName() : null;
-        List<ShipmentDetailDTO> shipmentDetails = orderService.getShipmentDetails(orderId, username);
+        List<ShipmentDetailDTO> shipmentDetails = orderService.getShipmentDetails(orderId,
+                username);
         return new ApiResponse<>("success", 200, "Shipment details retrieved", shipmentDetails);
     }
 
@@ -85,7 +86,8 @@ public class OrderController {
     public ApiResponse<String> updateShipmentStatus(
             @PathVariable Long shipmentId,
             @RequestParam String status) {
-        Shipment.ShipmentStatus shipmentStatus = Shipment.ShipmentStatus.valueOf(status.toUpperCase());
+        Shipment.ShipmentStatus shipmentStatus = Shipment.ShipmentStatus.valueOf(
+                status.toUpperCase());
         orderService.updateShipmentStatus(shipmentId, shipmentStatus);
         return new ApiResponse<>("success", 200, "Shipment status updated", null);
     }

@@ -65,14 +65,5 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();  // Mối quan hệ One-to-Many với Oder
 
-    @OneToMany(mappedBy = "buyer")
-    private List<ChatRoom> buyerChatRooms = new ArrayList<>();
-
-    @OneToMany(mappedBy = "admin")
-    private List<ChatRoom> adminChatRooms = new ArrayList<>();
-
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> sentMessages = new ArrayList<>();
-
 
 }

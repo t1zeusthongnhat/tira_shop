@@ -33,11 +33,11 @@ public class VoucherController {
     @Operation(summary = "Get list and filter voucher by code and status")
     public ApiResponse<PagedData<VoucherDTO>> searchVoucher(
             @RequestParam(value = "code", required = false) String code,
-            @RequestParam(value = "status",required = false) String status,
-            @PageableDefault(page = 0,size = 25,sort = "createdAt",direction = Direction.DESC) Pageable pageable
-    ){
-        var voucherItems = voucherService.seachVoucher(code,status,pageable);
-        return new ApiResponse<>("success",200,"Filter voucher success",voucherItems);
+            @RequestParam(value = "status", required = false) String status,
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        var voucherItems = voucherService.seachVoucher(code, status, pageable);
+        return new ApiResponse<>("success", 200, "Filter voucher success", voucherItems);
     }
 
     @GetMapping("/list")
@@ -58,7 +58,8 @@ public class VoucherController {
     @PutMapping("/update/{id}")
     @Operation(summary = "Update voucher", description = "Update voucher details by ID")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<VoucherDTO> updateVoucher(@PathVariable Long id, @RequestBody VoucherDTO voucherDTO) {
+    public ApiResponse<VoucherDTO> updateVoucher(@PathVariable Long id,
+            @RequestBody VoucherDTO voucherDTO) {
         VoucherDTO response = voucherService.updateVoucher(id, voucherDTO);
         return new ApiResponse<>("success", 200, "Update Voucher success", response);
     }
