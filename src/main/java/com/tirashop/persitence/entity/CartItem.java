@@ -15,25 +15,24 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "cart_item")
 public class CartItem {
-    //lưu thông tin về các sản phẩm trong giỏ hàng
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Mã sản phẩm trong giỏ hàng (Primary Key)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;  // Mã giỏ hàng (Khóa ngoại)
+    private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;  // Mã sản phẩm (Khóa ngoại)
+    private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;  // Số lượng sản phẩm
+    private int quantity;
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian thêm sản phẩm vào giỏ hàng
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;  // Thời gian cập nhật sản phẩm trong giỏ hàng
+    private LocalDateTime updatedAt;
 }

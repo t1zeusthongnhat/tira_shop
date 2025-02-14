@@ -15,13 +15,13 @@ import java.util.Date;
 @Entity
 public class InvalidatedToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động sinh ID nếu cần
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column(nullable = false, unique = true)
-    String token; // Token bị logout
+    String token;
 
     @Column(nullable = false)
-    Date expiryTime; // Thời gian hết hạn của token
+    Date expiryTime;
 }
 

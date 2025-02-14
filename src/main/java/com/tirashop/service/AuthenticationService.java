@@ -35,7 +35,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
@@ -57,14 +57,14 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse authenticated(AuthenticationRequest request){
+    public AuthenticationResponse authenticated(AuthenticationRequest request) {
 
         var userLogin = userRepository.findByUsername(request.getUsername())
-                        .orElseThrow(()-> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new RuntimeException("User not found!"));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), userLogin.getPassword());
 
-        if(!authenticated) throw new RuntimeException("Cannot authenticate user!");
+        if (!authenticated) throw new RuntimeException("Cannot authenticate user!");
 
         var token = generateToken(userLogin);
         var refreshToken = generateRefreshToken(userLogin);
@@ -78,7 +78,7 @@ public class AuthenticationService {
     }
 
 
-    String generateToken(User user){
+    String generateToken(User user) {
         // token duoc cau tao nhu sau:
         // 3 phan: JWT- json web token
         // header: chua thuat toan de gen ra mot chuoi token
@@ -96,13 +96,13 @@ public class AuthenticationService {
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("type", "access")
-                .claim("scope",buildScope(user))
+                .claim("scope", buildScope(user))
                 .claim("userId", user.getId()) // Thêm userId vào claims
                 .build();
         //Tao payload cho token
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         //Tao obj chua token
-        JWSObject jwsObject = new JWSObject(header,payload);
+        JWSObject jwsObject = new JWSObject(header, payload);
         //Kí và trả về một chuỗi String
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
@@ -137,8 +137,6 @@ public class AuthenticationService {
         boolean active = !isBlacklisted;
         return new IntrospectResponse(active);
     }
-
-
 
 
     public void logoutToken(IntrospectRequest request) throws ParseException, JOSEException {
@@ -226,6 +224,7 @@ public class AuthenticationService {
 
         return signedJWT; // Trả về SignedJWT nếu hợp lệ
     }
+
     public String generateRefreshToken(User user) {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -244,7 +243,6 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
-
 
 
 }

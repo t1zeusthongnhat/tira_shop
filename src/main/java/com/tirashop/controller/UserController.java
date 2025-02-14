@@ -5,7 +5,6 @@ import com.tirashop.dto.UserDTO;
 import com.tirashop.dto.UserProfileDTO;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.model.PagedData;
-import com.tirashop.persitence.repository.UserRepository;
 import com.tirashop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,10 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
@@ -87,15 +84,12 @@ public class UserController {
             @RequestParam(value = "birthday", required = false) String birthday,
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
 
-        // Lấy username hiện tại từ token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
-        // Gọi service để xử lý cập nhật
         UserDTO updatedUser = userService.updateUserProfile(currentUsername, newUsername, firstname,
                 lastname, phone, address, gender, birthday, avatar);
 
-        // Chuyển đổi UserDTO sang UserProfileDTO để trả về
         UserProfileDTO updatedProfile = UserProfileDTO.builder()
                 .username(updatedUser.getUsername())
                 .firstname(updatedUser.getFirstname())
@@ -128,10 +122,8 @@ public class UserController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "birthday", required = false) String birthday,
             @RequestParam(value = "role", required = false) List<String> roles,
-            // Truyền danh sách role
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
 
-        // Xử lý format ngày tháng
         LocalDate parsedBirthday = null;
         if (birthday != null && !birthday.isEmpty()) {
             try {
@@ -143,7 +135,6 @@ public class UserController {
             }
         }
 
-        // Tạo UserDTO từ các tham số
         UserDTO userDTO = UserDTO.builder()
                 .username(username)
                 .firstname(firstname)
@@ -155,16 +146,13 @@ public class UserController {
                 .gender(gender)
                 .status(status)
                 .provider("local")
-                .birthday(parsedBirthday) // Parse String thành LocalDate
+                .birthday(parsedBirthday)
                 .role(roles != null ? roles.stream()
                         .map(roleName -> RoleDTO.builder().name(roleName).build())
                         .collect(Collectors.toSet()) : null)
                 .build();
 
-        // Gọi service để lưu user
         UserDTO savedUser = userService.createUser(userDTO, avatar);
-
-        // Trả về ApiResponse với thông tin user đã được tạo
         return new ApiResponse<>("success", 201, "User created successfully", savedUser);
     }
 

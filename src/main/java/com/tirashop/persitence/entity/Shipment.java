@@ -15,31 +15,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "shipment")
 public class Shipment {
-    //lưu thông tin về vận chuyển của đơn hàng, bao gồm trạng thái giao hàng
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Mã vận chuyển (Primary Key)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;  // Mã đơn hàng (Khóa ngoại)
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id", nullable = true)
-    private OrderItem orderItem; // Mã sản phẩm trong đơn hàng (có thể NULL nếu shipment chung cho cả đơn hàng)
+    private OrderItem orderItem;
 
     @Column(name = "tracking_number", nullable = false)
-    private String trackingNumber;  // Số theo dõi vận chuyển
+    private String trackingNumber;
 
     @Column(name = "shipping_method", nullable = false)
-    private String shippingMethod;  // Phương thức giao hàng (ví dụ: giao hàng nhanh, giao hàng tiêu chuẩn)
+    private String shippingMethod;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ShipmentStatus status;  // Trạng thái giao hàng
+    private ShipmentStatus status;
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo vận chuyển
+    private LocalDateTime createdAt = LocalDateTime.now();
 
 
     public enum ShipmentStatus {

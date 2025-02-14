@@ -39,7 +39,7 @@ public class User {
     private String status;
     private String provider; //local, google, facebook
 
-    private String avatar; // URL của avatar trong file system
+    private String avatar;
 
     @OneToMany(mappedBy = "author")
     private Set<Post> author;
@@ -57,13 +57,13 @@ public class User {
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();  // Mối quan hệ One-to-Many với Review
+    private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cart> carts = new ArrayList<>();  // Mối quan hệ One-to-Many với Cart
+    private List<Cart> carts = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();  // Mối quan hệ One-to-Many với Oder
+    private List<Order> orders = new ArrayList<>();
 
 
 }

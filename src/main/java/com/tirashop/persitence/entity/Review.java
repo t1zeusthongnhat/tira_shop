@@ -22,29 +22,29 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // ID của đánh giá
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;  // Sản phẩm mà người dùng đánh giá
+    private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;  // Người dùng đánh giá
+    private User user;
 
     @Column(name = "rating", nullable = false)
-    private int rating;  // Điểm đánh giá, giả sử là số nguyên từ 1 đến 5
+    private int rating;
 
     @Column(name = "review", length = 500)
-    private String review;  // Mô tả đánh giá
+    private String review;
 
     @Column(name = "image")
-    private String image;  // URL của ảnh (nếu có ảnh đánh giá)
+    private String image;
 
     @Column(name = "created_at", updatable = false)
-    private LocalDate createdAt = LocalDate.now();  // Thời gian tạo đánh giá
+    private LocalDate createdAt = LocalDate.now();
 
     @Column(name = "updated_at")
-    private LocalDate updatedAt;  // Thời gian cập nhật (nếu có thay đổi)
+    private LocalDate updatedAt;
 
 }

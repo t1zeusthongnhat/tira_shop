@@ -23,7 +23,7 @@ public class Brand {
     private Long id;
     private String name;
     private String description;
-    private String logo; // Lưu trữ URL của logo
+    private String logo;
 
     @Column(name = "created_at", updatable = false)
     private LocalDate createdAt = LocalDate.now();

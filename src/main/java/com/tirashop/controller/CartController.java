@@ -81,12 +81,10 @@ public class CartController {
             Authentication authentication) {
         String username = null;
 
-        // Lấy username từ Authentication
         if (authentication != null && authentication.isAuthenticated()) {
             username = authentication.getName();
         }
 
-        // Chỉ cập nhật nếu sản phẩm đã tồn tại trong giỏ hàng
         CartDTO cart = cartService.updateItemInCart(username, request);
         return new ApiResponse<>("success", 200, "Cart item updated", cart);
     }

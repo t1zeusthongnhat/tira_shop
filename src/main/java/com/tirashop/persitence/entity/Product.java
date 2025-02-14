@@ -35,9 +35,9 @@ public class Product {
     private String status;
     private String size;
 
-    @ManyToOne(fetch = FetchType.LAZY) //lazy là chỉ tải dữ liệu khi cần thiết tức là có yêu cầu liên quan đến db chứa nó
-    @JoinColumn(name = "category_id") // Thiết lập khóa ngoại cho category
-    private Category category; // Sử dụng mối quan hệ Many-to-One với Category
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
@@ -55,7 +55,7 @@ public class Product {
     private List<Image> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();  // Mối quan hệ One-to-Many với Review
+    private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();

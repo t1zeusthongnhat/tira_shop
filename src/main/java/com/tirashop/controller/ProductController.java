@@ -50,13 +50,10 @@ public class ProductController {
                 pagedData);
     }
 
-    //getAllProductsWithImages
-    //filter san pham
-
     @PostMapping("/add")
     @Operation(summary = "Add new product", description = "Add a new product with its details")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Product added successfully")
-    @ResponseStatus(HttpStatus.CREATED) // Trả về mã 201 (Created)
+    @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest request) {
         ProductResponse response = productService.createProduct(request);
         return new ApiResponse<>("success", 201, "Add Product success", response);
@@ -65,7 +62,7 @@ public class ProductController {
     @PutMapping("/update/{id}")
     @Operation(summary = "Update product", description = "Update product details by ID")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product updated successfully")
-    @ResponseStatus(HttpStatus.OK) // Trả về mã 200 (OK)
+    @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id,
             @RequestBody ProductRequest request) {
         ProductResponse response = productService.updateProduct(request, id);
@@ -76,7 +73,7 @@ public class ProductController {
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete product", description = "Delete a product by its ID")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product deleted successfully")
-    @ResponseStatus(HttpStatus.OK) // Trả về mã 200 (OK)
+    @ResponseStatus(HttpStatus.OK)
     public ApiResponse<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return new ApiResponse<>("success", 200, "Delete Product success", null);
@@ -85,12 +82,11 @@ public class ProductController {
     @GetMapping("get/{id}")
     @Operation(summary = "Get product by ID", description = "Retrieve product details by its ID")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product retrieved successfully")
-    @ResponseStatus(HttpStatus.OK) // Trả về mã 200 (OK)
+    @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ProductResponse> getProductById(@PathVariable Long id) {
         ProductResponse response = productService.getProductById(id);
         return new ApiResponse<>("success", 200, "Get Product success", response);
     }
-
 
     @PostMapping("/{productId}/images/upload")
     public ApiResponse<ImageDTO> uploadImageToProduct(

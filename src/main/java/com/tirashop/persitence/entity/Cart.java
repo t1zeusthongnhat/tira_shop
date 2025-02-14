@@ -18,31 +18,30 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @Table(name = "cart")
 public class Cart {
-    //chứa thông tin tổng quan của giỏ hàng người dùng, không lưu thông tin sản phẩm trực tiếp
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Mã giỏ hàng (Primary Key)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;  // Mã người dùng (Khóa ngoại)
+    private User user;
 
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();  // Thời gian tạo giỏ hàng
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;  // Thời gian cập nhật giỏ hàng
+    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private CartStatus status;  // Trạng thái giỏ hàng
+    private CartStatus status;
 
     public enum CartStatus {
-        ACTIVE,  // Giỏ hàng chưa thanh toán
-        CHECKED_OUT  // Giỏ hàng đã thanh toán
+        ACTIVE,
+        CHECKED_OUT
     }
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems = new ArrayList<>(); // Khởi tạo danh sách rỗng mặc định
+    private List<CartItem> cartItems = new ArrayList<>();
 }
 

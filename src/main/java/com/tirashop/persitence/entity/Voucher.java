@@ -21,33 +21,33 @@ public class Voucher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Mã giảm giá (Primary Key)
+    private Long id;
 
     @Column(name = "code", unique = true, nullable = false)
-    private String code;  // Mã voucher
+    private String code;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false)
-    private DiscountType discountType;  // Loại giảm giá (percentage hoặc fixed)
+    private DiscountType discountType;
 
     @Column(name = "discount_value", nullable = false)
-    private double discountValue;  // Giá trị giảm giá
+    private double discountValue;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;  // Ngày bắt đầu áp dụng voucher
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;  // Ngày kết thúc áp dụng voucher
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private VoucherStatus status;  // Trạng thái của voucher (active, expired, used)
+    private VoucherStatus status;
 
     @Column(name = "created_at", updatable = false, nullable = false)
-    private LocalDate createdAt = LocalDate.now();  // Thời gian tạo voucher
+    private LocalDate createdAt = LocalDate.now();
 
     @Column(name = "updated_at")
-    private LocalDate updatedAt;  // Thời gian cập nhật voucher
+    private LocalDate updatedAt;
 
     public enum DiscountType {
         PERCENTAGE,  // Giảm giá theo phần trăm

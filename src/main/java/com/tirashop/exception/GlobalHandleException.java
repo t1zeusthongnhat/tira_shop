@@ -23,7 +23,6 @@ public class GlobalHandleException {
     private static final Logger logger = LoggerFactory.getLogger(GlobalHandleException.class);
 
 
-
     @ExceptionHandler
     public ResponseEntity<ApiResponse<Object>> handlingRuntimeEx(RuntimeException excep) {
         logger.error("RuntimeException occurred: {}", excep.getMessage(), excep);

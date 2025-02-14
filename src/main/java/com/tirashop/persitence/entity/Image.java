@@ -25,7 +25,7 @@ public class Image {
     @Column(name = "file_type")
     private String fileType;
 
-    @Column(name = "url") // Nếu lưu URL
+    @Column(name = "url")
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
