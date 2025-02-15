@@ -11,13 +11,16 @@ import com.tirashop.persitence.repository.OrderRepository;
 import com.tirashop.persitence.repository.UserRepository;
 import com.tirashop.persitence.repository.httpclient.EmailClient;
 import feign.FeignException;
+
 import java.util.Optional;
 import java.util.Random;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -61,11 +64,11 @@ public class EmailService {
     public void sendOrderConfirmationEmail(String toEmail, Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
-
         OrderDTO orderDTO = checkoutService.toOrderDTO(order);
 
         if (!order.getUser().getEmail().equalsIgnoreCase(toEmail)) {
-            log.error("Email mismatch: provided email ({}) does not match user's email ({}) for order ID: {}",
+            log.error(
+                    "Email mismatch: provided email ({}) does not match user's email ({}) for order ID: {}",
                     toEmail, order.getUser().getEmail(), orderId);
             throw new RuntimeException("Provided email does not match user's email.");
         }
@@ -75,63 +78,71 @@ public class EmailService {
             throw new RuntimeException("Order has no items, cannot send confirmation email.");
         }
 
-        String subject = "Order Confirmation - TiraShop";
+        String subject = "🛍️ ORDER CONFIRMATION - TiraShop";
         StringBuilder content = new StringBuilder();
 
-        content.append("<h2>Thank you for your order, ").append(orderDTO.getUserName()).append("!</h2>");
-        content.append("<p>Your order has been successfully placed. Below are your order details:</p>");
-        content.append("<p><strong>Order ID:</strong> ").append(orderDTO.getOrderId()).append("</p>");
-        content.append("<p><strong>Shipping Address:</strong> ").append(orderDTO.getShippingAddress()).append("</p>");
-        content.append("<p><strong>Total Price:</strong> $").append(orderDTO.getTotalPrice()).append("</p>");
-        content.append("<p><strong>Payment Status:</strong> ").append(orderDTO.getPaymentStatus()).append("</p>");
+        content.append(
+                "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; ");
+        content.append(
+                "border: 1px solid #d6d6d6; border-radius: 10px; background-color: #fdf3f3; text-align: center;'>");
 
-        content.append("<h3>Ordered Items:</h3>");
-        content.append("<ul>");
+        content.append(
+                "<img src='https://distinct-spider-cheaply.ngrok-free.app/uploads/logo/LogoBTEC.png' alt='TiraShop Logo' ");
+        content.append("style='width: 120px; margin-bottom: 20px;'>");
 
-        String baseUrl = "https://distinct-spider-cheaply.ngrok-free.app";
+        content.append("<h2 style='color: #e57373; text-transform: uppercase;'>🎉 THANK YOU "
+                + orderDTO.getUserName()
+                + " FOR YOUR ORDER!</h2>");
+        content.append(
+                "<p style='font-size: 16px; color: #555;'>Your order has been successfully placed. Here are the details:</p>");
+
+        content.append(
+                "<p style='font-size: 16px; color: #444;'><strong>Order Status:</strong> <span style='color: #e57373;'>"
+                        + orderDTO.getStatus() + "</span></p>");
+        content.append(
+                "<p style='font-size: 16px; color: #444;'><strong>Shipping Address:</strong> "
+                        + orderDTO.getShippingAddress() + "</p>");
+
+        content.append("<table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>");
+        content.append("<tr style='background-color: #e57373; color: white;'>");
+        content.append("<th style='padding: 12px; border: 1px solid #ddd;'>Product</th>");
+        content.append("<th style='padding: 12px; border: 1px solid #ddd;'>Quantity</th>");
+        content.append("<th style='padding: 12px; border: 1px solid #ddd;'>Price</th>");
+        content.append("</tr>");
+
         for (OrderItemDTO item : orderDTO.getItems()) {
-            String imageUrl = (item.getProductImage() != null && !item.getProductImage().isEmpty())
-                    ? baseUrl + item.getProductImage()
-                    : "No Image";
-
-            content.append("<li>")
-                    .append("<img src='").append(imageUrl).append("' width='50' height='50' alt='Product Image'/>")
-                    .append(" <strong>").append(item.getProductName()).append("</strong> - ")
-                    .append("Quantity: ").append(item.getQuantity())
-                    .append(", Price: $").append(item.getPrice())
-                    .append("</li>");
+            content.append("<tr style='background-color: #ffefef;'>");
+            content.append("<td style='padding: 12px; border: 1px solid #ddd; text-align: left;'>");
+            content.append(
+                    "<img src='https://distinct-spider-cheaply.ngrok-free.app"
+                            + item.getProductImage() + "' ");
+            content.append("alt='" + item.getProductName()
+                    + "' style='width: 95px; height: 95px; margin-right: 10px; vertical-align: middle;'>");
+            content.append(item.getProductName() + "</td>");
+            content.append(
+                    "<td style='padding: 12px; border: 1px solid #ddd;'>" + item.getQuantity()
+                            + "</td>");
+            content.append("<td style='padding: 12px; border: 1px solid #ddd;'>$" + item.getPrice()
+                    + "</td>");
+            content.append("</tr>");
         }
-        content.append("</ul>");
+        content.append("</table>");
 
-        log.info("Sending order confirmation email to: {}", toEmail);
-        log.info("Order Data: {}", orderDTO);
+        content.append(
+                "<p style='font-size: 18px; font-weight: bold; margin-top: 20px; color: #e57373;'>Total: $"
+                        + orderDTO.getTotalPrice() + "</p>");
+
+        content.append("</div>");
 
         sendEmail(new SendEmailRequest(toEmail, subject, content.toString()));
     }
 
+
     public void sendRegistrationEmail(String toEmail, String username) {
-        String subject = "Welcome to TiraShop!";
+        String subject = "🎉 Welcome to TiraShop!";
         String content = "<p>Hello " + username + ",</p>"
                 + "<p>You have successfully registered at TiraShop!</p>"
                 + "<p>Enjoy your shopping experience.</p>";
-        sendEmail(new SendEmailRequest(toEmail, subject, content));
-    }
-
-    public void sendForgotPasswordEmail(String toEmail) {
-        Optional<User> userOpt = userRepository.findByEmail(toEmail);
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Email does not exist in our system.");
-        }
-
-        String resetCode = String.format("%06d", new Random().nextInt(999999));
-
-        User user = userOpt.get();
-        user.setResetCode(resetCode);
-        userRepository.save(user);
-
-        String subject = "Password Reset Request";
-        String content = "<p>Your verification code is: <strong>" + resetCode + "</strong></p>"
-                + "<p>Please enter this code to reset your password.</p>";
         sendEmail(new SendEmailRequest(toEmail, subject, content));
     }
 
@@ -151,4 +162,25 @@ public class EmailService {
         userRepository.save(user);
     }
 
+    public void sendForgotPasswordEmail(String toEmail) {
+        Optional<User> userOpt = userRepository.findByEmail(toEmail);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Email does not exist in our system.");
+        }
+
+        String resetCode = String.format("%06d", new Random().nextInt(999999));
+        User user = userOpt.get();
+        user.setResetCode(resetCode);
+        userRepository.save(user);
+
+        String subject = "🔑 Password Reset Request";
+        String content = "<div style='text-align: center;'>"
+                + "<h2>Your verification code</h2>"
+                + "<p style='font-size: 22px; font-weight: bold; color: #2E86C1; border: 1px solid #ddd; padding: 10px; display: inline-block; border-radius: 5px;'>"
+                + resetCode + "</p>"
+                + "<p>Enter this code to reset your password.</p>"
+                + "</div>";
+
+        sendEmail(new SendEmailRequest(toEmail, subject, content));
+    }
 }
