@@ -40,6 +40,8 @@ public class User {
     private String provider; //local, google, facebook
 
     private String avatar;
+    @Column(name = "reset_code")
+    private String resetCode;
 
     @OneToMany(mappedBy = "author")
     private Set<Post> author;

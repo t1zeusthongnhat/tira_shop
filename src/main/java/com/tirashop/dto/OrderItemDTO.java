@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemDTO {
-    private Long productId;       // Mã sản phẩm
-    private String productName;   // Tên sản phẩm
-    private String brandName;     // Tên thương hiệu
-    private String categoryName;  // Tên danh mục
-    private String size;          // Kích thước sản phẩm
-    private int inventory;        // Số lượng tồn kho
-    private int quantity;         // Số lượng sản phẩm trong đơn hàng
-    private double price;         // Giá sản phẩm tại thời điểm đặt hàng
-    private String productImage;  // URL ảnh sản phẩm
+    private Long productId;
+    private String productName;
+    private String brandName;
+    private String categoryName;
+    private String size;
+    private int inventory;
+    private int quantity;
+    private double price;
+    private String productImage;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime createdAt; // Thời gian thêm sản phẩm vào đơn hàng
+    private LocalDateTime createdAt;
 }

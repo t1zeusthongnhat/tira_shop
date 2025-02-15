@@ -6,6 +6,7 @@ spring:
       - classpath:application-db.yml
       - classpath:application-jwt.yml
       - classpath:application-security.yml
+      - classpath:application-email.yml
 logging:
   level:
     org:

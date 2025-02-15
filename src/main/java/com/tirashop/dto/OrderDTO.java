@@ -12,19 +12,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO {
-    private Long orderId;               // Mã đơn hàng
-    private Long userId;                // Mã người dùng
-    private String userName;            // Tên người dùng
-    private double totalPrice;          // Tổng giá trị đơn hàng
-    private String status;              // Trạng thái đơn hàng (PENDING, COMPLETED, CANCELLED)
-    private String paymentStatus;       // Trạng thái thanh toán (PENDING, PAID, FAILED)
-    private String shippingAddress;     // Địa chỉ giao hàng
+    private Long orderId;
+    private Long userId;
+    private String userName;
+    private double totalPrice;
+    private String status;
+    private String paymentStatus;
+    private String shippingAddress;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime createdAt;    // Thời gian tạo đơn hàng
+    private LocalDateTime createdAt;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime updatedAt;    // Thời gian cập nhật đơn hàng
+    private LocalDateTime updatedAt;
 
-    private List<OrderItemDTO> items;   // Danh sách sản phẩm trong đơn hàng
+    private List<OrderItemDTO> items;
 }

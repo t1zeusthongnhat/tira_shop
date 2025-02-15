@@ -27,9 +27,19 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 
-    public final String[] PUBLIC_ENDPOINT = {"/tirashop/auth/**", "tirashop/uploads/**",
-            "tirashop/cart/**",
-            "/oauth2/authorization/facebook"};
+    public final String[] PUBLIC_ENDPOINT = {
+            "/tirashop/auth/**",
+            "/uploads/**",
+            "/tirashop/cart/**",
+            "/oauth2/authorization/facebook",
+            "/tirashop/product",
+            "/tirashop/posts",
+            "/tirashop/reviews/product/{productId}",
+            "/tirashop/reviews/user/{username}",
+            "/tirashop/product/search"
+
+
+    };
     public final String[] SWAGGER_WHITELIST = {"/v3/api-docs/**", "/swagger-ui/**",
             "/swagger-ui.html"};
 

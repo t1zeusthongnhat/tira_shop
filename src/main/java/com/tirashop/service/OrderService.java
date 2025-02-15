@@ -21,11 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderService {
+
     //Quản lý Shipment
     ShipmentRepository shipmentRepository;
     OrderRepository orderRepository;
-
-
 
 
     public List<OrderItemDTO> getProductsByStatus(String username, String status) {
@@ -49,9 +48,10 @@ public class OrderService {
                 .flatMap(order -> order.getOrderItems().stream())
                 .map(orderItem -> {
                     Product product = orderItem.getProduct();
-                    String productImage = product.getImages() != null && !product.getImages().isEmpty()
-                            ? product.getImages().get(0).getUrl()
-                            : null;
+                    String productImage =
+                            product.getImages() != null && !product.getImages().isEmpty()
+                                    ? product.getImages().get(0).getUrl()
+                                    : null;
 
                     return new OrderItemDTO(
                             product.getId(),
@@ -108,16 +108,19 @@ public class OrderService {
         }
 
         // Tìm danh sách các đơn hàng đã hoàn tất (COMPLETED) của người dùng
-        List<Order> completedOrders = orderRepository.findByUser_UsernameAndStatus(username, Order.OrderStatus.COMPLETED);
+        List<Order> completedOrders = orderRepository.findByUser_UsernameAndStatus(username,
+                Order.OrderStatus.COMPLETED);
 
         // Từ các đơn hàng, lấy danh sách sản phẩm đã mua
         return completedOrders.stream()
-                .flatMap(order -> order.getOrderItems().stream()) // Lấy tất cả sản phẩm từ các đơn hàng
+                .flatMap(order -> order.getOrderItems()
+                        .stream()) // Lấy tất cả sản phẩm từ các đơn hàng
                 .map(orderItem -> {
                     Product product = orderItem.getProduct();
-                    String productImage = product.getImages() != null && !product.getImages().isEmpty()
-                            ? product.getImages().get(0).getUrl()
-                            : null;
+                    String productImage =
+                            product.getImages() != null && !product.getImages().isEmpty()
+                                    ? product.getImages().get(0).getUrl()
+                                    : null;
 
                     return new OrderItemDTO(
                             product.getId(),
@@ -134,6 +137,7 @@ public class OrderService {
                 })
                 .collect(Collectors.toList());
     }
+
     // Xác nhận đã nhận hàng (User)
     public void confirmDelivery(Long shipmentId, String username) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
