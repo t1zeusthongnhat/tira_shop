@@ -50,6 +50,13 @@ public class ProductController {
                 pagedData);
     }
 
+    @DeleteMapping("/{id}/image")
+    @Operation(summary = "Delete all image by product")
+    public ApiResponse<Void> addProduct(@PathVariable Long id) {
+        productService.deleteImageProduct(id);
+        return new ApiResponse<>("success", 200, "Delete all img success", null);
+    }
+
     @PostMapping("/add")
     @Operation(summary = "Add new product", description = "Add a new product with its details")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Product added successfully")

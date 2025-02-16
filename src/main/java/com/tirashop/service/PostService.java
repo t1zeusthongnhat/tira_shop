@@ -31,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,7 +53,9 @@ public class PostService {
         var postSpec = PostSpecification.searchPost(name, topic, author);
         var postPage = postRepository.findAll(postSpec, pageable);
 
-        var postItem = postPage.stream().map(this::toDTO).toList();
+        var postItem = postPage.stream().map(
+                this::toDTO
+        ).toList();
         return PagedData.<PostDTO>builder()
                 .pageNo(postPage.getNumber())
                 .totalPages(postPage.getTotalPages())

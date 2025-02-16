@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,13 +42,21 @@ public class ProductService {
     BrandRepository brandRepository;
     ImageRepository imageRepository;
 
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/product/image";
+    private static final String UPLOAD_DIR =
+            System.getProperty("user.dir") + "/uploads/product/image";
 
 
 
-    public PagedData<ProductDTO> filterProductsWithPaging(String name,String size, Double minPrice, Double maxPrice, String category, String brand, Pageable pageable) {
+    public void deleteImageProduct(Long productId){
+        var listImageProduct = imageRepository.findByProductId(productId).stream().collect(Collectors.toList());
+        imageRepository.deleteAll(listImageProduct);
+    }
 
-        Specification<Product> spec = ProductSpecification.filterProducts(name,size, minPrice, maxPrice, category, brand);
+    public PagedData<ProductDTO> filterProductsWithPaging(String name, String size, Double minPrice,
+            Double maxPrice, String category, String brand, Pageable pageable) {
+
+        Specification<Product> spec = ProductSpecification.filterProducts(name, size, minPrice,
+                maxPrice, category, brand);
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
 
@@ -66,8 +73,6 @@ public class ProductService {
                 .elementList(productDTOs)
                 .build();
     }
-
-
 
 
     public ProductResponse createProduct(ProductRequest request) {
@@ -97,8 +102,6 @@ public class ProductService {
         productRepository.save(product);
         return toResponse(product);
     }
-
-
 
 
     public ProductResponse updateProduct(ProductRequest request, Long id) {
@@ -141,16 +144,15 @@ public class ProductService {
     }
 
 
-    public ProductResponse getProductById(Long id){
-       Product product = productRepository.findById(id)
-               .orElseThrow(()-> new RuntimeException("Cannot found product has id: "+id));
+    public ProductResponse getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cannot found product has id: " + id));
         return toResponse(product);
     }
 
-    public void deleteProduct(Long id){
+    public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
-
 
 
     // Chuyển đổi từ Product sang ProductDTO
@@ -165,8 +167,10 @@ public class ProductService {
         productDTO.setQuantity(product.getQuantity());
         productDTO.setStatus(product.getStatus());
         productDTO.setSize(product.getSize());
-        productDTO.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
-        productDTO.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
+        productDTO.setCategoryId(
+                product.getCategory() != null ? product.getCategory().getId() : null);
+        productDTO.setCategoryName(
+                product.getCategory() != null ? product.getCategory().getName() : null);
         productDTO.setBrandId(product.getBrand() != null ? product.getBrand().getId() : null);
         productDTO.setBrandName(product.getBrand() != null ? product.getBrand().getName() : null);
         productDTO.setInventory(product.getInventory());
@@ -193,7 +197,8 @@ public class ProductService {
         response.setQuantity(product.getQuantity());
         response.setStatus(product.getStatus());
         response.setSize(product.getSize());
-        response.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        response.setCategoryId(
+                product.getCategory() != null ? product.getCategory().getId() : null);
         response.setBrandId(product.getBrand() != null ? product.getBrand().getId() : null);
         response.setInventory(product.getInventory());
         response.setCreatedAt(product.getCreatedAt());
@@ -250,7 +255,8 @@ public class ProductService {
     // xu li image
     public ImageDTO uploadImageToProduct(Long productId, MultipartFile file) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Cannot find product with ID: " + productId));
+                .orElseThrow(
+                        () -> new RuntimeException("Cannot find product with ID: " + productId));
 
         // Tạo URL tạm thời để kiểm tra (trước khi lưu file)
         String tempFileName = file.getOriginalFilename();
@@ -276,6 +282,7 @@ public class ProductService {
         Image savedImage = imageRepository.save(image);
         return toImageDTO(savedImage);
     }
+
     public void deleteImageById(Long productId, Long imageId) {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Cannot find image with ID: " + imageId));
@@ -288,6 +295,7 @@ public class ProductService {
         // Xóa ảnh
         imageRepository.delete(image);
     }
+
     public ImageDTO updateImage(Long productId, Long imageId, MultipartFile file) {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Cannot find image with ID: " + imageId));
@@ -343,7 +351,6 @@ public class ProductService {
                 image.getCreatedAt()
         );
     }
-
 
 
 }

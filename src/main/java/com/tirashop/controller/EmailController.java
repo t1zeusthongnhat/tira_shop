@@ -34,7 +34,7 @@ public class EmailController {
                 "Order confirmation email sent successfully.", toEmail);
     }
 
-    @PostMapping("/send-registration")
+        @PostMapping("/send-registration")
     @Operation(summary = "Send registration email", description = "Sends a welcome email after user registration.")
     public ApiResponse<String> sendRegistrationEmail(@RequestParam String toEmail,
                                                      @RequestParam String username) {
