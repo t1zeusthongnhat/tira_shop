@@ -84,7 +84,6 @@ public class ReviewService {
         if (image != null && !image.isEmpty()) {
             imageUrl = handleImageUpload(image, REVIEW_IMAGE_DIR);
         }
-
         // 4. Lưu đánh giá
         Review review = new Review();
         review.setUser(user);

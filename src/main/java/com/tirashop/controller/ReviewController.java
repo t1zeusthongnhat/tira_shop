@@ -4,8 +4,10 @@ import com.tirashop.dto.ReviewDTO;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.model.PagedData;
 import com.tirashop.service.ReviewService;
+import com.tirashop.service.openAi.OpenAiModerationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -14,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/tirashop/reviews")
@@ -23,6 +24,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final OpenAiModerationService moderationService;
 
 
     @GetMapping("")
@@ -46,8 +48,22 @@ public class ReviewController {
             Authentication authentication) {
 
         String username = authentication != null ? authentication.getName() : null;
-        ReviewDTO review = reviewService.addReview(productId, username, rating, reviewText, image);
 
+        if (Optional.ofNullable(reviewText).filter(text -> !text.isBlank()).isPresent()) {
+            try {
+                boolean isSafe = moderationService.isContentSafe(reviewText);
+                if (!isSafe) {
+                    System.out.println("WARNING: This content is prohibited by Gemini AI!");
+                    return new ApiResponse<>("error", 400, "Review contains inappropriate content",
+                            null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ApiResponse<>("error", 500, "Error checking content moderation", null);
+            }
+        }
+
+        ReviewDTO review = reviewService.addReview(productId, username, rating, reviewText, image);
         return new ApiResponse<>("success", 200, "Review added successfully", review);
     }
 
