@@ -1,5 +1,8 @@
 package com.tirashop.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
+import java.time.LocalDateTime;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,11 +18,13 @@ public class PostDTO {
     private String imageUrl;
     private String short_description;
     private String content;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate createdAt = LocalDate.now();
     private LocalDate updatedAt;
-
-    private Long authorId;  // Chỉ lấy ID của tác giả
-    private String authorName;  // Tên tác giả
-    private String authorAvatar;  // URL ảnh đại diện tác giả
+    private String status;
+    private Long authorId;
+    private String authorName;
+    private String authorAvatar;
+    private Boolean isMarkdown;
 }
 

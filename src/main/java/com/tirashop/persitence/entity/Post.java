@@ -1,6 +1,7 @@
 package com.tirashop.persitence.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
@@ -16,6 +18,7 @@ import lombok.experimental.FieldNameConstants;
 @AllArgsConstructor
 @FieldNameConstants
 @Table(name = "post")
+@Where(clause = "status = 'PUBLISHED'")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +27,9 @@ public class Post {
     private String topic;
     private String imageUrl;
     private String short_description;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "created_at", updatable = false)
@@ -35,5 +41,10 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private User author;
+
+    private Boolean isMarkdown;
+
+    private String status;
+
 
 }

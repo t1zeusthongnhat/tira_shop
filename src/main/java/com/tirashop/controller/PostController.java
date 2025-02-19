@@ -52,8 +52,25 @@ public class PostController {
 
         String username = authentication.getName();  // Get username from authentication
 
-        PostDTO postDTO = postService.createPost(name, topic, shortDescription, content, image,
+        PostDTO postDTO = postService.createPostManually(name, topic, shortDescription, content,
+                image,
                 username);
+        return new ApiResponse<>("success", 200, "Post created successfully", postDTO);
+    }
+
+    @PostMapping("/createWithAI")
+    @Operation(summary = "Create new post with AI-generated content", description = "Create a new post with AI-generated content, optional image, and scheduling")
+    public ApiResponse<PostDTO> createPostWithAI(
+            @RequestParam String name,
+            @RequestParam String topic,
+            @RequestParam String shortDescription,
+            @RequestParam(required = false) MultipartFile image,
+            Authentication authentication) {
+
+        String username = authentication.getName();  // Get username from authentication
+
+        PostDTO postDTO = postService.createPostWithAI(name, topic, shortDescription, username,
+                image);
         return new ApiResponse<>("success", 200, "Post created successfully", postDTO);
     }
 

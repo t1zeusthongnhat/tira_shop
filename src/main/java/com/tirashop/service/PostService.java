@@ -1,5 +1,7 @@
 package com.tirashop.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tirashop.dto.PostDTO;
 import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Post;
@@ -7,13 +9,21 @@ import com.tirashop.persitence.entity.User;
 import com.tirashop.persitence.repository.PostRepository;
 import com.tirashop.persitence.repository.UserRepository;
 import com.tirashop.persitence.specification.PostSpecification;
+import io.github.cdimascio.dotenv.Dotenv;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -21,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,18 +43,18 @@ public class PostService {
 
     PostRepository postRepository;
     UserRepository userRepository;
+    private static final Dotenv dotenv = Dotenv.load();
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private static final String GEMINI_API_KEY = dotenv.get("GEMINI_POST_KEY");
 
     private static final String POST_IMAGE_DIR = System.getProperty("user.dir") + "/uploads/post";
 
-
     public PagedData<PostDTO> searchPost(String name, String topic, String author,
-            Pageable pageable) {
+                                         Pageable pageable) {
         var postSpec = PostSpecification.searchPost(name, topic, author);
         var postPage = postRepository.findAll(postSpec, pageable);
 
-        var postItem = postPage.stream().map(
-                this::toDTO
-        ).toList();
+        var postItem = postPage.stream().map(this::toDTO).toList();
         return PagedData.<PostDTO>builder()
                 .pageNo(postPage.getNumber())
                 .totalPages(postPage.getTotalPages())
@@ -53,21 +64,17 @@ public class PostService {
                 .build();
     }
 
-    // Tạo bài viết mới
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public PostDTO createPost(String name, String topic, String shortDescription, String content,
-            MultipartFile image, String username) {
-        // Tìm người dùng theo username
+    public PostDTO createPostManually(String name, String topic, String shortDescription,
+                                      String content,
+                                      MultipartFile image, String username) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        // Xử lý upload ảnh
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
             imageUrl = handleImageUpload(image, POST_IMAGE_DIR);
         }
-
-        // Tạo bài viết mới
         Post post = new Post();
         post.setName(name);
         post.setTopic(topic);
@@ -76,25 +83,52 @@ public class PostService {
         post.setImageUrl(imageUrl);
         post.setAuthor(author);
         post.setCreatedAt(LocalDate.now());
+        post.setStatus("PUBLISHED");
+        post.setIsMarkdown(false);
 
         postRepository.save(post);
-
         return toDTO(post);
     }
 
-    // Cập nhật bài viết
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public PostDTO createPostWithAI(String name, String topic, String shortDescription,
+                                    String username,
+                                    MultipartFile image) {
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        String content = generateContentWithAI(topic, name,
+                shortDescription);  // AI generated content
+
+        Post post = new Post();
+        post.setName(name);
+        post.setTopic(topic);
+        post.setShort_description(shortDescription);
+        post.setContent(content);
+        post.setAuthor(author);
+        post.setCreatedAt(LocalDate.now());
+        post.setStatus("DRAFT");  // Set status to "DRAFT" (String)
+        post.setIsMarkdown(true);
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = handleImageUpload(image, POST_IMAGE_DIR);
+            post.setImageUrl(imageUrl);
+        }
+
+        postRepository.save(post);
+        return toDTO(post);
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO updatePost(Long postId, String name, String topic, String shortDescription,
-            String content, MultipartFile image, String username) {
+                              String content, MultipartFile image, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // Kiểm tra quyền sở hữu bài viết
         if (!post.getAuthor().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to update this post.");
         }
 
-        // Cập nhật thông tin bài viết
         if (name != null) {
             post.setName(name);
         }
@@ -108,7 +142,6 @@ public class PostService {
             post.setContent(content);
         }
 
-        // Xử lý ảnh (nếu có)
         if (image != null && !image.isEmpty()) {
             String imageUrl = handleImageUpload(image, POST_IMAGE_DIR);
             post.setImageUrl(imageUrl);
@@ -120,13 +153,11 @@ public class PostService {
         return toDTO(post);
     }
 
-    // Xóa bài viết
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public boolean deletePost(Long postId, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // Kiểm tra quyền sở hữu bài viết
         if (!post.getAuthor().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to delete this post.");
         }
@@ -135,7 +166,6 @@ public class PostService {
         return true;
     }
 
-    // Lấy thông tin bài viết
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO getPostById(Long postId) {
         Post post = postRepository.findById(postId)
@@ -143,7 +173,6 @@ public class PostService {
         return toDTO(post);
     }
 
-    // Lấy tất cả bài viết
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<PostDTO> getAllPosts() {
         return postRepository.findAll().stream()
@@ -151,7 +180,6 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // Chuyển đổi từ Post Entity sang DTO
     public PostDTO toDTO(Post post) {
         return PostDTO.builder()
                 .id(post.getId())
@@ -162,36 +190,67 @@ public class PostService {
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
-                .authorId(post.getAuthor().getId())  // Lấy ID của tác giả
-                .authorName(post.getAuthor().getUsername())  // Lấy tên tác giả
-                .authorAvatar(post.getAuthor().getAvatar())  // Lấy URL avatar của tác giả
+                .authorId(post.getAuthor().getId())
+                .authorName(post.getAuthor().getUsername())
+                .authorAvatar(post.getAuthor().getAvatar())
+                .status(post.getStatus())
+                .isMarkdown(post.getIsMarkdown())
                 .build();
     }
 
-    // Hàm xử lý upload ảnh
     private String handleImageUpload(MultipartFile file, String uploadDir) {
         try {
-            // Tạo thư mục nếu chưa tồn tại
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Xử lý tên file
             String originalFileName = file.getOriginalFilename();
             String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
 
-            // Lưu file
             Path filePath = uploadPath.resolve(uniqueFileName);
             file.transferTo(filePath.toFile());
 
-            // Trả về URL tương đối
             return "/uploads/post/" + uniqueFileName;
         } catch (IOException e) {
             log.error("Error uploading image: {}", e.getMessage());
             throw new RuntimeException("Failed to upload image", e);
         }
     }
+
+
+    private String generateContentWithAI(String topic, String name, String shortDescription) {
+        try {
+            String payload = String.format(
+                    "{ \"contents\": [{ \"parts\": [{\"text\": \"Generate a blog post about %s titled '%s'. Short description: %s\" }] }] }",
+                    topic, name, shortDescription);
+            log.info("Request payload: {}", payload);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    GEMINI_API_URL + "?key=" + GEMINI_API_KEY, HttpMethod.POST, entity,
+                    String.class);
+
+            log.info("Response from Gemini API: {}", response.getBody());
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Error generating content: " + response.getStatusCode());
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+            String generatedContent = jsonNode.path("candidates").path(0)
+                    .path("content").path("parts").path(0).path("text").asText();
+
+            log.info("Generated Content: {}", generatedContent);
+            return generatedContent;
+        } catch (Exception e) {
+            log.error("AI content generation failed: {}", e.getMessage());
+            throw new RuntimeException("Failed to generate AI content", e);
+        }
+    }
+
+
 }
-
-
