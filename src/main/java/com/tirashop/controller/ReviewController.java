@@ -62,6 +62,18 @@ public class ReviewController {
                 return new ApiResponse<>("error", 500, "Error checking content moderation", null);
             }
         }
+        if (image != null && !image.isEmpty()) {
+            try {
+                boolean isImageSafe = moderationService.isImageSafe(image);
+                if (!isImageSafe) {
+                    return new ApiResponse<>("error", 400, "Image contains inappropriate content",
+                            null);
+                }
+            } catch (Exception e) {
+                return new ApiResponse<>("error", 500, "Error checking image: " + e.getMessage(),
+                        null);
+            }
+        }
 
         ReviewDTO review = reviewService.addReview(productId, username, rating, reviewText, image);
         return new ApiResponse<>("success", 200, "Review added successfully", review);
