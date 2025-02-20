@@ -46,9 +46,26 @@ public class ProductService {
             System.getProperty("user.dir") + "/uploads/product/image";
 
 
+    public PagedData<ProductDTO> searchProductsByLabel(String label, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByCategoryOrBrandOrName(label, pageable);
+        List<ProductDTO> productDTOs = productPage.getContent()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
 
-    public void deleteImageProduct(Long productId){
-        var listImageProduct = imageRepository.findByProductId(productId).stream().collect(Collectors.toList());
+        return PagedData.<ProductDTO>builder()
+                .pageNo(productPage.getNumber())
+                .elementPerPage(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .elementList(productDTOs)
+                .build();
+    }
+
+
+    public void deleteImageProduct(Long productId) {
+        var listImageProduct = imageRepository.findByProductId(productId).stream()
+                .collect(Collectors.toList());
         imageRepository.deleteAll(listImageProduct);
     }
 
@@ -167,6 +184,7 @@ public class ProductService {
         productDTO.setQuantity(product.getQuantity());
         productDTO.setStatus(product.getStatus());
         productDTO.setSize(product.getSize());
+        productDTO.setTagName(product.getTagName());
         productDTO.setCategoryId(
                 product.getCategory() != null ? product.getCategory().getId() : null);
         productDTO.setCategoryName(
@@ -194,6 +212,7 @@ public class ProductService {
         response.setDescription(product.getDescription());
         response.setMaterial(product.getMaterial());
         response.setPrice(product.getPrice());
+        response.setTagName(product.getTagName());
         response.setQuantity(product.getQuantity());
         response.setStatus(product.getStatus());
         response.setSize(product.getSize());
@@ -216,6 +235,7 @@ public class ProductService {
         product.setMaterial(request.getMaterial());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
+        product.setTagName(request.getTagName());
         product.setStatus(request.getStatus());
         product.setSize(request.getSize());
         product.setInventory(request.getInventory());

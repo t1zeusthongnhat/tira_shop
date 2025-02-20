@@ -26,7 +26,7 @@ public class Product {
     private String code;
     private String description;
     private String material;
-
+    private String tagName;
     private double price;
 
     private Double originalPrice;

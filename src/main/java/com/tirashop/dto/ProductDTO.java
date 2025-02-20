@@ -42,6 +42,8 @@ public class ProductDTO {
 
     private int inventory;
 
+    private String tagName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate createdAt;
 

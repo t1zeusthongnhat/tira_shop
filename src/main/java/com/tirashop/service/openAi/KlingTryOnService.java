@@ -11,7 +11,7 @@ public class KlingTryOnService {
 
     private final RestTemplate restTemplate;
     private static final String API_URL = "https://api.piapi.ai/api/v1/task";
-    private static final String API_KEY = "YOUR_API_KEY";
+    private static final String API_KEY = "NONE";
 
     public KlingTryOnService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
