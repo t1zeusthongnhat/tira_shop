@@ -15,7 +15,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRegisterRequest {
-    private Long id;
 
     @Size(min = 6, message = "Username must be at least 6 characters!")
     private String username;
@@ -26,11 +25,10 @@ public class UserRegisterRequest {
 
     @Email(message = "Email must be in valid format !!!")
     private String email;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate birthday;
     private String password;
     private String confirmPassword;
 
-     // mac dinh khi dang ki status la Active
-     // role: mac dinh la ROLE_USER
 }

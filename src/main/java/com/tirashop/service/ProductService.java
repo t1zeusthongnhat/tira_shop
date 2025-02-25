@@ -228,7 +228,6 @@ public class ProductService {
     // Chuyển đổi từ ProductRequest sang Product
     private Product toEntity(ProductRequest request) {
         Product product = new Product();
-        product.setId(request.getId());
         product.setName(request.getName());
         product.setCode(request.getCode());
         product.setDescription(request.getDescription());

@@ -13,8 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductRequest {
 
-    private Long id;
-
     private String name;
 
     private String code;

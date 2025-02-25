@@ -190,17 +190,14 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists!");
         }
-        // Validate password confirmation
         if (!StringUtils.hasText(request.getPassword()) || !request.getPassword()
                 .equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match or are invalid!");
         }
 
-        // Lấy role mặc định từ cơ sở dữ liệu
         Role role = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new IllegalArgumentException("Default role not found!"));
 
-        // Chuyển đổi request sang entity User
         User user = new User();
         user.setUsername(request.getUsername());
         user.setFirstname(request.getFirstname());
@@ -209,15 +206,13 @@ public class UserService {
         user.setGender(request.getGender());
         user.setEmail(request.getEmail());
         user.setBirthday(request.getBirthday());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // Mã hóa mật khẩu
-        user.setStatus("Active"); // Trạng thái mặc định
-        user.setRole(Collections.singleton(role)); // Vai trò mặc định
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setStatus("Active");
+        user.setRole(Collections.singleton(role));
         user.setCreatedAt(LocalDate.now());
 
-        // Lưu thông tin user vào cơ sở dữ liệu
         userRepository.save(user);
 
-        // Chuyển đổi User sang UserRegisterResponse để trả về
         UserRegisterResponse response = new UserRegisterResponse();
         response.setId(user.getId());
         response.setUsername(user.getUsername());

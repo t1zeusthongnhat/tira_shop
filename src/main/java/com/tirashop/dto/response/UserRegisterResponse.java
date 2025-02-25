@@ -37,6 +37,5 @@ public class UserRegisterResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate createdAt;
-    // mac dinh khi dang ki status la Active
-    // role: mac dinh la ROLE_USER
+
 }
