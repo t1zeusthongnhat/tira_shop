@@ -61,9 +61,12 @@ public class VoucherService {
     public VoucherDTO updateVoucher(Long id, VoucherDTO voucherDTO) {
         Voucher existingVoucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found with id: " + id));
-        Voucher updatedVoucher = mapToEntity(voucherDTO, false); // isCreate = false
+        if(voucherRepository.existsByCode(voucherDTO.getCode())){
+            throw new RuntimeException("Voucher has exist");
+        }
+        Voucher updatedVoucher = mapToEntity(voucherDTO, false);
         updatedVoucher.setId(existingVoucher.getId());
-        updatedVoucher.setCreatedAt(existingVoucher.getCreatedAt()); // Giữ nguyên thời gian tạo
+        updatedVoucher.setCreatedAt(existingVoucher.getCreatedAt());
         Voucher savedVoucher = voucherRepository.save(updatedVoucher);
         return mapToDto(savedVoucher);
     }

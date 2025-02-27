@@ -41,7 +41,7 @@ public class ReviewService {
         var reviewPage = reviewRepository.findAll(reviewSpec, pageable);
 
         var reviewItem = reviewPage.stream().map(
-                this::toDTO // Hàm chuyển từ entity sang DTO
+                this::toDTO
         ).toList();
 
         return PagedData.<ReviewDTO>builder()
@@ -71,15 +71,12 @@ public class ReviewService {
 
 
     public ReviewDTO addReview(Long productId, String username, int rating, String reviewText, MultipartFile image) {
-        // 1. Xác thực người dùng
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        // 2. Xác thực sản phẩm
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
-        // 3. Xử lý upload ảnh (nếu có)
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
             imageUrl = handleImageUpload(image, REVIEW_IMAGE_DIR);
@@ -94,8 +91,6 @@ public class ReviewService {
         review.setCreatedAt(LocalDate.now());
 
         reviewRepository.save(review);
-
-        // 5. Trả về ReviewDTO
         return new ReviewDTO(
                 review.getId(),
                 product.getId(),
@@ -119,20 +114,16 @@ public class ReviewService {
         return true;
     }
     public PagedData<ReviewDTO> getReviewsByProductId(Long productId, Pageable pageable) {
-        // Kiểm tra sản phẩm có tồn tại hay không
         if (!productRepository.existsById(productId)) {
             throw new RuntimeException("Product not found with ID: " + productId);
         }
 
-        // Lấy danh sách review theo product ID và phân trang
         Page<Review> reviewPage = reviewRepository.findByProduct_Id(productId, pageable);
 
-        // Chuyển đổi từ entity sang DTO
         List<ReviewDTO> reviewList = reviewPage.stream()
                 .map(this::toDTO)
                 .toList();
 
-        // Trả về dữ liệu phân trang
         return PagedData.<ReviewDTO>builder()
                 .pageNo(reviewPage.getNumber())
                 .totalPages(reviewPage.getTotalPages())
@@ -144,19 +135,15 @@ public class ReviewService {
 
 
     public PagedData<ReviewDTO> getReviewsByUser(String username, Pageable pageable) {
-        // Kiểm tra user tồn tại
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
 
-        // Lấy danh sách review theo user ID và phân trang
         Page<Review> reviewPage = reviewRepository.findByUser_Id(user.getId(), pageable);
 
-        // Chuyển đổi từ entity sang DTO
         List<ReviewDTO> reviewList = reviewPage.stream()
                 .map(this::toDTO)
                 .toList();
 
-        // Trả về dữ liệu phân trang
         return PagedData.<ReviewDTO>builder()
                 .pageNo(reviewPage.getNumber())
                 .totalPages(reviewPage.getTotalPages())
@@ -168,24 +155,19 @@ public class ReviewService {
 
 
 
-    // Hàm xử lý upload ảnh
     private String handleImageUpload(MultipartFile file, String uploadDir) {
         try {
-            // Tạo thư mục nếu chưa tồn tại
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Xử lý tên file
             String originalFileName = file.getOriginalFilename();
             String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
 
-            // Lưu file
             Path filePath = uploadPath.resolve(uniqueFileName);
             file.transferTo(filePath.toFile());
 
-            // Trả về URL tương đối
             return "/uploads/review/" + uniqueFileName;
         } catch (IOException e) {
             log.error("Error uploading image: {}", e.getMessage());

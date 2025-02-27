@@ -71,6 +71,9 @@ public class CategoryService {
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Cannot found cate has id: "+id));
+        if (categoryRepository.existsByName(categoryDTO.getName())) {
+            throw new IllegalArgumentException("Category name already exists");
+        }
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
         category.setCreatedAt(LocalDate.now());

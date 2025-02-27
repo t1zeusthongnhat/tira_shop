@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -78,6 +77,9 @@ public class BrandService {
     public BrandDTO updateBrand(Long id, String name, String description, MultipartFile logoFile) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Brand not found: " + id));
+        if (brandRepository.existsByName(name)) {
+            throw new IllegalArgumentException("Brand name already exists");
+        }
 
         brand.setName(name);
         brand.setDescription(description);

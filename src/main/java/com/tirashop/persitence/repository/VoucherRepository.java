@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long>, JpaSpecificationExecutor<Voucher> {
-    // Các phương thức truy vấn bổ sung nếu cần
+    boolean existsByCode(String code);
 }

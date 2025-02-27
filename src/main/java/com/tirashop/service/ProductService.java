@@ -124,8 +124,9 @@ public class ProductService {
     public ProductResponse updateProduct(ProductRequest request, Long id) {
         Product productUpdate = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot find product with ID: " + id));
-
-        // Kiểm tra giá trị hợp lệ
+        if (productRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("Product name already exists");
+        }
         if (request.getPrice() <= 0) {
             throw new IllegalArgumentException("Price must be greater than 0");
         }
@@ -133,8 +134,6 @@ public class ProductService {
         if (request.getOriginalPrice() != null && request.getOriginalPrice() < request.getPrice()) {
             throw new IllegalArgumentException("Original price must be greater than current price");
         }
-
-        // Cập nhật các trường
         productUpdate.setName(request.getName());
         productUpdate.setCode(request.getCode());
         productUpdate.setDescription(request.getDescription());
@@ -146,16 +145,11 @@ public class ProductService {
         productUpdate.setInventory(request.getInventory());
         productUpdate.setUpdatedAt(LocalDate.now());
 
-        // Xử lý giá gốc
         if (request.getOriginalPrice() != null) {
             productUpdate.setOriginalPrice(request.getOriginalPrice());
         } else {
             productUpdate.setOriginalPrice(null);
         }
-
-        // Xử lý mối quan hệ Category và Brand (đã đúng, không cần chỉnh)
-
-        // Lưu sản phẩm sau khi cập nhật
         productRepository.save(productUpdate);
         return toResponse(productUpdate);
     }
