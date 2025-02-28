@@ -49,7 +49,7 @@ public class PostService {
     private static final String POST_IMAGE_DIR = System.getProperty("user.dir") + "/uploads/post";
 
     public PagedData<PostDTO> searchPost(String name, String topic, String author,
-                                         Pageable pageable) {
+            Pageable pageable) {
         var postSpec = PostSpecification.searchPost(name, topic, author);
         var postPage = postRepository.findAll(postSpec, pageable);
 
@@ -67,8 +67,8 @@ public class PostService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO createPostManually(String name, String topic, String shortDescription,
-                                      String content,
-                                      MultipartFile image, String username) {
+            String content,
+            MultipartFile image, String username) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -93,8 +93,8 @@ public class PostService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO createPostWithAI(String name, String topic, String shortDescription,
-                                    String username,
-                                    MultipartFile image) {
+            String username,
+            MultipartFile image) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -122,7 +122,7 @@ public class PostService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO updatePost(Long postId, String name, String topic, String shortDescription,
-                              String content, MultipartFile image, String username) {
+            String content, MultipartFile image, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 

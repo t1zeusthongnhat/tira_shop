@@ -121,10 +121,10 @@ public class ProductService {
     }
 
 
-    public ProductResponse updateProduct(ProductRequest request, Long id) {
+    public ProductResponse updateProduct(Long id,ProductRequest request) {
         Product productUpdate = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot find product with ID: " + id));
-        if (productRepository.existsByName(request.getName())) {
+        if (!productUpdate.getName().equals(request.getName())&&productRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("Product name already exists");
         }
         if (request.getPrice() <= 0) {

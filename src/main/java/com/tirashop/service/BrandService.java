@@ -77,8 +77,8 @@ public class BrandService {
     public BrandDTO updateBrand(Long id, String name, String description, MultipartFile logoFile) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Brand not found: " + id));
-        if (brandRepository.existsByName(name)) {
-            throw new IllegalArgumentException("Brand name already exists");
+        if(!brand.getName().equals(name)&& brandRepository.existsByName(name)){
+            throw new RuntimeException("Brand has exist.");
         }
 
         brand.setName(name);

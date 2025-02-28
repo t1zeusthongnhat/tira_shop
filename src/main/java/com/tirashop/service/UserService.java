@@ -236,7 +236,6 @@ public class UserService {
     public UserDTO updateUser(Long id, UserDTO userDTO, MultipartFile avatar) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot found user has id: " + id));
-
         user.setUsername(userDTO.getUsername());
         user.setFirstname(userDTO.getFirstname());
         user.setLastname(userDTO.getLastname());

@@ -25,10 +25,9 @@ public class CategoryService {
     CategoryRepository categoryRepository;
 
 
-
-    public PagedData<CategoryDTO> searchCate(String name, Pageable pageable){
+    public PagedData<CategoryDTO> searchCate(String name, Pageable pageable) {
         var categorySpec = CategorySpecification.searchCate(name);
-        var catePage = categoryRepository.findAll(categorySpec,pageable);
+        var catePage = categoryRepository.findAll(categorySpec, pageable);
 
         var categoryItem = catePage.stream().map(
                 this::toDTO
@@ -43,14 +42,15 @@ public class CategoryService {
                 .build();
     }
 
-    public List<CategoryDTO> getAllCate(){
+    public List<CategoryDTO> getAllCate() {
         List<Category> listCate = categoryRepository.findAll();
         return listCate.stream().map(this::toDTO).toList();
     }
 
     public CategoryDTO addNewCate(CategoryDTO categoryDTO) {
         // Kiểm tra tính hợp lệ của CategoryDTO
-        if (categoryDTO == null || categoryDTO.getName() == null || categoryDTO.getName().trim().isEmpty()) {
+        if (categoryDTO == null || categoryDTO.getName() == null || categoryDTO.getName().trim()
+                .isEmpty()) {
             throw new IllegalArgumentException("Category name cannot be null or empty");
         }
 
@@ -67,11 +67,12 @@ public class CategoryService {
         return toDTO(savedCategory);
     }
 
-    public CategoryDTO updateCate(Long id,CategoryDTO categoryDTO) {
+    public CategoryDTO updateCate(Long id, CategoryDTO categoryDTO) {
 
         Category category = categoryRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Cannot found cate has id: "+id));
-        if (categoryRepository.existsByName(categoryDTO.getName())) {
+                .orElseThrow(() -> new RuntimeException("Cannot found cate has id: " + id));
+        if (!category.getName().equals(categoryDTO.getName()) && categoryRepository.existsByName(
+                categoryDTO.getName())) {
             throw new IllegalArgumentException("Category name already exists");
         }
         category.setName(categoryDTO.getName());
@@ -79,13 +80,15 @@ public class CategoryService {
         category.setCreatedAt(LocalDate.now());
         category.setUpdatedAt(LocalDate.now());
         // Kiểm tra tính hợp lệ của CategoryDTO
-        if (categoryDTO == null || categoryDTO.getName() == null || categoryDTO.getName().trim().isEmpty()) {
+        if (categoryDTO == null || categoryDTO.getName() == null || categoryDTO.getName().trim()
+                .isEmpty()) {
             throw new IllegalArgumentException("Category name cannot be null or empty");
         }
         Category savedCategory = categoryRepository.save(category);
         // Chuyển đổi lại từ Entity sang DTO và trả về
         return toDTO(savedCategory);
     }
+
     public void deleteCate(Long id) {
         // Kiểm tra xem danh mục có tồn tại không
         if (!categoryRepository.existsById(id)) {
@@ -96,12 +99,7 @@ public class CategoryService {
     }
 
 
-
-
-
-
-
-    CategoryDTO toDTO(Category category){
+    CategoryDTO toDTO(Category category) {
         CategoryDTO categoryDTO = CategoryDTO.builder()
                 .id(category.getId())
                 .createdAt(category.getCreatedAt())
@@ -112,7 +110,7 @@ public class CategoryService {
         return categoryDTO;
     }
 
-    Category toEntity(CategoryDTO categoryDTO){
+    Category toEntity(CategoryDTO categoryDTO) {
         Category category = Category.builder()
                 .name(categoryDTO.getName())
                 .description(categoryDTO.getDescription())
@@ -122,7 +120,6 @@ public class CategoryService {
         return category;
 
     }
-
 
 
 }

@@ -72,7 +72,7 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id,
             @RequestBody ProductRequest request) {
-        ProductResponse response = productService.updateProduct(request, id);
+        ProductResponse response = productService.updateProduct(id, request);
         return new ApiResponse<>("success", 200, "Update Product success", response);
     }
 
