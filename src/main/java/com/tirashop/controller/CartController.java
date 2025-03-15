@@ -35,6 +35,20 @@ public class CartController {
         return new ApiResponse<>("success", 200, "Product added to cart", cart);
     }
 
+    @PutMapping("/update")
+    @Operation(summary = "Update item quantity/size", description = "Update quantity or size of an item in the cart")
+    public ApiResponse<CartDTO> updateItem(@RequestBody CartItemDTO request,
+            Authentication authentication) {
+        String username = null;
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            username = authentication.getName();
+        }
+
+        CartDTO cart = cartService.updateItemInCart(username, request);
+        return new ApiResponse<>("success", 200, "Cart item updated", cart);
+    }
+
     @GetMapping("/list")
     @Operation(summary = "Get cart items", description = "Retrieve all items in the cart")
     public ApiResponse<CartDTO> getCart(Authentication authentication) {
@@ -75,19 +89,7 @@ public class CartController {
         return new ApiResponse<>("success", 200, "Cart cleared", cart);
     }
 
-    @PutMapping("/update")
-    @Operation(summary = "Update item quantity/size", description = "Update quantity or size of an item in the cart")
-    public ApiResponse<CartDTO> updateItem(@RequestBody CartItemDTO request,
-            Authentication authentication) {
-        String username = null;
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            username = authentication.getName();
-        }
-
-        CartDTO cart = cartService.updateItemInCart(username, request);
-        return new ApiResponse<>("success", 200, "Cart item updated", cart);
-    }
 
 }
 

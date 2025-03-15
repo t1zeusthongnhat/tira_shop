@@ -3,12 +3,17 @@ package com.tirashop.controller;
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.dto.response.SearchOrderItem;
+import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Shipment;
 import com.tirashop.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +26,16 @@ import java.util.List;
 public class OrderController {
 
     OrderService orderService;
+
+    @GetMapping("")
+    @Operation(summary = "Get all products", description = "Retrieve all products in orders")
+    public ApiResponse<PagedData<SearchOrderItem>> getPendingProducts(
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        var items = orderService.searchOrders(keyword, pageable);
+        return new ApiResponse<>("success", 200, "All product order", items);
+    }
 
     @PutMapping("/{orderId}/status")
     @Operation(summary = "Update order status", description = "Update the status of an order (PENDING, COMPLETED, CANCELLED)")
@@ -41,6 +56,7 @@ public class OrderController {
         List<OrderItemDTO> pendingProducts = orderService.getProductsByStatus(username, "PENDING");
         return new ApiResponse<>("success", 200, "Pending products retrieved", pendingProducts);
     }
+
 
     @GetMapping("/cancelled")
     @Operation(summary = "Get cancelled products", description = "Retrieve all products in CANCELLED orders by the user")

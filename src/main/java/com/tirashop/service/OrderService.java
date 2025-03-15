@@ -2,16 +2,31 @@ package com.tirashop.service;
 
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
+import com.tirashop.dto.response.SearchOrderItem;
+import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Order;
 import com.tirashop.persitence.entity.OrderItem;
 import com.tirashop.persitence.entity.Product;
 import com.tirashop.persitence.entity.Shipment;
+import com.tirashop.persitence.entity.User;
 import com.tirashop.persitence.repository.OrderRepository;
 import com.tirashop.persitence.repository.ShipmentRepository;
+import com.tirashop.persitence.specification.OrderSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,9 +37,44 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderService {
 
+
     //Quản lý Shipment
     ShipmentRepository shipmentRepository;
     OrderRepository orderRepository;
+
+    public PagedData<SearchOrderItem> searchOrders(String keyword, Pageable pageable) {
+        var orderSpec = OrderSpecification.searchOrders(keyword);
+        var orderPage = orderRepository.findAll(orderSpec, pageable);
+
+        List<SearchOrderItem> orderItems = orderPage.getContent().stream().flatMap(order ->
+                order.getOrderItems().stream().map(orderItem ->
+                        new SearchOrderItem(
+                                order.getUser().getUsername(),
+                                orderItem.getProduct().getName(),
+                                orderItem.getProduct().getBrand() != null ? orderItem.getProduct()
+                                        .getBrand().getName() : null,
+                                orderItem.getProduct().getCategory() != null
+                                        ? orderItem.getProduct().getCategory().getName() : null,
+                                orderItem.getProduct().getSize(),
+                                orderItem.getQuantity(),
+                                orderItem.getPrice(),
+                                orderItem.getProduct().getImages() != null
+                                        && !orderItem.getProduct().getImages().isEmpty()
+                                        ? orderItem.getProduct().getImages().get(0).getUrl()
+                                        : null,
+                                order.getCreatedAt()
+                        )
+                )
+        ).collect(Collectors.toList());
+
+        return new PagedData<>(
+                orderPage.getNumber(),
+                orderPage.getSize(),
+                orderPage.getTotalElements(),
+                orderPage.getTotalPages(),
+                orderItems
+        );
+    }
 
 
     public List<OrderItemDTO> getProductsByStatus(String username, String status) {
