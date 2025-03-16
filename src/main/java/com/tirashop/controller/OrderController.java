@@ -3,6 +3,7 @@ package com.tirashop.controller;
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.dto.response.RevenueResponse;
 import com.tirashop.dto.response.SearchOrderItem;
 import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Shipment;
@@ -14,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,13 @@ import java.util.List;
 public class OrderController {
 
     OrderService orderService;
+
+    @GetMapping("/revenue")
+    @Operation(summary = "Get all revenue", description = "Retrieve all revenue in orders")
+    public ApiResponse<RevenueResponse> getRevenueAndProductPerformance() {
+        RevenueResponse response = orderService.getRevenueAndProductPerformance();
+        return new ApiResponse<>("success", 200, "Get revenue", response);
+    }
 
     @GetMapping("")
     @Operation(summary = "Get all products", description = "Retrieve all products in orders")

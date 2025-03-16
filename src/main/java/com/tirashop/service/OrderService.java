@@ -2,6 +2,8 @@ package com.tirashop.service;
 
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
+import com.tirashop.dto.response.RevenueResponse;
+import com.tirashop.dto.response.RevenueResponse.ProductPerformance;
 import com.tirashop.dto.response.SearchOrderItem;
 import com.tirashop.model.PagedData;
 import com.tirashop.persitence.entity.Order;
@@ -22,6 +24,8 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,6 +45,48 @@ public class OrderService {
     //Quản lý Shipment
     ShipmentRepository shipmentRepository;
     OrderRepository orderRepository;
+
+    public RevenueResponse getRevenueAndProductPerformance() {
+        // Fetch all completed orders
+        List<Order> completedOrders = orderRepository.findByStatus(Order.OrderStatus.COMPLETED);
+
+        // Calculate total revenue and product performance
+        double totalRevenue = 0.0;
+        Map<Long, ProductPerformance> productPerformanceMap = new HashMap<>();
+
+        for (Order order : completedOrders) {
+            for (OrderItem orderItem : order.getOrderItems()) {
+                Product product = orderItem.getProduct();
+                double itemRevenue = orderItem.getPrice() * orderItem.getQuantity();
+                totalRevenue += itemRevenue;
+
+                // Update product performance
+                productPerformanceMap.compute(product.getId(), (key, existing) -> {
+                    if (existing == null) {
+                        return new RevenueResponse.ProductPerformance(
+                                product.getId(),
+                                product.getName(),
+                                product.getCode(),
+                                orderItem.getQuantity(),
+                                itemRevenue
+                        );
+                    } else {
+                        existing.setTotalQuantitySold(
+                                existing.getTotalQuantitySold() + orderItem.getQuantity());
+                        existing.setTotalRevenue(existing.getTotalRevenue() + itemRevenue);
+                        return existing;
+                    }
+                });
+            }
+        }
+
+        // Convert map to list
+        List<RevenueResponse.ProductPerformance> productPerformances = productPerformanceMap.values()
+                .stream()
+                .collect(Collectors.toList());
+
+        return new RevenueResponse(totalRevenue, productPerformances);
+    }
 
     public PagedData<SearchOrderItem> searchOrders(String keyword, Pageable pageable) {
         var orderSpec = OrderSpecification.searchOrders(keyword);

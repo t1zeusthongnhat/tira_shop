@@ -1,6 +1,9 @@
 package com.tirashop.persitence.repository;
 
 import com.tirashop.persitence.entity.Order;
+import com.tirashop.persitence.entity.Order.OrderStatus;
+import java.util.Optional;
+import javax.swing.text.html.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -12,4 +15,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>,
         JpaSpecificationExecutor<Order> {
 
     List<Order> findByUser_UsernameAndStatus(String username, Order.OrderStatus status);
+
+    List<Order> findByStatus(OrderStatus status);
 }
