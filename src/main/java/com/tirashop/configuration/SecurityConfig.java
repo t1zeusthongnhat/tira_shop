@@ -37,9 +37,9 @@ public class SecurityConfig {
             "/tirashop/posts",
             "/tirashop/reviews/product/{productId}",
             "/tirashop/reviews/user/{username}",
-            "/tirashop/product/search"
-
-
+            "/tirashop/product/search",
+            "/tirashop/category/**",
+            "/tirashop/posts"
     };
     public final String[] SWAGGER_WHITELIST = {"/v3/api-docs/**", "/swagger-ui/**",
             "/swagger-ui.html"};

@@ -167,14 +167,13 @@ public class PostService {
         return true;
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+
     public PostDTO getPostById(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         return toDTO(post);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<PostDTO> getAllPosts() {
         return postRepository.findAll().stream()
                 .map(this::toDTO)
