@@ -1,5 +1,9 @@
 package com.tirashop.configuration;
 
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -9,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
-    //  http://localhost:8080/swagger-ui/index.html#/
+    //http://localhost:8080/swagger-ui/index.html
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -23,6 +27,14 @@ public class OpenApiConfig {
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
-                                        .bearerFormat("JWT"))); // Định dạng Bearer token
+                                        .bearerFormat("JWT"))
+                        .addRequestBodies("tryOnRequest",
+                                new RequestBody()
+                                        .content(new Content().addMediaType("multipart/form-data",
+                                                new MediaType().schema(new Schema<>()
+                                                        .type("object")
+                                                        .addProperties("modelImage", new Schema<>().type("string").format("binary"))
+                                                        .addProperties("dressImage", new Schema<>().type("string").format("binary"))
+                                                )))));
     }
 }

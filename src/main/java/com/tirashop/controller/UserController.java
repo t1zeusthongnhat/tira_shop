@@ -71,7 +71,7 @@ public class UserController {
     }
 
 
-    @PutMapping("/update-profile")
+    @PutMapping(value = "/update-profile",consumes = "multipart/form-data")
     @Operation(summary = "Update user profile", description = "Update the profile information of the authenticated user")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile updated successfully")
     public ApiResponse<UserProfileDTO> updateProfileUser(

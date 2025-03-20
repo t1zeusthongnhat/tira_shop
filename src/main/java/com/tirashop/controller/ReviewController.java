@@ -38,7 +38,7 @@ public class ReviewController {
         return new ApiResponse<>("success", 200, "All reviews retrieved successfully", reviews);
     }
 
-    @PostMapping("/{productId}")
+    @PostMapping(value = "/{productId}",consumes = "multipart/form-data")
     @Operation(summary = "Create review", description = "Create review for product")
     public ApiResponse<ReviewDTO> addReview(
             @PathVariable Long productId,

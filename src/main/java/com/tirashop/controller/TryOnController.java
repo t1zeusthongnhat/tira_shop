@@ -20,7 +20,7 @@ public class TryOnController {
     private final KlingTryOnService klingTryOnService;
 
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public String tryOn(
             @RequestParam("modelImage") MultipartFile modelImage,
             @RequestParam("dressImage") MultipartFile dressImage) {

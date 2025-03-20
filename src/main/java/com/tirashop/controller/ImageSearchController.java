@@ -24,7 +24,7 @@ public class ImageSearchController {
     private final ImageSearchService imageSearchService;
     private final ProductService productService;
 
-    @PostMapping("/search-by-image")
+    @PostMapping(value = "/search-by-image", consumes = "multipart/form-data")
     @Operation(summary = "Search products using an image", description = "Extract features from an image and search for related products")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<PagedData<ProductDTO>> searchByImage(

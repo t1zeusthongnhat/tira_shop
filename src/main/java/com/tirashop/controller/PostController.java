@@ -40,7 +40,7 @@ public class PostController {
     }
 
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create",consumes = "multipart/form-data")
     @Operation(summary = "Create new post", description = "Create a new post with optional image")
     public ApiResponse<PostDTO> createPost(
             @RequestParam String name,
@@ -50,7 +50,7 @@ public class PostController {
             @RequestParam(required = false) MultipartFile image,
             Authentication authentication) {
 
-        String username = authentication.getName();  // Get username from authentication
+        String username = authentication.getName();
 
         PostDTO postDTO = postService.createPostManually(name, topic, shortDescription, content,
                 image,
@@ -58,7 +58,7 @@ public class PostController {
         return new ApiResponse<>("success", 200, "Post created successfully", postDTO);
     }
 
-    @PostMapping("/createWithAI")
+    @PostMapping(value = "/createWithAI",consumes = "multipart/form-data")
     @Operation(summary = "Create new post with AI-generated content", description = "Create a new post with AI-generated content, optional image, and scheduling")
     public ApiResponse<PostDTO> createPostWithAI(
             @RequestParam String name,
@@ -67,7 +67,7 @@ public class PostController {
             @RequestParam(required = false) MultipartFile image,
             Authentication authentication) {
 
-        String username = authentication.getName();  // Get username from authentication
+        String username = authentication.getName();
 
         PostDTO postDTO = postService.createPostWithAI(name, topic, shortDescription, username,
                 image);
@@ -85,7 +85,7 @@ public class PostController {
         return new ApiResponse<>("success", 200, "Post update status successfully", post);
     }
 
-    @PutMapping("/{postId}/update")
+    @PutMapping(value = "/{postId}/update",consumes = "multipart/form-data")
     @Operation(summary = "Update post", description = "Update an existing post")
     public ApiResponse<PostDTO> updatePost(
             @PathVariable Long postId,
@@ -96,7 +96,7 @@ public class PostController {
             @RequestParam(required = false) MultipartFile image,
             Authentication authentication) {
 
-        String username = authentication.getName();  // Get username from authentication
+        String username = authentication.getName();
         PostDTO postDTO = postService.updatePost(postId, name, topic, shortDescription, content,
                 image, username);
         return new ApiResponse<>("success", 200, "Post updated successfully", postDTO);

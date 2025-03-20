@@ -50,7 +50,7 @@ public class BrandController {
         return new ApiResponse<>("success", 200, "Get Brands success", brands);
     }
 
-    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/add", consumes = "multipart/form-data")
     @Operation(summary = "Add new brand", description = "Add a new brand with its details and upload logo")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<BrandDTO> addBrand(
@@ -61,7 +61,7 @@ public class BrandController {
         return new ApiResponse<>("success", 201, "Add Brand success", response);
     }
 
-    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update/{id}", consumes = "multipart/form-data")
     @Operation(summary = "Update brand", description = "Update brand details and logo by ID")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<BrandDTO> updateBrand(

@@ -95,7 +95,7 @@ public class ProductController {
         return new ApiResponse<>("success", 200, "Get Product success", response);
     }
 
-    @PostMapping("/{productId}/images/upload")
+    @PostMapping(value = "/{productId}/images/upload",consumes = "multipart/form-data")
     public ApiResponse<ImageDTO> uploadImageToProduct(
             @PathVariable Long productId,
             @RequestParam("file") MultipartFile file
@@ -123,7 +123,7 @@ public class ProductController {
         return new ApiResponse<>("success", 200, "Image deleted successfully", null);
     }
 
-    @PutMapping("/{productId}/images/{imageId}")
+    @PutMapping(value = "/{productId}/images/{imageId}",consumes = "multipart/form-data")
     public ApiResponse<ImageDTO> updateImage(
             @PathVariable Long productId,
             @PathVariable Long imageId,
