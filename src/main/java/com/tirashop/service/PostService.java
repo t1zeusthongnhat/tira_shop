@@ -52,6 +52,7 @@ public class PostService {
 
     public PagedData<PostDTO> searchPost(String name, String topic, String author,
                                          Pageable pageable) {
+
         var postSpec = PostSpecification.searchPost(name, topic, author);
         var postPage = postRepository.findAll(postSpec, pageable);
 

@@ -1,15 +1,17 @@
 package com.tirashop.persitence.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+
 import lombok.experimental.FieldNameConstants;
-import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
@@ -18,7 +20,6 @@ import org.hibernate.annotations.Where;
 @AllArgsConstructor
 @FieldNameConstants
 @Table(name = "post")
-@Where(clause = "status = 'PUBLISHED'")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
