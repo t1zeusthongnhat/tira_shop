@@ -26,9 +26,9 @@ public class VoucherService {
     VoucherRepository voucherRepository;
 
 
-    public PagedData<VoucherDTO> seachVoucher(String code, String status, Pageable pageable){
+    public PagedData<VoucherDTO> seachVoucher(String code, String status, Pageable pageable) {
 
-        var voucherSpec = VoucherSpecification.searchVoucher(code,status);
+        var voucherSpec = VoucherSpecification.searchVoucher(code, status);
         var voucherPage = voucherRepository.findAll(voucherSpec, pageable);
 
         var voucherItem = voucherPage.getContent().stream().map(
@@ -61,9 +61,13 @@ public class VoucherService {
     public VoucherDTO updateVoucher(Long id, VoucherDTO voucherDTO) {
         Voucher existingVoucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found with id: " + id));
-        if(voucherRepository.existsByCode(voucherDTO.getCode())){
+
+        if (!existingVoucher.getCode().equals(voucherDTO.getCode()) &&
+                voucherRepository.existsByCode(voucherDTO.getCode())) {
+
             throw new RuntimeException("Voucher has exist");
         }
+
         Voucher updatedVoucher = mapToEntity(voucherDTO, false);
         updatedVoucher.setId(existingVoucher.getId());
         updatedVoucher.setCreatedAt(existingVoucher.getCreatedAt());
@@ -83,6 +87,7 @@ public class VoucherService {
                 .orElseThrow(() -> new RuntimeException("Voucher not found with id: " + id));
         return mapToDto(voucher);
     }
+
     private VoucherDTO mapToDto(Voucher voucher) {
         if (voucher == null) {
             return null;
@@ -122,7 +127,6 @@ public class VoucherService {
 
         return voucher;
     }
-
 
 
 }
