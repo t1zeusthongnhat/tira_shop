@@ -2,9 +2,11 @@ package com.tirashop.controller;
 
 import com.tirashop.service.openAi.KlingTryOnService;
 import io.swagger.v3.oas.annotations.Operation;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,14 +21,21 @@ public class TryOnController {
 
     private final KlingTryOnService klingTryOnService;
 
-
     @PostMapping(consumes = "multipart/form-data")
     public String tryOn(
             @RequestParam("modelImage") MultipartFile modelImage,
-            @RequestParam("dressImage") MultipartFile dressImage) {
+            @RequestParam(value = "dressImage", required = false) MultipartFile dressImage,
+            @RequestParam(value = "dressImageUrl", required = false) String dressImageUrl,
+            @RequestParam("useImageUrl") boolean useImageUrl) {
         try {
-            String taskId = klingTryOnService.createTryOnTask(modelImage,
-                    dressImage);
+            if (!useImageUrl && dressImage == null) {
+                return "Error: dressImage is required when useImageUrl is false";
+            }
+            if (useImageUrl && (dressImageUrl == null || dressImageUrl.isEmpty())) {
+                return "Error: dressImageUrl is required when useImageUrl is true";
+            }
+            //true: dung url
+            String taskId = klingTryOnService.createTryOnTask(modelImage, dressImage, dressImageUrl, useImageUrl);
             return "Task created with task_id: " + taskId;
         } catch (IOException e) {
             return "Error: " + e.getMessage();
@@ -44,5 +53,6 @@ public class TryOnController {
             return ResponseEntity.status(500).body(null);
         }
     }
+
 }
 
