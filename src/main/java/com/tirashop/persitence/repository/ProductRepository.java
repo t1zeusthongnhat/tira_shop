@@ -16,9 +16,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     boolean existsByName(String name);
 
-    @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :label, '%')) " +
-            "OR LOWER(p.tagName) LIKE LOWER(CONCAT('%', :label, '%'))")
-    Page<Product> findByCategoryOrBrandOrName(@Param("label") String label, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE LOWER(p.tagName) LIKE LOWER(CONCAT('%', :label, '%'))")
+    Page<Product> findByTagName(@Param("label") String label, Pageable pageable);
 
 }
 

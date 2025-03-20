@@ -44,7 +44,7 @@ public class Post {
 
     private Boolean isMarkdown;
 
-    private String status;
+    private String status; //PUBLISHED, DRAFT
 
 
 }

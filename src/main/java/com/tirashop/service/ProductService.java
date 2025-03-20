@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,7 +48,7 @@ public class ProductService {
 
 
     public PagedData<ProductDTO> searchProductsByLabel(String label, Pageable pageable) {
-        Page<Product> productPage = productRepository.findByCategoryOrBrandOrName(label, pageable);
+        Page<Product> productPage = productRepository.findByTagName(label, pageable);
         List<ProductDTO> productDTOs = productPage.getContent()
                 .stream()
                 .map(this::toDTO)
@@ -70,7 +71,7 @@ public class ProductService {
     }
 
     public PagedData<ProductDTO> filterProductsWithPaging(String name, String size, Double minPrice,
-            Double maxPrice, String category, String brand, Pageable pageable) {
+                                                          Double maxPrice, String category, String brand, Pageable pageable) {
 
         Specification<Product> spec = ProductSpecification.filterProducts(name, size, minPrice,
                 maxPrice, category, brand);
@@ -121,10 +122,10 @@ public class ProductService {
     }
 
 
-    public ProductResponse updateProduct(Long id,ProductRequest request) {
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product productUpdate = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot find product with ID: " + id));
-        if (!productUpdate.getName().equals(request.getName())&&productRepository.existsByName(request.getName())) {
+        if (!productUpdate.getName().equals(request.getName()) && productRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("Product name already exists");
         }
         if (request.getPrice() <= 0) {

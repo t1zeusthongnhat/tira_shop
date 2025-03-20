@@ -74,6 +74,16 @@ public class PostController {
         return new ApiResponse<>("success", 200, "Post created successfully", postDTO);
     }
 
+    @PutMapping("/{postId}/change-status")
+    @Operation(summary = "Update status post", description = "Update an existing post")
+    public ApiResponse<Long> updatePost(
+            @PathVariable Long postId,
+            @RequestParam(required = true) String status
+    ) {
+
+        var post = postService.updateStatus(postId, status);
+        return new ApiResponse<>("success", 200, "Post update status successfully", post);
+    }
 
     @PutMapping("/{postId}/update")
     @Operation(summary = "Update post", description = "Update an existing post")

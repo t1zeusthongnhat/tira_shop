@@ -10,7 +10,9 @@ import com.tirashop.persitence.repository.PostRepository;
 import com.tirashop.persitence.repository.UserRepository;
 import com.tirashop.persitence.specification.PostSpecification;
 import io.github.cdimascio.dotenv.Dotenv;
+
 import java.time.LocalDateTime;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -49,7 +51,7 @@ public class PostService {
     private static final String POST_IMAGE_DIR = System.getProperty("user.dir") + "/uploads/post";
 
     public PagedData<PostDTO> searchPost(String name, String topic, String author,
-            Pageable pageable) {
+                                         Pageable pageable) {
         var postSpec = PostSpecification.searchPost(name, topic, author);
         var postPage = postRepository.findAll(postSpec, pageable);
 
@@ -67,8 +69,8 @@ public class PostService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO createPostManually(String name, String topic, String shortDescription,
-            String content,
-            MultipartFile image, String username) {
+                                      String content,
+                                      MultipartFile image, String username) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -93,8 +95,8 @@ public class PostService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO createPostWithAI(String name, String topic, String shortDescription,
-            String username,
-            MultipartFile image) {
+                                    String username,
+                                    MultipartFile image) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -120,9 +122,18 @@ public class PostService {
         return toDTO(post);
     }
 
+    public Long updateStatus(Long id, String status) {
+        var post = postRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Post not found."));
+
+        post.setStatus(status);
+        postRepository.save(post);
+        return post.getId();
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO updatePost(Long postId, String name, String topic, String shortDescription,
-            String content, MultipartFile image, String username) {
+                              String content, MultipartFile image, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
