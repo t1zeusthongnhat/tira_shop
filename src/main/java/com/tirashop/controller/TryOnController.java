@@ -19,17 +19,6 @@ public class TryOnController {
 
     private final KlingTryOnService klingTryOnService;
 
-    @GetMapping("/history")
-    public ResponseEntity<?> getTryOnHistory() {
-        try {
-            List<Map<String, Object>> history = klingTryOnService.getTryOnHistory();
-            return ResponseEntity.ok(history);
-        } catch (IOException e) {
-            return ResponseEntity.status(500)
-                    .body("Error fetching try-on history: " + e.getMessage());
-        }
-    }
-
 
     @PostMapping
     public String tryOn(
