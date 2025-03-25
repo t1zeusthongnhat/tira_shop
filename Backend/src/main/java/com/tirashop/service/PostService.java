@@ -68,6 +68,20 @@ public class PostService {
                 .build();
     }
 
+    public void updateImg(Long id, MultipartFile url) {
+        var post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found."));
+
+        String imageUrl = null;
+        if (url != null && !url.isEmpty()) {
+            imageUrl = handleImageUpload(url, POST_IMAGE_DIR);
+        }
+
+        post.setImageUrl(imageUrl);
+        postRepository.save(post);
+
+
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PostDTO createPostManually(String name, String topic, String shortDescription,
                                       String content,

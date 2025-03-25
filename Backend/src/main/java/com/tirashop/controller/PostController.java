@@ -40,7 +40,7 @@ public class PostController {
     }
 
 
-    @PostMapping(value = "/create",consumes = "multipart/form-data")
+    @PostMapping(value = "/create", consumes = "multipart/form-data")
     @Operation(summary = "Create new post", description = "Create a new post with optional image")
     public ApiResponse<PostDTO> createPost(
             @RequestParam String name,
@@ -58,7 +58,7 @@ public class PostController {
         return new ApiResponse<>("success", 200, "Post created successfully", postDTO);
     }
 
-    @PostMapping(value = "/createWithAI",consumes = "multipart/form-data")
+    @PostMapping(value = "/createWithAI", consumes = "multipart/form-data")
     @Operation(summary = "Create new post with AI-generated content", description = "Create a new post with AI-generated content, optional image, and scheduling")
     public ApiResponse<PostDTO> createPostWithAI(
             @RequestParam String name,
@@ -85,7 +85,18 @@ public class PostController {
         return new ApiResponse<>("success", 200, "Post update status successfully", post);
     }
 
-    @PutMapping(value = "/{postId}/update",consumes = "multipart/form-data")
+    @PutMapping("/{postId}/imageUrl")
+    @Operation(summary = "Update image post", description = "Update image post")
+    public ApiResponse<Void> updateImagePost(
+            @PathVariable Long postId,
+            @RequestParam(required = false) MultipartFile img
+    ) {
+
+        postService.updateImg(postId, img);
+        return new ApiResponse<>("success", 200, "Post update image status successfully", null);
+    }
+
+    @PutMapping(value = "/{postId}/update", consumes = "multipart/form-data")
     @Operation(summary = "Update post", description = "Update an existing post")
     public ApiResponse<PostDTO> updatePost(
             @PathVariable Long postId,
