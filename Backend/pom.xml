@@ -49,6 +49,7 @@
 			<artifactId>json</artifactId>
 			<version>20210307</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.assemblyai</groupId>
 			<artifactId>assemblyai-java</artifactId>
