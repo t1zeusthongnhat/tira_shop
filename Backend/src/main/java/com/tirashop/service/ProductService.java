@@ -47,6 +47,34 @@ public class ProductService {
             System.getProperty("user.dir") + "/uploads/product/image";
 
 
+    public PagedData<ProductDTO> filterProducts(String word1, Pageable pageable) {
+        Page<Product> productPage;
+        productPage = productRepository.findByNameContainingVietnamese(word1, pageable);
+        return mapToPagedData(productPage);
+    }
+
+    public PagedData<ProductDTO> filterProductsWithLanguage(String language, String word1, String word2, Pageable pageable) {
+        Page<Product> productPage;
+        if ("vi".equalsIgnoreCase(language)) {
+            productPage = productRepository.findByNameContainingVietnamese(word1, pageable);
+        } else {
+            productPage = productRepository.findByNameContainingEnglish(word1, word2, pageable);
+        }
+        return mapToPagedData(productPage);
+    }
+
+    private PagedData<ProductDTO> mapToPagedData(Page<Product> productPage) {
+        return PagedData.<ProductDTO>builder()
+                .pageNo(productPage.getNumber())
+                .elementPerPage(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .elementList(productPage.getContent().stream()
+                        .map(this::toDTO)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
     public PagedData<ProductDTO> searchProductsByLabel(String label, Pageable pageable) {
         Page<Product> productPage = productRepository.findByTagName(label, pageable);
         List<ProductDTO> productDTOs = productPage.getContent()

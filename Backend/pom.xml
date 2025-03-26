@@ -59,6 +59,11 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.konghq</groupId>
+			<artifactId>unirest-java</artifactId>
+			<version>3.13.6</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.auth0</groupId>
