@@ -19,6 +19,8 @@ public class SearchOrderItem {
     private double price;
     private String productImage;
 
+    private String orderStatus;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdAt;
 

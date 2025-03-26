@@ -23,15 +23,18 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,6 +111,7 @@ public class OrderService {
                                         && !orderItem.getProduct().getImages().isEmpty()
                                         ? orderItem.getProduct().getImages().get(0).getUrl()
                                         : null,
+                                order.getStatus().name(),
                                 order.getCreatedAt()
                         )
                 )

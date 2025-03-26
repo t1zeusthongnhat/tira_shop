@@ -37,13 +37,13 @@ public class OrderController {
     }
 
     @GetMapping("")
-    @Operation(summary = "Get all products", description = "Retrieve all products in orders")
+    @Operation(summary = "Get all orders", description = "Retrieve all products in orders")
     public ApiResponse<PagedData<SearchOrderItem>> getPendingProducts(
             @RequestParam(required = false) String keyword,
             @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
         var items = orderService.searchOrders(keyword, pageable);
-        return new ApiResponse<>("success", 200, "All product order", items);
+        return new ApiResponse<>("success", 200, "All product in order", items);
     }
 
     @PutMapping("/{orderId}/status")
