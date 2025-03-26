@@ -1,7 +1,9 @@
 package com.tirashop.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.assemblyai.api.AssemblyAI;
+import com.assemblyai.api.resources.transcripts.types.Transcript;
+import com.assemblyai.api.resources.transcripts.types.TranscriptOptionalParams;
+import com.assemblyai.api.resources.transcripts.types.TranscriptStatus;
 import com.tirashop.dto.ProductDTO;
 import com.tirashop.dto.response.ApiResponse;
 import com.tirashop.model.PagedData;
@@ -9,19 +11,16 @@ import com.tirashop.service.ProductService;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 
 @Slf4j
@@ -32,101 +31,49 @@ import java.io.IOException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class VoiceSearchController {
 
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String DEEPGRAM_API_KEY = dotenv.get("VOICE_TO_TEXT");
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    final ProductService productService;
 
-    @PostMapping(value = "/search", consumes = "multipart/form-data")
-    @Operation(summary = "Search products using voice", description = "Convert voice to text and search for products. Specify language as 'en' for English or 'vi' for Vietnamese.")
+    private static final Dotenv dotenv = Dotenv.load();
+    private static final String API_KEY = dotenv.get("VOICE_TO_TEXT");
+
+    private final AssemblyAI client = AssemblyAI.builder()
+            .apiKey(API_KEY)
+            .build();
+
+    private final ProductService productService;
+
+    @PostMapping("/search")
+    @Operation(summary = "Search products using voice", description = "Convert voice to text and search for products")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<PagedData<ProductDTO>> searchByVoice(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "language", defaultValue = "en") String language,
-            @PageableDefault(page = 0, size = 25, sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
-        log.info("Starting voice search with Deepgram API_KEY, language: {}", language);
-
+            @RequestParam("file") MultipartFile file, Pageable pageable) {
         try {
-            byte[] audioBytes = file.getBytes();
-            String contentType = file.getContentType() != null ? file.getContentType() : "audio/mpeg";
 
-            String deepgramUrl;
-            if ("vi".equalsIgnoreCase(language)) {
-                deepgramUrl = "https://api.deepgram.com/v1/listen?punctuate=true&model=nova-2&language=vi";
-            } else if ("en".equalsIgnoreCase(language)) {
-                deepgramUrl = "https://api.deepgram.com/v1/listen?punctuate=true&model=nova-2&language=en";
-            } else {
-                log.warn("Unsupported language: {}. Defaulting to English.", language);
-                deepgramUrl = "https://api.deepgram.com/v1/listen?punctuate=true&model=nova-2&language=en";
+            File tempFile = File.createTempFile("audio", ".mp3");
+            file.transferTo(tempFile);
+
+            TranscriptOptionalParams params = TranscriptOptionalParams.builder().build();
+            Transcript transcript = client.transcripts().transcribe(tempFile, params);
+            tempFile.delete();
+
+            if (transcript.getStatus().equals(TranscriptStatus.ERROR)) {
+                return new ApiResponse<>("error", 500,
+                        transcript.getError().orElse("Unknown error"), null);
             }
 
-            HttpResponse<String> response = Unirest.post(deepgramUrl)
-                    .header("Authorization", "Token " + DEEPGRAM_API_KEY)
-                    .header("Content-Type", contentType)
-                    .body(audioBytes)
-                    .asString();
-
-            if (response.getStatus() != 200) {
-                log.error("Deepgram API request failed: {}", response.getBody());
-                return new ApiResponse<>("error", 500, "Deepgram API request failed: " + response.getBody(), null);
-            }
-
-            JsonNode responseJson = objectMapper.readTree(response.getBody());
-            String transcriptText = responseJson.at("/results/channels/0/alternatives/0/transcript").asText();
-            log.info("Transcription completed, text: {}", transcriptText);
-
-            if (transcriptText.isEmpty()) {
-                log.warn("No transcription available for the provided audio in language: {}", language);
-                return new ApiResponse<>("error", 400, "Could not transcribe the audio file", null);
-            }
-
-            String searchQuery = transcriptText;
-            if ("vi".equalsIgnoreCase(language)) {
-                searchQuery = translateToEnglish(transcriptText);
-                log.info("Translated from Vietnamese to English: {}", searchQuery);
-            }
-
-            String cleanedQuery = searchQuery
+            String queryText = transcript.getText().orElse("")
                     .trim()
-                    .replaceAll("[^\\p{L}\\p{Nd}\\s]", "")
+                    .replaceAll("[^a-zA-Z0-9\\s]", "")
                     .toLowerCase();
-            String[] words = cleanedQuery.split("\\s+");
-            String word1 = words.length > 0 ? words[0] : "";
-            String word2 = words.length > 1 ? words[1] : "";
-            log.info("Cleaned query: {}, Word 1: {}, Word 2: {}", cleanedQuery, word1, word2);
+            log.info("Cleaned Transcribed text: {}", queryText);
 
-            PagedData<ProductDTO> searchResults;
-            if ("en".equalsIgnoreCase(language) && words.length == 1) {
-                searchResults = productService.filterProducts(word1, pageable);
-            } else {
-                searchResults = productService.filterProductsWithLanguage(language, word1, word2, pageable);
-            }
+            PagedData<ProductDTO> searchResults = productService.filterProductsWithPaging(queryText,
+                    null, null, null, null, null, pageable);
 
-            return new ApiResponse<>("success", 200, "Voice search results retrieved successfully", searchResults);
-
+            return new ApiResponse<>("success", 200, "Voice search results retrieved successfully",
+                    searchResults);
         } catch (IOException e) {
-            log.error("Error processing voice search: {}", e.getMessage(), e);
-            return new ApiResponse<>("error", 500, "Error processing file: " + e.getMessage(), null);
-        }
-    }
-
-    private String translateToEnglish(String vietnameseText) {
-        try {
-            HttpResponse<String> translateResponse = Unirest.get("https://api.mymemory.translated.net/get")
-                    .queryString("q", vietnameseText)
-                    .queryString("langpair", "vi|en")
-                    .asString();
-
-            if (translateResponse.getStatus() != 200) {
-                log.error("Translation API request failed: {}", translateResponse.getBody());
-                return vietnameseText;
-            }
-
-            JsonNode translateJson = objectMapper.readTree(translateResponse.getBody());
-            return translateJson.at("/responseData/translatedText").asText();
-        } catch (Exception e) {
-            log.error("Error translating text: {}", e.getMessage(), e);
-            return vietnameseText;
+            return new ApiResponse<>("error", 500, "Error processing file: " + e.getMessage(),
+                    null);
         }
     }
 }

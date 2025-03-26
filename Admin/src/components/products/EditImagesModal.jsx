@@ -34,6 +34,23 @@ const EditImagesModal = ({ isOpen, onClose, productId }) => {
         setImages(updated);
     };
 
+    const handleDelete = async (imageId) => {
+        if (!window.confirm("Are you sure you want to delete this image?")) return;
+
+        try {
+            await axios.delete(`http://localhost:8080/tirashop/product/${productId}/images/${imageId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+            showToast("Image deleted successfully!", "success");
+            fetchImages(); // Reload list after deletion
+        } catch (err) {
+            console.error("Error deleting image", err);
+            showToast("Failed to delete image.", "error");
+        }
+    };
+
     const handleSaveAll = async () => {
         for (const img of images) {
             if (img.newFile) {
@@ -68,7 +85,14 @@ const EditImagesModal = ({ isOpen, onClose, productId }) => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {images.map((img, index) => (
-                        <div key={img.id} className="bg-gray-50 rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div key={img.id} className="bg-gray-50 rounded-xl border border-gray-200 p-4 shadow-sm relative">
+                            <button
+                                onClick={() => handleDelete(img.id)}
+                                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm font-bold"
+                                title="Delete Image"
+                            >
+                                ✕
+                            </button>
                             <p className="text-xs text-gray-500 mb-2">Image ID: {img.id}</p>
                             <div className="flex flex-col gap-4 items-center">
                                 <div>
