@@ -1,89 +1,164 @@
+// import React, { useState } from 'react';
+// import axios from 'axios';
+// import { toast } from 'react-toastify';
+
+// const OrderDetailModal = ({ isOpen, onClose, order }) => {
+//   const [shipmentStatus, setShipmentStatus] = useState(order?.shipmentStatus || '');
+//   const shipmentId = order?.shipmentId;
+
+//   const statusOptions = ['PENDING', 'DELIVERED', 'FAILED'];
+  
+//   const handleUpdateStatus = async (newStatus) => {
+//     const token = localStorage.getItem('token'); // hoặc key khác nếu bạn đặt tên khác
+  
+//     if (!token) {
+//       toast.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+//       return;
+//     }
+  
+//     try {
+//       const response = await axios.put(
+//         `http://localhost:8080/tirashop/orders/shipments/${shipmentId}/status?status=${newStatus}`,
+//         null,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         }
+//       );
+//       console.log("✅ API Response:", response.data);
+  
+//       setShipmentStatus(newStatus);
+//       toast.success("Cập nhật trạng thái vận chuyển thành công!");
+//     } catch (err) {
+//       console.error("❌ API Error:", err);
+//       toast.error("Cập nhật trạng thái thất bại!");
+//     }
+//   };
+  
+
+//   if (!isOpen || !order) return null;
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+//       <div className="bg-white p-6 rounded-xl w-full max-w-xl relative">
+//         <button onClick={onClose} className="absolute top-2 right-3 text-xl">×</button>
+//         <h2 className="text-lg font-semibold mb-4">Chi tiết đơn hàng</h2>
+
+//         <p><strong>Người đặt:</strong> {order.username}</p>
+//         <p><strong>Sản phẩm:</strong> {order.productName}</p>
+//         <p><strong>Kích cỡ:</strong> {order.size}</p>
+//         <p><strong>Số lượng:</strong> {order.quantity}</p>
+//         <p><strong>Giá:</strong> ${order.price?.toLocaleString()}</p>
+//         <p><strong>Trạng thái đơn hàng:</strong> {order.orderStatus}</p>
+
+//         <div className="mt-4">
+//           <label className="block font-medium mb-1">Trạng thái vận chuyển:</label>
+//           <select
+//             value={shipmentStatus}
+//             onChange={(e) => handleUpdateStatus(e.target.value)}
+//             className="border rounded px-3 py-1"
+//           >
+//             {statusOptions.map((status) => (
+//               <option key={status} value={status}>{status}</option>
+//             ))}
+//           </select>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default OrderDetailModal;
+
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { X } from 'lucide-react';
+import { toast } from 'react-toastify';
 
-const OrderDetailModal = ({ isOpen, onClose, order }) => {
-    const [orderItems, setOrderItems] = useState([]);
-    const [loading, setLoading] = useState(true);
+const shipmentStatusOptions = ['FAILED', 'DELIVERED', 'PENDING'];
 
-    useEffect(() => {
-        if (isOpen && order?.id) {
-            fetchOrderItems(order.id);
-        }
-    }, [isOpen, order]);
+const OrderDetailModal = ({ isOpen, onClose, orderId }) => {
+  const [shipment, setShipment] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const fetchOrderItems = async (orderId) => {
-        setLoading(true);
-        try {
-            const response = await axios.get(`http://localhost:8080/tirashop/orders/${orderId}/shipments`);
-            const data = response.data.data?.elementList || [];
-            setOrderItems(data);
-        } catch (err) {
-            console.error("Error fetching order items:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  useEffect(() => {
+    if (isOpen && orderId) {
+      fetchShipment(orderId);
+    }
+  }, [isOpen, orderId]);
+  
 
-    if (!isOpen || !order) return null;
+  const fetchShipment = async (orderId) => {
+    console.log("Fetching shipment for orderId:", orderId);
+    try {
+      setLoading(true);
+      const res = await axios.get(`http://localhost:8080/tirashop/orders/${orderId}/shipments`);
+      setShipment(res.data.data);
+    } catch (err) {
+      toast.error('Không thể tải thông tin giao hàng');
+      setShipment(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white w-[800px] max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-6 relative">
-                <button className="absolute top-4 right-4 text-gray-600 hover:text-red-600" onClick={onClose}>
-                    <X size={24} />
-                </button>
-                <h2 className="text-xl font-bold mb-4 text-gray-800">Order Detail - #{order.id}</h2>
+  const handleStatusChange = async (e) => {
+    const newStatus = e.target.value;
+    try {
+      await axios.put(
+        `http://localhost:8080/tirashop/orders/shipments/${shipment.id}/status?status=${newStatus}`
+      );
+      toast.success('Cập nhật trạng thái thành công!');
+      setShipment({ ...shipment, status: newStatus });
+    } catch (err) {
+      toast.error('Không thể cập nhật trạng thái');
+    }
+  };
 
-                <div className="mb-4">
-                    <p><strong>Shipping Address:</strong> {order.shippingAddress}</p>
-                    <p><strong>Status:</strong> {order.status}</p>
-                    <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
-                    <p><strong>Total Price:</strong> {order.totalPrice.toLocaleString()} đ</p>
-                    <p><strong>Created At:</strong> {new Date(order.createdAt).toLocaleString()}</p>
-                </div>
+  if (!isOpen) return null;
 
-                <h3 className="text-lg font-semibold mb-2 text-gray-700">Items:</h3>
+  return (
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-xl">
+        <h2 className="text-xl font-bold mb-4">Chi tiết giao hàng</h2>
 
-                {loading ? (
-                    <p className="text-gray-500">Loading items...</p>
-                ) : (
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead>
-                            <tr>
-                                <th className="py-2 text-left text-gray-600">Product Name</th>
-                                <th className="py-2 text-left text-gray-600">Category</th>
-                                <th className="py-2 text-left text-gray-600">Brand</th>
-                                <th className="py-2 text-left text-gray-600">Size</th>
-                                <th className="py-2 text-left text-gray-600">Quantity</th>
-                                <th className="py-2 text-left text-gray-600">Price</th>
-                                <th className="py-2 text-left text-gray-600">Image</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orderItems.map((item, idx) => (
-                                <tr key={idx} className="border-t border-gray-200">
-                                    <td className="py-2">{item.productName}</td>
-                                    <td className="py-2">{item.categoryName}</td>
-                                    <td className="py-2">{item.brandName}</td>
-                                    <td className="py-2">{item.size}</td>
-                                    <td className="py-2">{item.quantity}</td>
-                                    <td className="py-2">{item.price.toLocaleString()} đ</td>
-                                    <td className="py-2">
-                                        <img
-                                            src={`http://localhost:8080${item.productImage}`}
-                                            alt={item.productName}
-                                            className="w-16 h-16 object-cover rounded"
-                                        />
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+        {loading ? (
+          <p>Đang tải...</p>
+        ) : shipment ? (
+          <>
+            <p><strong>Mã vận đơn:</strong> {shipment.trackingNumber}</p>
+            <p><strong>Phương thức giao:</strong> {shipment.shippingMethod}</p>
+            <p><strong>Ngày tạo:</strong> {shipment.createdAt}</p>
+
+            <div className="mt-4">
+              <label className="block mb-1 font-medium">Trạng thái:</label>
+              <select
+                className="w-full border px-3 py-2 rounded"
+                value={shipment.status}
+                onChange={handleStatusChange}
+              >
+                {shipmentStatusOptions.map((status) => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
             </div>
+          </>
+        ) : (
+          <p>Không có thông tin giao hàng.</p>
+        )}
+
+        <div className="mt-6 text-right">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          >
+            Đóng
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default OrderDetailModal;
