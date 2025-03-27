@@ -41,20 +41,13 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
-            @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = Integer.MAX_VALUE, sort = "createdAt", direction = Direction.DESC) Pageable pageable
 
     ) {
         PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name, size,
                 minPrice, maxPrice, category, brand, pageable);
         return new ApiResponse<>("success", 200, "Filtered products retrieved successfully",
                 pagedData);
-    }
-
-    @DeleteMapping("/{id}/image")
-    @Operation(summary = "Delete all image by product")
-    public ApiResponse<Void> addProduct(@PathVariable Long id) {
-        productService.deleteImageProduct(id);
-        return new ApiResponse<>("success", 200, "Delete all img success", null);
     }
 
     @PostMapping("/add")
@@ -71,7 +64,7 @@ public class ProductController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product updated successfully")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id,
-            @RequestBody ProductRequest request) {
+                                                      @RequestBody ProductRequest request) {
         ProductResponse response = productService.updateProduct(id, request);
         return new ApiResponse<>("success", 200, "Update Product success", response);
     }
@@ -95,7 +88,7 @@ public class ProductController {
         return new ApiResponse<>("success", 200, "Get Product success", response);
     }
 
-    @PostMapping(value = "/{productId}/images/upload",consumes = "multipart/form-data")
+    @PostMapping(value = "/{productId}/images/upload", consumes = "multipart/form-data")
     public ApiResponse<ImageDTO> uploadImageToProduct(
             @PathVariable Long productId,
             @RequestParam("file") MultipartFile file
@@ -123,7 +116,7 @@ public class ProductController {
         return new ApiResponse<>("success", 200, "Image deleted successfully", null);
     }
 
-    @PutMapping(value = "/{productId}/images/{imageId}",consumes = "multipart/form-data")
+    @PutMapping(value = "/{productId}/images/{imageId}", consumes = "multipart/form-data")
     public ApiResponse<ImageDTO> updateImage(
             @PathVariable Long productId,
             @PathVariable Long imageId,
