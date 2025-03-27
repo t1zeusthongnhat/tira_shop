@@ -124,9 +124,6 @@ const PostsTable = () => {
         return words.length > wordLimit ? words.slice(0, wordLimit).join(' ') + '...' : content;
     };
 
-
-
-
     return (
         <div className='m-5 p-6 bg-white text-black rounded-xl'>
             <div className='flex justify-between items-center mb-6'>
@@ -173,20 +170,17 @@ const PostsTable = () => {
                                 <td className='px-0 py-2 text-sm text-gray-700 w-[200px]'>{post.short_description}</td>
                                 <td className='py-2 text-sm text-gray-700'>
                                     <div className="prose prose-sm max-w-full">
-                                        <ReactMarkdown>
-                                            {truncateContent(post.content)}
-                                        </ReactMarkdown>
+                                            {truncateContent(post.content)}                                  
                                     </div>
                                     {post.content.split(' ').length > 30 && (
                                         <button
                                             className='text-blue-500 hover:underline ml-2'
                                             onClick={() => handleViewClick(post)}
                                         >
-                                            View More...
+                                            View More
                                         </button>
                                     )}
                                 </td>
-
 
                                 <td className='py-2 text-sm text-gray-700 w-[120px]'>
                                     <button className='text-indigo-600 hover:text-indigo-500 mr-2' onClick={() => handleEditClick(post)}>
