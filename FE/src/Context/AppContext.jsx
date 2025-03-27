@@ -42,7 +42,7 @@ export const AppProvider = ({ children }) => {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         setCart([]);
-        toast.error("Your session has expired. Please log in again.");
+       
         return;
       }
 
@@ -96,7 +96,6 @@ export const AppProvider = ({ children }) => {
             localStorage.removeItem("token");
             setIsAuthenticated(false);
             setCart([]);
-            toast.error("Your session has expired. Please log in again.");
           }
         } catch (err) {
           console.error("Token validation error:", err);

@@ -20,9 +20,7 @@ function MyHeader() {
   const [cart, setCart] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const [showSidebarBrandDropdown, setShowSidebarBrandDropdown] =
-    useState(false);
+  
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -54,10 +52,7 @@ function MyHeader() {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         setCart([]);
-        toast.error("Your session has expired. Please log in again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      
         navigate("/auth");
         return;
       }
@@ -162,10 +157,7 @@ function MyHeader() {
       if (response.status === 401) {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
-        toast.error("Your session has expired. Please log in again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      
         navigate("/auth");
         return;
       }
@@ -232,10 +224,7 @@ function MyHeader() {
       if (response.status === 401) {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
-        toast.error("Your session has expired. Please log in again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        
         navigate("/auth");
         return;
       }
@@ -272,12 +261,7 @@ function MyHeader() {
     }
   };
 
-  const navigateToBrand = (brand) => {
-    console.log(`Navigating to ${brand} products`);
-    setShowSidebarBrandDropdown(false);
-    setIsMenuOpen(false);
-  };
-
+ 
   const isHomepage = location.pathname === "/";
 
   return (
@@ -374,22 +358,7 @@ function MyHeader() {
         </button>
         <ul className={styles.menuList}>
           <li onClick={navigateToBestProducts}>Best Product</li>
-          <li
-            className={styles.menuItemWithSubmenu}
-            onClick={() =>
-              setShowSidebarBrandDropdown(!showSidebarBrandDropdown)
-            }
-          >
-            Brand {showSidebarBrandDropdown ? "▲" : "▼"}
-            {showSidebarBrandDropdown && (
-              <ul className={styles.submenu}>
-                <li onClick={() => navigateToBrand("Gucci")}>Gucci</li>
-                <li onClick={() => navigateToBrand("Calvin")}>Calvin</li>
-                <li onClick={() => navigateToBrand("Versace")}>Versace</li>
-                <li onClick={() => navigateToBrand("Zara")}>Zara</li>
-              </ul>
-            )}
-          </li>
+        
           <li>Store System</li>
           <li>Voucher</li>
           {!isAuthenticated ? (

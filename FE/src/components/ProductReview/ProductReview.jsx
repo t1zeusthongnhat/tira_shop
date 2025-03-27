@@ -37,10 +37,7 @@ function ProductReview() {
 
         if (response.status === 401) {
           localStorage.removeItem("token");
-          toast.error("Your session has expired. Please log in again.", {
-            position: "top-right",
-            autoClose: 3000,
-          });
+         
           setLoading(false);
           return;
         }
@@ -112,10 +109,7 @@ function ProductReview() {
 
       if (response.status === 401) {
         localStorage.removeItem("token");
-        toast.error("Your session has expired. Please log in again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+       
         setSubmitting(false);
         return;
       }

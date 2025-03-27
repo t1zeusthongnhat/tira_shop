@@ -6,7 +6,7 @@ import Footer from "../Footer/Footer";
 import { useAppContext } from "../../Context/AppContext";
 
 function CategoryPage() {
-  const { categoryId } = useParams();
+  // const { categoryId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, fetchCart } = useAppContext();
@@ -30,7 +30,7 @@ function CategoryPage() {
     const token = localStorage.getItem("token");
     if (!token) {
       setIsSessionExpired(true);
-      toast.error("Your session has expired. Please log in again.");
+   
       navigate("/auth");
       return false;
     }
@@ -54,15 +54,11 @@ function CategoryPage() {
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
+      const data = await response.json(); 
       if (data.status === "success" && data.data?.elementList) {
         setCategories(data.data.elementList);
-      } else {
-        toast.error(data.message || "Failed to fetch categories");
       }
-    } catch (err) {
-      toast.error(`Error fetching categories: ${err.message}`);
-    }
+    } catch (err) {}
   }, [navigate, isSessionExpired]);
 
   const fetchBrands = useCallback(async () => {

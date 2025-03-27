@@ -16,9 +16,7 @@ function PostList() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        throw new Error("Please login to view news.");
-      }
+     
       const url = "http://localhost:8080/tirashop/posts?author=duo";
       const response = await fetch(url, {
         method: "GET",
@@ -29,7 +27,7 @@ function PostList() {
       });
 
       if (response.status === 401) {
-        toast.error("Session expired. Please login again.");
+      
         localStorage.removeItem("token");
         navigate("/auth");
         return;

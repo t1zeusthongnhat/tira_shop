@@ -25,7 +25,6 @@ function FixedHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showBrandDropdown, setShowBrandDropdown] = useState(false);
 
   // Xử lý trạng thái cuộn dựa trên đường dẫn
   useEffect(() => {
@@ -84,12 +83,7 @@ function FixedHeader() {
     }
   };
 
-  const navigateToBrand = (brand) => {
-    console.log(`Navigating to ${brand} products`);
-    setShowBrandDropdown(false);
-    setIsMenuOpen(false);
-    // navigate(`/brand/${brand.toLowerCase()}`);
-  };
+  
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -126,41 +120,7 @@ function FixedHeader() {
           <div className={styles.navItem} onClick={navigateToBestProducts}>
             Best Product
           </div>
-          <div
-            className={styles.navItem}
-            onMouseEnter={() => setShowBrandDropdown(true)}
-            onMouseLeave={() => setShowBrandDropdown(false)}
-          >
-            Brand
-            {showBrandDropdown && (
-              <div className={styles.brandDropdown}>
-                <div
-                  className={styles.brandItem}
-                  onClick={() => navigateToBrand("Gucci")}
-                >
-                  Gucci
-                </div>
-                <div
-                  className={styles.brandItem}
-                  onClick={() => navigateToBrand("Calvin")}
-                >
-                  Calvin
-                </div>
-                <div
-                  className={styles.brandItem}
-                  onClick={() => navigateToBrand("Versace")}
-                >
-                  Versace
-                </div>
-                <div
-                  className={styles.brandItem}
-                  onClick={() => navigateToBrand("Zara")}
-                >
-                  Zara
-                </div>
-              </div>
-            )}
-          </div>
+         
           <div className={styles.navItem} onClick={() => navigate("/stores")}>
             Store System
           </div>
@@ -221,21 +181,7 @@ function FixedHeader() {
         </button>
         <ul className={styles.menuList}>
           <li onClick={navigateToBestProducts}>Best Product</li>
-          <li
-            className={styles.menuItemWithSubmenu}
-            onMouseEnter={() => setShowBrandDropdown(true)}
-            onMouseLeave={() => setShowBrandDropdown(false)}
-          >
-            Brand
-            {showBrandDropdown && (
-              <ul className={styles.submenu}>
-                <li onClick={() => navigateToBrand("Gucci")}>Gucci</li>
-                <li onClick={() => navigateToBrand("Calvin")}>Calvin</li>
-                <li onClick={() => navigateToBrand("Versace")}>Versace</li>
-                <li onClick={() => navigateToBrand("Zara")}>Zara</li>
-              </ul>
-            )}
-          </li>
+         
           <li onClick={() => navigate("/stores")}>Store System</li>
           <li onClick={() => navigate("/vouchers")}>Voucher</li>
           {!isAuthenticated ? (

@@ -15,9 +15,9 @@ function DetailPostList() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        throw new Error("Please login to view post details.");
-      }
+      // if (!token) {
+      //   throw new Error("Please login to view post details.");
+      // }
 
       const url = `http://localhost:8080/tirashop/posts/${postId}`;
       const response = await fetch(url, {
@@ -29,7 +29,7 @@ function DetailPostList() {
       });
 
       if (response.status === 401) {
-        toast.error("Session expired. Please login again.");
+     
         localStorage.removeItem("token");
         navigate("/auth");
         return;

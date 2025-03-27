@@ -7,7 +7,7 @@ import { FiX } from "react-icons/fi";
 import styles from "./chatbot.module.scss";
 import { useAppContext } from "../../context/AppContext";
 
-const API_URL = "https://58d7-202-93-156-66.ngrok-free.app"; // Cập nhật API của bạn
+const API_URL = "https://2005-42-114-248-80.ngrok-free.app"; // Cập nhật API của bạn
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();

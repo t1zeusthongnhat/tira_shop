@@ -52,7 +52,7 @@ function Cart() {
       const data = await response.json();
       if (response.status === 401) {
         localStorage.removeItem("token");
-        toast.error("Your session has expired. Please log in again.");
+      
         navigate("/auth");
         return;
       }
@@ -92,7 +92,7 @@ function Cart() {
       const data = await response.json();
       if (response.status === 401) {
         localStorage.removeItem("token");
-        toast.error("Your session has expired. Please log in again.");
+       
         navigate("/auth");
         return;
       }
@@ -135,7 +135,7 @@ function Cart() {
 
       if (response.status === 401) {
         localStorage.removeItem("token");
-        toast.error("Your session has expired. Please log in again.");
+       
         navigate("/auth");
         return;
       }

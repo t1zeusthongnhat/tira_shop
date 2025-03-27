@@ -51,10 +51,7 @@ function UserProfile() {
       if (response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
-        toast.error("Your session has expired. Please log in again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      
         navigate("/auth");
         return;
       }
@@ -192,10 +189,7 @@ function UserProfile() {
       if (response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
-        toast.error("Your session has expired. Please log in again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+       
         navigate("/auth");
         return;
       }
