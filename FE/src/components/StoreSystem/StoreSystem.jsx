@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import styles from './styles.module.scss';
+import Footer from "../Footer/Footer"
 
 const StoreSystem = () => {
   const [selectedStore, setSelectedStore] = useState(null);
@@ -36,46 +37,49 @@ const StoreSystem = () => {
   };
 
   return (
-    <div className={styles.storeSystem}>
-      <div className={styles.storeContainer}>
-        <div className={styles.storeList}>
-          <h1>Our Stores</h1>
-          {stores.map((store) => (
-            <div 
-              key={store.id} 
-              className={`${styles.storeCard} ${selectedStore === store.id ? styles.active : ''}`}
-              onClick={() => setSelectedStore(store.id)}
-            >
-              <h2>{store.name}</h2>
-              <p><strong>Address:</strong> {store.address}</p>
-              <p><strong>Phone:</strong> {store.phone}</p>
-            </div>
-          ))}
-        </div>
-        
-        <div className={styles.mapContainer}>
-          <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={selectedStore 
-                ? stores.find(store => store.id === selectedStore) 
-                : defaultCenter
-              }
-              zoom={15}
-            >
-              {stores.map((store) => (
-                <Marker
-                  key={store.id}
-                  position={{ lat: store.lat, lng: store.lng }}
-                  title={store.name}
-                  onClick={() => setSelectedStore(store.id)}
-                />
-              ))}
-            </GoogleMap>
-          </LoadScript>
-        </div>
+    <> <div className={styles.storeSystem}>
+    <div className={styles.storeContainer}>
+      <div className={styles.storeList}>
+        <h1>Our Stores</h1>
+        {stores.map((store) => (
+          <div 
+            key={store.id} 
+            className={`${styles.storeCard} ${selectedStore === store.id ? styles.active : ''}`}
+            onClick={() => setSelectedStore(store.id)}
+          >
+            <h2>{store.name}</h2>
+            <p><strong>Address:</strong> {store.address}</p>
+            <p><strong>Phone:</strong> {store.phone}</p>
+          </div>
+        ))}
+      </div>
+      
+      <div className={styles.mapContainer}>
+        <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={selectedStore 
+              ? stores.find(store => store.id === selectedStore) 
+              : defaultCenter
+            }
+            zoom={15}
+          >
+            {stores.map((store) => (
+              <Marker
+                key={store.id}
+                position={{ lat: store.lat, lng: store.lng }}
+                title={store.name}
+                onClick={() => setSelectedStore(store.id)}
+              />
+            ))}
+          </GoogleMap>
+        </LoadScript>
       </div>
     </div>
+  </div>
+  <Footer></Footer>
+  </>
+   
   );
 };
 

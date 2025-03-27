@@ -1,65 +1,104 @@
 .storeSystem {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
     padding: 2rem;
-    background-color: #f4f7fa;
-    min-height: 100vh;
+    min-height: calc(100vh - 200px);
     margin-top: 120px;
+  }
   
-    .storeContainer {
-      display: flex;
-      gap: 2rem;
-      background-color: white;
+  .storeContainer {
+    display: flex;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(192, 9, 0, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: #ffffff;
+    border: 1px solid rgba(192, 9, 0, 0.1);
+  }
+  
+  .storeList {
+    flex: 0 0 400px;
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-right: 1px solid rgba(192, 9, 0, 0.1);
+  
+    h1 {
+      color: #C00900;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      position: relative;
+  
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background-color: #C00900;
+      }
+    }
+  }
+  
+  .storeCard {
+    background-color: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(192, 9, 0, 0.05);
+  
+    &:hover {
+      border-color: rgba(192, 9, 0, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(192, 9, 0, 0.1);
+    }
+  
+    &.active {
+      border-color: #C00900;
+      background-color: rgba(192, 9, 0, 0.05);
+      
+      h2 {
+        color: #C00900;
+      }
+    }
+  
+    h2 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      transition: color 0.3s ease;
+    }
+  
+    p {
+      color: #666;
+      margin-bottom: 0.5rem;
+  
+      strong {
+        color: #C00900;
+        margin-right: 0.5rem;
+      }
+    }
+  }
+  
+  .mapContainer {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    // Optional: Add a subtle border or shadow to the map
+    > div {
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-    }
-  
-    .storeList {
-      flex: 1;
-      padding: 2rem;
-      background-color: #f9f9f9;
-  
-      h1 {
-        color: #333;
-        margin-bottom: 1.5rem;
-        font-size: 2rem;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 0.5rem;
-      }
-  
-      .storeCard {
-        background-color: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-  
-        &:hover {
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-          border-color: #3498db;
-        }
-  
-        &.active {
-          border-color: #2ecc71;
-          background-color: #f0f9f4;
-        }
-  
-        h2 {
-          color: #2c3e50;
-          margin-bottom: 0.5rem;
-        }
-  
-        p {
-          color: #7f8c8d;
-          margin: 0.25rem 0;
-        }
-      }
-    }
-  
-    .mapContainer {
-      flex: 1.5;
-      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(192, 9, 0, 0.1);
     }
   }
   
@@ -67,5 +106,29 @@
   @media (max-width: 1024px) {
     .storeContainer {
       flex-direction: column;
+    }
+  
+    .storeList {
+      flex: 1;
+      border-right: none;
+      border-bottom: 1px solid rgba(192, 9, 0, 0.1);
+    }
+  
+    .mapContainer {
+      height: 400px;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .storeSystem {
+      padding: 1rem;
+    }
+  
+    .storeList {
+      padding: 1rem;
+    }
+  
+    .storeCard {
+      padding: 1rem;
     }
   }
