@@ -14,12 +14,10 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
     status: "",
     categoryId: "",
     brandId: "",
-    image: null,
   });
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     if (isOpen && product) {
@@ -33,9 +31,7 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
         status: product.status,
         categoryId: product.categoryId,
         brandId: product.brandId,
-        image: null,
       });
-      setPreviewImage(product.image || null);
     }
   }, [isOpen, product]);
 
@@ -65,14 +61,6 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProductData({ ...productData, image: file });
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -97,25 +85,30 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
         }
       );
 
-      // If there's an image, upload it
-      if (productData.image) {
-        const formData = new FormData();
-        formData.append("file", productData.image);
+      // ✅ Lấy product vừa update từ server
+      const updatedProduct = productResponse.data.data;
 
-        await axios.post(
-          `http://localhost:8080/tirashop/product/${productData.id}/images/upload`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+      // ✅ Gán brandName & categoryName thủ công từ danh sách đã fetch
+      const selectedBrand = brands.find(b => b.id === Number(productData.brandId));
+      const selectedCategory = categories.find(c => c.id === Number(productData.categoryId));
+
+      updatedProduct.brandName = selectedBrand?.name || "";
+      updatedProduct.categoryName = selectedCategory?.name || "";
+
+      // Gọi API để lấy lại ảnh mới nhất sau khi update
+      try {
+        const imageRes = await axios.get(`http://localhost:8080/tirashop/product/${productData.id}/images`);
+        const images = imageRes.data.data || [];
+        const validImage = images.find(img => img.url);
+        updatedProduct.image = validImage ? `http://localhost:8080${encodeURI(validImage.url)}` : null;
+      } catch (imageError) {
+        console.error("Error fetching updated image:", imageError);
+        updatedProduct.image = null;
       }
 
+
       showToast("Product updated successfully!", "success");
-      onProductUpdated(productResponse.data.data);
+      onProductUpdated(updatedProduct); // ✅ Truyền lại object đầy đủ
       onClose();
     } catch (err) {
       console.error("Error updating product or uploading image:", err.response?.data || err);
@@ -124,6 +117,7 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
 
     setLoading(false);
   };
+
 
   if (!isOpen) return null;
 
@@ -243,19 +237,6 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="mb-1">
-            <label className="block text-gray-700 text-sm font-medium">Product Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full px-3 py-1 border rounded-lg"
-            />
-            {previewImage && (
-              <img src={previewImage} alt="Preview" className="mt-2 w-[60px] h-auto object-cover rounded-lg" />
-            )}
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
