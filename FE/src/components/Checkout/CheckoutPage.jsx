@@ -16,6 +16,9 @@ function CheckoutPage() {
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [step, setStep] = useState(1); // 1: shipping, 2: payment
+  const [pendingItems, setPendingItems] = useState([]); // Lưu danh sách sản phẩm PENDING
+  const [orderId, setOrderId] = useState(null); // Lưu orderId sau khi tạo đơn hàng
+  const [shipmentId, setShipmentId] = useState(null); // Lưu shipmentId
   const shippingFee = 5.0;
 
   useEffect(() => {
@@ -26,7 +29,29 @@ function CheckoutPage() {
       return;
     }
     fetchCart();
+    fetchPendingItems(); // Lấy danh sách sản phẩm PENDING
   }, [navigate, fetchCart]);
+
+  // Lấy danh sách sản phẩm PENDING
+  const fetchPendingItems = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8080/tirashop/orders/pending", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        setPendingItems(data.data || []);
+      } else {
+        toast.error(data.message || "Failed to fetch pending items");
+      }
+    } catch (err) {
+      toast.error("Error fetching pending items: " + err.message);
+    }
+  };
 
   const subtotal = cart.reduce(
     (sum, item) => sum + (item.productPrice || 0) * (item.quantity || 0),
@@ -46,6 +71,58 @@ function CheckoutPage() {
     setStep(1);
   };
 
+  // Cập nhật trạng thái đơn hàng thành CONFIRMED
+  const updateOrderStatus = async (shipmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/tirashop/orders/shipments/${shipmentId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: "CONFIRMED",
+          }),
+        }
+      );
+      const data = await response.json();
+      if (data.status === "success") {
+        toast.success("Order status updated to CONFIRMED!");
+      } else {
+        toast.error(data.message || "Failed to update order status");
+      }
+    } catch (err) {
+      toast.error("Error updating order status: " + err.message);
+    }
+  };
+
+  // Xác nhận giao hàng (giả sử người dùng xác nhận khi nhận hàng COD)
+  const confirmDelivery = async (shipmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/tirashop/orders/shipments/${shipmentId}/confirm`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (data.status === "success") {
+        toast.success("Delivery confirmed successfully!");
+      } else {
+        toast.error(data.message || "Failed to confirm delivery");
+      }
+    } catch (err) {
+      toast.error("Error confirming delivery: " + err.message);
+    }
+  };
+
   const handleCheckout = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
@@ -58,6 +135,10 @@ function CheckoutPage() {
     }
     if (!paymentMethod) {
       toast.error("Please select a payment method");
+      return;
+    }
+    if (paymentMethod !== "cod") {
+      toast.error("Only Cash on Delivery (COD) is supported in this flow");
       return;
     }
 
@@ -89,14 +170,17 @@ function CheckoutPage() {
         toast.success("Order placed successfully!");
         setCart([]);
 
-        // Redirect to payment gateway if needed
-        if (paymentMethod === "momo" || paymentMethod === "vnpay") {
-          // Redirect to the appropriate payment gateway
-          // This is a placeholder - you would replace with actual redirect logic
-          window.location.href = data.paymentUrl || "/payment-processing";
-        } else {
-          setTimeout(() => navigate("/order-success"), 1500);
-        }
+        // Giả sử API trả về orderId và shipmentId sau khi tạo đơn hàng
+        const newOrderId = data.orderId || "12345"; // Thay bằng giá trị thực từ API
+        const newShipmentId = data.shipmentId || "67890"; // Thay bằng giá trị thực từ API
+        setOrderId(newOrderId);
+        setShipmentId(newShipmentId);
+
+        // Cập nhật trạng thái đơn hàng thành CONFIRMED
+        await updateOrderStatus(newShipmentId);
+
+        // Với COD, không cần redirect đến cổng thanh toán
+        setTimeout(() => navigate("/order-success"), 1500);
       } else {
         setError(data.message || "Checkout failed");
         toast.error(data.message || "Checkout failed");
@@ -109,28 +193,17 @@ function CheckoutPage() {
     }
   };
 
-  // Updated payment methods with real images
+  // Giả sử người dùng xác nhận giao hàng (cho COD)
+  const handleConfirmDelivery = async () => {
+    if (!shipmentId) {
+      toast.error("No shipment ID available to confirm delivery");
+      return;
+    }
+    await confirmDelivery(shipmentId);
+  };
+
   const paymentMethods = [
-    { id: "cod", name: "Cash on Delivery (COD)", icon: "cash-icon.svg" },
-    {
-      id: "momo",
-      name: "MoMo",
-      imageUrl:
-        "https://www.visa.com.vn/dam/VCOM/regional/ap/vietnam/global-elements/images/qr-pay-momo-800x450.jpg",
-    },
-    {
-      id: "vnpay",
-      name: "VNPay",
-      imageUrl:
-        "https://www.visa.com.vn/dam/VCOM/regional/ap/vietnam/global-elements/images/qr-pay-vnpay-800x450.jpg",
-    },
-    {
-      id: "creditcard",
-      name: "Credit/Debit Card",
-      imageUrl:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSgber4MngQY983WF6ItDL0bzmmImENuVrPw&s",
-    },
-    { id: "banktransfer", name: "Bank Transfer", icon: "bank-icon.svg" },
+    { id: "cod", name: "Cash on Delivery (COD)"},
   ];
 
   return (
@@ -264,20 +337,7 @@ function CheckoutPage() {
                           />
                           <span className={styles.radioCheckmark}></span>
                         </div>
-                        <div className={styles.paymentMethodIcon}>
-                          {method.imageUrl ? (
-                            <img
-                              src={method.imageUrl}
-                              alt={method.name}
-                              className={styles.paymentImage}
-                            />
-                          ) : (
-                            <img
-                              src={`/assets/images/${method.icon}`}
-                              alt={method.name}
-                            />
-                          )}
-                        </div>
+                        
                         <label htmlFor={method.id}>{method.name}</label>
                       </div>
                     ))}
@@ -312,6 +372,19 @@ function CheckoutPage() {
                       {loading ? "Processing..." : "Place Order"}
                     </button>
                   </div>
+
+                  {/* Nút giả lập xác nhận giao hàng (cho COD) */}
+                  {shipmentId && (
+                    <div className={styles.confirmDelivery}>
+                      <button
+                        type="button"
+                        className={styles.confirmDeliveryBtn}
+                        onClick={handleConfirmDelivery}
+                      >
+                        Confirm Delivery (COD)
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -9,6 +9,7 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const [isListening, setIsListening] = useState(false);
+  const [language, setLanguage] = useState("en"); // State để lưu ngôn ngữ
 
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -22,7 +23,14 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
       return;
     }
 
-    recognition.lang = "en-US"; // Changed to English, adjust as needed
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to search for products.");
+      navigate("/auth");
+      return;
+    }
+
+    recognition.lang = language === "en" ? "en-US" : "vi-VN"; // Chọn ngôn ngữ
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -48,7 +56,6 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
 
   const searchProducts = async (query) => {
     try {
-      // Check if query is empty
       if (!query || query.trim() === "") {
         toast.error("Please provide a search keyword.");
         return;
@@ -61,18 +68,14 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append("file", query);
-
       const response = await fetch(
-        "http://localhost:8080/tirashop/product?name=" + query,
+        `http://localhost:8080/tirashop/product?name=${query}`,
         {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
-          // body: formData, // Note: GET requests typically don’t have a body
         }
       );
 
@@ -83,13 +86,10 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
           toast.info("No matching products found.");
           navigate("/category/all", { state: { searchResults: [], query } });
         } else {
-          // If products are found, navigate to CategoryPage
-          navigate("/category/all", {
-            state: { searchResults: products, query },
-          });
+          navigate("/category/all", { state: { searchResults: products, query } });
         }
       } else {
-        console.log("Error response:", data); // Log error response from backend
+        console.log("Error response:", data);
         toast.error(
           data.message || "Unable to search for products. Please try again."
         );
@@ -103,19 +103,61 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = (event) => {
-    if (event.target.files.length > 0) {
-      alert(`You selected an image: ${event.target.files[0].name}`);
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      toast.error("Please select an image to search.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to search for products.");
+      navigate("/auth");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:8080/tirashop/search/image", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok && data.status === "success") {
+        const products = data.data.elementList || [];
+        if (products.length === 0) {
+          toast.info("No matching products found for this image.");
+          navigate("/category/all", { state: { searchResults: [], query: "Image Search" } });
+        } else {
+          navigate("/category/all", {
+            state: { searchResults: products, query: "Image Search" },
+          });
+        }
+      } else {
+        console.log("Error response:", data);
+        toast.error(
+          data.message || "Unable to search by image. Please try again."
+        );
+      }
+    } catch (err) {
+      toast.error(`Image search error: ${err.message}`);
     }
   };
 
-  if (!isSearchOpen) return null;
-
-  const handleKeyPesearch = (event) => {
+  const handleKeyPressSearch = (event) => {
     if (event.key === "Enter") {
       searchProducts(event.target.value);
     }
   };
+
+  if (!isSearchOpen) return null;
 
   return (
     <div className={styles.searchBar}>
@@ -123,10 +165,20 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
         type="text"
         placeholder="What are you looking for?"
         className={styles.searchInput}
-        onKeyPress={handleKeyPesearch}
+        onKeyPress={handleKeyPressSearch}
       />
 
       <div className={styles.searchIcons}>
+        {/* Dropdown chọn ngôn ngữ */}
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className={styles.languageSelect}
+        >
+          <option value="en">English</option>
+          <option value="vi">Vietnamese</option>
+        </select>
+
         <button
           className={styles.iconButton}
           onClick={handleVoiceSearch}

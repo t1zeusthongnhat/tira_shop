@@ -8,6 +8,7 @@ import { useState } from "react";
 import ChatBox from "./components/HomePage/ChatBox";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import OrderHistoryPage from "./components/OrderHistoryPage/OrderHistoryPage"
 import { AppProvider, useAppContext } from "./context/AppContext";
 import HomePage from "./components/HomePage/HomePage";
 import AuthPage from "./components/Auth/AuthPage";
@@ -26,6 +27,7 @@ import CategoryPage from "./components/CategoryPage/CategoryPage";
 import TryOn from "./components/HomePage/TryOn";
 import TryOnButton from "./components/HomePage/TryonButton";
 import "./assets/style/toastifyCustom.module.scss";
+import StoreSystem from "./components/StoreSystem/StoreSystem";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAppContext();
@@ -57,49 +59,51 @@ function App() {
               <Route
                 path="/checkout"
                 element={
-                  <ProtectedRoute>
+               
                     <CheckoutPage />
-                  </ProtectedRoute>
+                  
                 }
               />
               <Route
                 path="/product/:id"
                 element={
-                  <ProtectedRoute>
+              
                     <ProductDetail />
-                  </ProtectedRoute>
+                  
                 }
               />
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute>
+                  
                     <UserProfile />
-                  </ProtectedRoute>
+                 
                 }
               />
               <Route
                 path="/vouchers"
                 element={
-                  <ProtectedRoute>
+                 
                     <VoucherPage />
-                  </ProtectedRoute>
+                
                 }
               />
               <Route
                 path="/news"
                 element={
-                  <ProtectedRoute>
+                 
                     <PostList />
-                  </ProtectedRoute>
+                
                 }
               />
+              <Route path="/orders" element={<OrderHistoryPage />} />
+              <Route path="/stores" element={<StoreSystem/>}/>
               <Route
                 path="/post/:postId"
                 element={
-                  <ProtectedRoute>
+                 
                     <DetailPostList />
-                  </ProtectedRoute>
+                 
                 }
               />
               {/* Route cho /category/:categoryId */}

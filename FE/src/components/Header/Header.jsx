@@ -359,7 +359,7 @@ function MyHeader() {
         <ul className={styles.menuList}>
           <li onClick={navigateToBestProducts}>Best Product</li>
         
-          <li>Store System</li>
+          <li onClick={() => navigate("/stores")}>Store System</li>
           <li>Voucher</li>
           {!isAuthenticated ? (
             <li onClick={() => navigate("/auth")}>Sign In</li>
@@ -382,7 +382,7 @@ function MyHeader() {
           >
             My Account
           </li>
-          <li>My Orders</li>
+          <li onClick={() => navigate("/orders")}>My Orders</li>
           <li>Contact Us</li>
         </ul>
       </div>

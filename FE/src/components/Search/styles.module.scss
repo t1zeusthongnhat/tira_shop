@@ -2,7 +2,7 @@
   position: fixed;
   top: 150px; /* Đưa lên cao */
   right: 200px; /* Dịch sang phải */
-  width: 400px; /* Gọn gàng */
+  width: 600px; /* Gọn gàng */
   background: white; /* Chuyển sang màu trắng tinh */
   display: flex;
   align-items: center;
@@ -35,42 +35,130 @@
 }
 
 /* Vùng chứa icon */
+/* Search Icons Container */
 .searchIcons {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  // Language Select Dropdown
+  .languageSelect {
+    appearance: none;
+    background-color: transparent;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+  }
+
+  // Icon Buttons
+  .iconButton {
+    background-color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: scale(1.1);
+      background-color: #f0f0f0;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    img {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.2s ease;
+    }
+
+    span {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 15px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover span {
+      opacity: 1;
+    }
+  }
+
+  // Hidden File Input
+  .hiddenFileInput {
+    display: none;
+  }
+
+  // Close Search Button
+  .closeSearch {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #ff5252;
+      transform: rotate(90deg);
+    }
+  }
 }
 
-/* Cài đặt icon */
-.iconButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
+// Responsive Adjustments
+@media (max-width: 600px) {
+  .searchIcons {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px;
 
-/* Hover icon */
-.iconButton:hover {
-  transform: scale(1.1);
-  color: #007bff;
-}
-
-/* Nút đóng */
-.closeSearch {
-  background: none;
-  border: none;
-  font-size: 16px;
-  color: #333;
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.closeSearch:hover {
-  transform: scale(1.2);
-  color: red;
-}
-
-/* Ẩn input chọn file */
-.hiddenFileInput {
-  display: none;
+    .iconButton, .languageSelect {
+      width: 35px;
+      height: 35px;
+      font-size: 12px;
+    }
+  }
 }

@@ -6,7 +6,7 @@ import Footer from "../Footer/Footer";
 import { useAppContext } from "../../Context/AppContext";
 
 function CategoryPage() {
-  // const { categoryId } = useParams();
+  const { categoryId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, fetchCart } = useAppContext();
