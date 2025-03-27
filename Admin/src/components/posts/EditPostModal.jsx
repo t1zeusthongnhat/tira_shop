@@ -3,6 +3,7 @@ import axios from 'axios';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ReactMarkdown from 'react-markdown';
 
 const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
     const [postData, setPostData] = useState({
@@ -115,7 +116,7 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
                         />
                     </div>
 
-                    <div className='mb-1'>
+                    {/* <div className='mb-1'>
                         <label className='block text-gray-700 text-sm font-medium mb-1'>Content</label>
                         <textarea
                             name='content'
@@ -124,7 +125,26 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
                             className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 h-40'
                             required
                         />
+                    </div> */}
+                    <div className='mb-1'>
+                        <label className='block text-gray-700 text-sm font-medium mb-1'>Content</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Left: Markdown Editor */}
+                            <textarea
+                                name='content'
+                                value={postData.content}
+                                onChange={handleChange}
+                                className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 h-40 resize-none'
+                                required
+                            />
+
+                            {/* Right: Live Preview */}
+                            <div className="border rounded-lg p-3 bg-gray-50 overflow-auto h-40 prose prose-sm max-w-full text-gray-800">
+                                <ReactMarkdown>{postData.content}</ReactMarkdown>
+                            </div>
+                        </div>
                     </div>
+
 
                     <div className='mb-1'>
                         <label className='block text-gray-700 text-sm font-medium mb-1'>Image</label>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 
 const ViewContentModal = ({ post, onClose }) => {
     if (!post) return null;
@@ -20,7 +21,9 @@ const ViewContentModal = ({ post, onClose }) => {
                         <X size={28} />
                     </button>
                 </div>
-                <p className='mt-4 text-gray-800 text-base leading-relaxed'>{post.content}</p>
+                <div className='prose max-w-full text-gray-800'>
+                    <ReactMarkdown>{post.content}</ReactMarkdown>
+                </div>
             </motion.div>
         </div>
     );

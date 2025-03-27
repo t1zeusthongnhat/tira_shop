@@ -3,6 +3,7 @@ import axios from 'axios';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ReactMarkdown from 'react-markdown';
 
 const AddPostUsingAI = ({ isOpen, onClose, onPostAdded }) => {
     const [postData, setPostData] = useState({ name: '', topic: '', shortDescription: '', image: null });
@@ -159,8 +160,12 @@ const AddPostUsingAI = ({ isOpen, onClose, onPostAdded }) => {
                         <p><strong>Name:</strong> {generatedPost.name}</p>
                         <p><strong>Topic:</strong> {generatedPost.topic}</p>
                         <p><strong>Short Description:</strong> {generatedPost.shortDescription}</p>
-                        <p><strong>Content:</strong> {generatedPost.content}</p>
-
+                        <div className='mt-2'>
+                            <p className='font-semibold text-gray-800'>Content:</p>
+                            <div className='prose prose-sm max-w-full'>
+                                <ReactMarkdown>{generatedPost.content}</ReactMarkdown>
+                            </div>
+                        </div>
                         <div className='mt-2'>
                             <label className='block text-gray-700 text-sm font-medium mb-1'>Post Status</label>
                             <select

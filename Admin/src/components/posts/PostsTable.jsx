@@ -8,6 +8,8 @@ import Pagination from '../common/Pagination';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ViewContentModal from './ViewContentModal';
+import ReactMarkdown from 'react-markdown';
+
 
 const PostsTable = () => {
     const [posts, setPosts] = useState([]);
@@ -170,17 +172,21 @@ const PostsTable = () => {
                                 <td className='py-2 text-sm text-gray-700 w-[150px]'>{post.topic}</td>
                                 <td className='px-0 py-2 text-sm text-gray-700 w-[200px]'>{post.short_description}</td>
                                 <td className='py-2 text-sm text-gray-700'>
-                                    {truncateContent(post.content)}
+                                    <div className="prose prose-sm max-w-full">
+                                        <ReactMarkdown>
+                                            {truncateContent(post.content)}
+                                        </ReactMarkdown>
+                                    </div>
                                     {post.content.split(' ').length > 30 && (
                                         <button
                                             className='text-blue-500 hover:underline ml-2'
                                             onClick={() => handleViewClick(post)}
                                         >
-                                            View More
+                                            View More...
                                         </button>
-
                                     )}
                                 </td>
+
 
                                 <td className='py-2 text-sm text-gray-700 w-[120px]'>
                                     <button className='text-indigo-600 hover:text-indigo-500 mr-2' onClick={() => handleEditClick(post)}>

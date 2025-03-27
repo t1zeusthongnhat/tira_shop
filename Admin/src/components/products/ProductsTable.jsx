@@ -218,7 +218,7 @@ const ProductsTable = () => {
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Status</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Brand</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Category</th>
-                            <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Actions</th>
+                            <th className='py-3 pl-8 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Actions</th>
                         </tr>
                     </thead>
                     <tbody className='divide-y divide-gray-300'>
@@ -265,18 +265,17 @@ const ProductsTable = () => {
                                     <button className='text-indigo-600 hover:text-indigo-500 mr-2' onClick={() => handleEditClick(product)}>
                                         <Edit size={18} />
                                     </button>
-                                    <button className='text-red-600 hover:text-red-500 mr-2' onClick={() => handleDeleteClick(product)}>
-                                        <Trash2 size={18} />
-                                    </button>
-
                                     <button className='text-blue-400 hover:text-red-500 mr-2' onClick={() => handleReviewClick(product)}>
                                         <IoEyeSharp size={18} />
                                     </button>
                                     <button className='text-green-500 hover:text-green-600 mr-2' onClick={() => handleGreenClick(product)}>
                                         <RiImageAddFill size={18} />
                                     </button>
-                                    <button className='text-indigo-600 hover:text-indigo-500 ' onClick={() => handleEditImageClick(product)}>
+                                    <button className='text-indigo-600 hover:text-indigo-500 mr-2 ' onClick={() => handleEditImageClick(product)}>
                                         <RiImageEditFill size={18} />
+                                    </button>
+                                    <button className='text-red-600 hover:text-red-500 ' onClick={() => handleDeleteClick(product)}>
+                                        <Trash2 size={18} />
                                     </button>
                                 </td>
                             </motion.tr>
