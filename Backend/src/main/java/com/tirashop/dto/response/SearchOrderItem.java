@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchOrderItem {
+    private Long orderId;
     private String username;
     private String productName;
     private String brandName;

@@ -98,6 +98,7 @@ public class OrderService {
         List<SearchOrderItem> orderItems = orderPage.getContent().stream().flatMap(order ->
                 order.getOrderItems().stream().map(orderItem ->
                         new SearchOrderItem(
+                                order.getId(),
                                 order.getUser().getUsername(),
                                 orderItem.getProduct().getName(),
                                 orderItem.getProduct().getBrand() != null ? orderItem.getProduct()
