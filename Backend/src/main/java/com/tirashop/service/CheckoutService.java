@@ -127,14 +127,19 @@ public class CheckoutService {
         payment.setCreatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
 
-        // 8. Tạo vận chuyển (Shipment)
-        Shipment shipment = new Shipment();
-        shipment.setOrder(order);
-        shipment.setTrackingNumber(UUID.randomUUID().toString());
-        shipment.setShippingMethod("Standard Shipping");
-        shipment.setStatus(Shipment.ShipmentStatus.PENDING);
-        shipment.setCreatedAt(LocalDateTime.now());
-        shipmentRepository.save(shipment);
+        // 8. Tạo vận chuyển (Shipment) cho từng OrderItem
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Shipment shipment = new Shipment();
+            shipment.setOrder(order);
+            shipment.setOrderItem(orderItem); // gắn với từng order item
+            shipment.setTrackingNumber(UUID.randomUUID().toString());
+            shipment.setShippingMethod("Standard Shipping");
+            shipment.setStatus(Shipment.ShipmentStatus.PENDING);
+            shipment.setCreatedAt(LocalDateTime.now());
+
+            shipmentRepository.save(shipment);
+        }
+
 
         // 9. Dọn dẹp giỏ hàng
         cart.getCartItems().clear(); // Xóa danh sách sản phẩm trong giỏ hàng
