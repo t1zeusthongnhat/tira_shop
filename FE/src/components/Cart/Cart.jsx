@@ -69,7 +69,7 @@ function Cart() {
     }
   };
 
-  const handleRemoveItem = async (cartId) => {
+  const handleRemoveItem = async (itemId) => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Please log in to remove items from cart");
@@ -79,7 +79,7 @@ function Cart() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/tirashop/cart/remove/${cartId}`,
+        `http://localhost:8080/tirashop/cart/remove/${itemId}`,
         {
           method: "DELETE",
           headers: {
@@ -224,7 +224,7 @@ function Cart() {
                 </div>
                 <button
                   className={styles.removeButton}
-                  onClick={() => handleRemoveItem(item.cartId)}
+                  onClick={() => handleRemoveItem(item.id)}
                 >
                   Remove
                 </button>
