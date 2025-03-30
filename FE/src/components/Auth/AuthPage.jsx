@@ -23,6 +23,7 @@ function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Kiểm tra token khi tải trang
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
@@ -74,6 +75,7 @@ function AuthPage() {
     setError("");
     setIsLoading(true);
 
+    // Logic xử lý đăng nhập/đăng ký thông thường (giữ nguyên)
     if (signIn) {
       if (!formData.username || !formData.password) {
         setError("Please fill in all required fields.");
@@ -156,12 +158,11 @@ function AuthPage() {
             });
           }
         } else {
-          // Registration successful, now log the user in automatically
+          // Logic xử lý đăng ký (giữ nguyên)
           const loginPayload = {
             username: formData.username,
             password: formData.password,
           };
-
           const loginResponse = await fetch(
             "http://localhost:8080/tirashop/auth/login",
             {
@@ -170,11 +171,7 @@ function AuthPage() {
               body: JSON.stringify(loginPayload),
             }
           );
-
           const loginData = await loginResponse.json();
-          console.log("Login Response Status:", loginResponse.status);
-          console.log("Login Response Data:", loginData);
-
           if (loginResponse.status === 200 && loginData.status === "success") {
             if (loginData.data && loginData.data.token) {
               const token = loginData.data.token;
@@ -185,98 +182,12 @@ function AuthPage() {
               );
               localStorage.setItem("username", formData.username);
               setIsAuthenticated(true);
-
-              // Now send the welcome email using the token
-              try {
-                const emailResponse = await fetch(
-                  "http://localhost:8080/api/email/send-registration",
-                  {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${token}`, // Add the token here
-                    },
-                    body: JSON.stringify({
-                      toEmail: formData.email,
-                      username: formData.username,
-                    }),
-                  }
-                );
-
-                const emailData = await emailResponse.json();
-                console.log("Email Response Status:", emailResponse.status);
-                console.log("Email Response Data:", emailData);
-
-                if (
-                  emailResponse.status === 200 &&
-                  emailData.status === "success"
-                ) {
-                  toast.success("Welcome email sent successfully!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                  });
-                } else {
-                  toast.warn(
-                    "Registration successful, but failed to send welcome email.",
-                    {
-                      position: "top-right",
-                      autoClose: 3000,
-                    }
-                  );
-                }
-              } catch (emailErr) {
-                console.error("Error sending welcome email:", emailErr);
-                toast.warn(
-                  "Registration successful, but failed to send welcome email.",
-                  {
-                    position: "top-right",
-                    autoClose: 3000,
-                  }
-                );
-              }
-
               toast.success("Registration successful! You are now logged in.", {
                 position: "top-right",
                 autoClose: 3000,
               });
               navigate("/");
-            } else {
-              setError("Registration successful, but auto-login failed.");
-              toast.error("Auto-login failed. Please log in manually.", {
-                position: "top-right",
-                autoClose: 3000,
-              });
-              setSignIn(true);
-              setFormData({
-                username: "",
-                password: "",
-                confirmPassword: "",
-                email: "",
-                phoneNumber: "",
-                firstName: "",
-                lastName: "",
-                gender: "",
-                dateOfBirth: "",
-              });
             }
-          } else {
-            setError("Registration successful, but auto-login failed.");
-            toast.error("Auto-login failed. Please log in manually.", {
-              position: "top-right",
-              autoClose: 3000,
-            });
-            setSignIn(true);
-            setFormData({
-              username: "",
-              password: "",
-              confirmPassword: "",
-              email: "",
-              phoneNumber: "",
-              firstName: "",
-              lastName: "",
-              gender: "",
-              dateOfBirth: "",
-            });
           }
         }
       } else {
@@ -296,6 +207,48 @@ function AuthPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Hàm xử lý đăng nhập bằng Google/Facebook
+  const handleSocialLogin = (provider) => {
+    const authUrl =
+      provider === "google"
+        ? "http://localhost:8080/oauth2/authorization/google"
+        : "http://localhost:8080/oauth2/authorization/facebook";
+
+    // Mở cửa sổ popup để xử lý OAuth2
+    const width = 600;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    const popup = window.open(
+      authUrl,
+      "Social Login",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    // Lắng nghe tin nhắn từ popup
+    const handleMessage = (event) => {
+      // Kiểm tra nguồn gốc để đảm bảo an toàn
+      if (event.origin !== "http://localhost:8080") return;
+
+      const data = event.data;
+      if (data && data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.userId || "unknown");
+        localStorage.setItem("username", data.username || "social-user");
+        setIsAuthenticated(true);
+        toast.success(`Login with ${provider} successful!`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        navigate("/");
+        popup.close();
+        window.removeEventListener("message", handleMessage);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
   };
 
   return (
@@ -431,11 +384,13 @@ function AuthPage() {
             </Components.Button>
 
             <Components.SocialDivider>Or sign in with</Components.SocialDivider>
-            <Components.SocialButton>
+
+            <Components.SocialButton onClick={() => handleSocialLogin("google")}>
               <FaGoogle style={{ marginRight: "10px" }} />
               Sign in with Google
             </Components.SocialButton>
-            <Components.SocialButton>
+
+            <Components.SocialButton onClick={() => handleSocialLogin("facebook")}>
               <FaFacebookF style={{ marginRight: "10px" }} />
               Sign in with Facebook
             </Components.SocialButton>
