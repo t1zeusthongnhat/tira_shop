@@ -9,7 +9,7 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const [isListening, setIsListening] = useState(false);
-  const [language, setLanguage] = useState("en"); // State để lưu ngôn ngữ
+  const [language, setLanguage] = useState("en"); // Ngôn ngữ mặc định là tiếng Anh
 
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -23,13 +23,6 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Please log in to search for products.");
-      navigate("/auth");
-      return;
-    }
-
     recognition.lang = language === "en" ? "en-US" : "vi-VN"; // Chọn ngôn ngữ
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
@@ -37,11 +30,18 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
     setIsListening(true);
     recognition.start();
 
-    recognition.onresult = (event) => {
+    recognition.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
       setIsListening(false);
       toast.info(`You said: "${transcript}"`);
-      searchProducts(transcript);
+
+      // Nếu là tiếng Việt, dịch sang tiếng Anh trước khi tìm kiếm
+      if (language === "vi") {
+        const translatedText = await translateToEnglish(transcript);
+        searchProducts(translatedText, "en"); // Gửi từ khóa đã dịch với language=en
+      } else {
+        searchProducts(transcript, language); // Tiếng Anh thì gửi trực tiếp
+      }
     };
 
     recognition.onerror = (event) => {
@@ -54,26 +54,36 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
     };
   };
 
-  const searchProducts = async (query) => {
+  // Hàm dịch từ tiếng Việt sang tiếng Anh
+  const translateToEnglish = async (vietnameseText) => {
+    try {
+      const response = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(vietnameseText)}&langpair=vi|en`
+      );
+      const data = await response.json();
+      const translatedText = data.responseData.translatedText;
+  
+      return translatedText;
+    } catch (err) {
+      toast.error(`Translation error: ${err.message}`);
+      return vietnameseText; // Nếu dịch thất bại, trả về nguyên văn bản gốc
+    }
+  };
+
+  const searchProducts = async (query, searchLanguage = "en") => {
     try {
       if (!query || query.trim() === "") {
         toast.error("Please provide a search keyword.");
         return;
       }
 
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to search for products.");
-        navigate("/auth");
-        return;
-      }
-
+      // Gửi yêu cầu tìm kiếm với ngôn ngữ được chọn
       const response = await fetch(
-        `http://localhost:8080/tirashop/product?name=${query}`,
+        `http://localhost:8080/tirashop/product?name=${encodeURIComponent(query)}&language=${searchLanguage}`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
             Accept: "application/json",
           },
         }
@@ -110,22 +120,12 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Please log in to search for products.");
-      navigate("/auth");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("file", file);
 
     try {
       const response = await fetch("http://localhost:8080/tirashop/search/image", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formData,
       });
 
@@ -151,9 +151,15 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
     }
   };
 
-  const handleKeyPressSearch = (event) => {
+  const handleKeyPressSearch = async (event) => {
     if (event.key === "Enter") {
-      searchProducts(event.target.value);
+      const query = event.target.value;
+      if (language === "vi") {
+        const translatedText = await translateToEnglish(query);
+        searchProducts(translatedText, "en"); // Dịch sang tiếng Anh nếu là tiếng Việt
+      } else {
+        searchProducts(query, language); // Gửi trực tiếp nếu là tiếng Anh
+      }
     }
   };
 

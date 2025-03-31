@@ -2,93 +2,93 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 .productListContainer {
-  padding: 80px 30px;
+  padding: 60px 20px; /* Giảm padding để tiết kiệm không gian */
   text-align: center;
   background-color: #ffffff;
   position: relative;
-  font-family: "Poppins", sans-serif; /* Font đẹp và dễ đọc */
+  font-family: "Poppins", sans-serif;
 }
 
 .bestProduct {
-  font-size: 2.5rem; /* Giảm từ 3rem để nhỏ hơn một chút */
+  font-size: 2rem; /* Giảm từ 2.5rem để nhỏ gọn hơn */
   font-weight: 700;
   color: #222;
-  margin-bottom: 60px;
+  margin-bottom: 40px; /* Giảm từ 60px */
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px; /* Giảm từ 2px */
   position: relative;
   display: inline-block;
 
   &:after {
     content: "";
     position: absolute;
-    bottom: -12px;
+    bottom: -10px; /* Giảm từ -12px */
     left: 50%;
     transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
+    width: 60px; /* Giảm từ 80px */
+    height: 3px; /* Giảm từ 4px */
     background: #ff3e55;
   }
 
   &:before {
     content: "";
     position: absolute;
-    bottom: -12px;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 150px;
+    width: 120px; /* Giảm từ 150px */
     height: 1px;
     background: #f0f0f0;
   }
 }
 
 .container {
-  max-width: 1600px;
+  max-width: 1400px; /* Giảm từ 1600px để phù hợp với màn hình nhỏ hơn */
   margin: 0 auto;
 }
 
 .productGrid {
-  padding: 20px 0;
+  padding: 15px 0; /* Giảm từ 20px */
   z-index: 0;
 
   .productItem {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 10px; /* Giảm từ 12px */
     overflow: hidden;
     transition: transform 0.4s ease, box-shadow 0.4s ease;
-    margin: 15px; /* Giảm margin để vừa 5 sản phẩm */
-    padding: 20px; /* Giảm padding để layout gọn hơn */
+    margin: 10px; /* Giảm từ 15px để các sản phẩm gần nhau hơn */
+    padding: 0x; /* Giảm từ 20px */
     border: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03); /* Giảm độ đổ bóng */
     position: relative;
-    display: flex; /* Use flexbox to control layout */
-    flex-direction: column; /* Stack children vertically */
-    height: 100%; /* Ensure all cards take up the same height */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between; /* Đảm bảo các phần tử phân bố đều */
 
     &:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      transform: translateY(-8px); /* Giảm từ -10px */
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
     }
 
     .boxImg {
       cursor: pointer;
       overflow: hidden;
-      border-radius: 10px;
+      border-radius: 8px; /* Giảm từ 10px */
       position: relative;
       background: #fafafa;
-      height: 300px; /* Tăng chiều cao cố định để hình ảnh có nhiều không gian */
+      height: 250px; /* Giảm từ 300px để cân đối hơn */
       display: flex;
       align-items: center;
       justify-content: center;
 
-      /* Thêm gradient mờ để làm nổi bật hình ảnh */
       &:before {
         content: "";
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 40px;
+        height: 30px; /* Giảm từ 40px */
         background: linear-gradient(
           to bottom,
           rgba(250, 250, 250, 0.8),
@@ -99,7 +99,6 @@
         pointer-events: none;
       }
 
-      /* Hiệu ứng khi hover */
       &:after {
         content: "";
         position: absolute;
@@ -121,86 +120,82 @@
       }
 
       img {
-        width: 90%; /* Giảm kích thước hình ảnh xuống 90% để có khoảng trắng xung quanh */
-        height: 90%; /* Giảm chiều cao để có khoảng trắng */
-        object-fit: contain; /* Đảm bảo hình ảnh hiển thị đầy đủ không bị cắt */
+        width: 85%; /* Giảm từ 90% */
+        height: 85%;
+        object-fit: contain;
         transition: transform 0.6s ease, filter 0.3s ease;
         object-position: center;
-        border-radius: 6px; /* Bo tròn nhẹ cho hình ảnh */
-        filter: drop-shadow(
-          0 4px 12px rgba(0, 0, 0, 0.05)
-        ); /* Thêm đổ bóng nhẹ */
+        border-radius: 4px; /* Giảm từ 6px */
+        filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.05));
 
         &:hover {
-          transform: scale(
-            1.05
-          ); /* Giảm mức độ zoom khi hover để hiệu ứng tinh tế hơn */
-          filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.1));
+          transform: scale(1.03); /* Giảm từ 1.05 để hiệu ứng nhẹ nhàng hơn */
+          filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
         }
       }
     }
 
     .title {
-      font-size: 1.2rem; /* Giảm từ 1.4rem */
-      font-weight: 400; /* Giảm độ đậm để tinh tế hơn */
+      font-size: 1rem; /* Giảm từ 1.2rem */
+      font-weight: 400;
       color: #222;
-      margin: 15px 0 6px; /* Giảm margin */
+      margin: 10px 0 4px; /* Giảm từ 15px 0 6px */
       text-align: center;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      min-height: 3rem; /* Ensure consistent height for product names */
+      letter-spacing: 0.6px; /* Giảm từ 0.8px */
+      min-height: 2.5rem; /* Giảm từ 3rem */
       display: -webkit-box;
-      -webkit-line-clamp: 2; /* Limit to 2 lines */
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .category {
-      font-size: 0.85rem; /* Giảm từ 1rem */
-      color: #666; /* Đổi màu nhẹ hơn cho tinh tế */
+      font-size: 0.8rem; /* Giảm từ 0.85rem */
+      color: #666;
       text-align: center;
-      margin-bottom: 12px;
-      font-weight: 400; /* Giảm độ đậm */
-      min-height: 1.5rem; /* Ensure consistent height for category */
+      margin-bottom: 8px; /* Giảm từ 12px */
+      font-weight: 400;
+      min-height: 1.2rem; /* Giảm từ 1.5rem */
     }
 
     .priceCl {
-      font-size: 1.2rem; /* Giảm từ 1.5rem */
+      font-size: 1.1rem; /* Giảm từ 1.2rem */
       font-weight: 400;
       color: #f34237;
       text-align: center;
-      margin-bottom: 15px;
-      letter-spacing: 0.8px;
-      min-height: 1.5rem; /* Ensure consistent height for price */
+      margin-bottom: 10px; /* Giảm từ 15px */
+      letter-spacing: 0.6px; /* Giảm từ 0.8px */
+      min-height: 1.2rem; /* Giảm từ 1.5rem */
     }
 
     .sizeSelector {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 12px; /* Giảm từ 20px */
 
       label {
-        font-size: 0.85rem; /* Giảm từ 0.95rem */
+        font-size: 0.8rem; /* Giảm từ 0.85rem */
         color: #333;
-        margin-right: 10px;
+        margin-right: 8px; /* Giảm từ 10px */
         text-transform: uppercase;
         font-weight: 500;
-        letter-spacing: 0.8px;
+        letter-spacing: 0.6px;
       }
 
       select {
-        padding: 8px 16px; /* Giảm padding */
-        border-radius: 6px;
+        padding: 6px 12px; /* Giảm từ 8px 16px */
+        border-radius: 4px; /* Giảm từ 6px */
         border: 1px solid #eeeeee;
-        font-size: 0.85rem; /* Giảm từ 0.95rem */
+        font-size: 0.8rem; /* Giảm từ 0.85rem */
         cursor: pointer;
         transition: all 0.3s ease;
         background: #fff;
         color: #333;
         font-weight: 500;
-        min-width: 90px; /* Giảm chiều rộng */
+        min-width: 80px; /* Giảm từ 90px */
         text-align: center;
 
         &:focus {
@@ -218,20 +213,20 @@
     .addToCartBtn {
       display: block;
       width: 100%;
-      padding: 12px; /* Giảm từ 15px */
+      padding: 10px; /* Giảm từ 12px */
       background-color: #cb0500;
       color: #fff;
       border: none;
-      border-radius: 8px;
-      font-size: 0.9rem; /* Giảm từ 1.05rem */
+      border-radius: 6px; /* Giảm từ 8px */
+      font-size: 0.85rem; /* Giảm từ 0.9rem */
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.6px; /* Giảm từ 0.8px */
       position: relative;
       overflow: hidden;
-      margin-top: auto; /* Push the button to the bottom */
+      margin-top: 8px; /* Giảm từ auto để kiểm soát khoảng cách */
 
       &:before {
         content: "";
@@ -247,7 +242,7 @@
 
       &:hover {
         background-color: #cb0500;
-        letter-spacing: 1.5px;
+        letter-spacing: 1.2px; /* Giảm từ 1.5px */
 
         &:before {
           transform: skewX(-20deg) translateX(200%);
@@ -265,20 +260,20 @@
 
 .buttonContainer {
   text-align: center;
-  margin-top: 50px;
+  margin-top: 30px; /* Giảm từ 50px */
 
   .button {
-    padding: 15px 40px; /* Giảm padding */
+    padding: 12px 30px; /* Giảm từ 15px 40px */
     background-color: transparent;
     color: #333;
     border: 2px solid #cb0500;
-    border-radius: 8px;
-    font-size: 1rem; /* Giảm từ 1.15rem */
+    border-radius: 6px; /* Giảm từ 8px */
+    font-size: 0.9rem; /* Giảm từ 1rem */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.4s ease;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px; /* Giảm từ 1.5px */
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -319,45 +314,62 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .productListContainer {
+    padding: 40px 15px; /* Giảm padding trên mobile */
+  }
+
   .bestProduct {
-    font-size: 2rem; /* Giảm từ 2.2rem */
-    margin-bottom: 40px;
+    font-size: 1.5rem; /* Giảm từ 2rem */
+    margin-bottom: 30px; /* Giảm từ 40px */
   }
 
   .productGrid .productItem {
-    margin: 8px;
-    padding: 12px;
+    margin: 5px; /* Giảm từ 8px */
+    padding: 10px; /* Giảm từ 12px */
 
     .boxImg {
-      height: 240px; /* Điều chỉnh chiều cao phù hợp cho mobile */
+      height: 200px; /* Giảm từ 240px */
     }
 
     .title {
-      font-size: 1rem; /* Giảm từ 1.2rem */
+      font-size: 0.9rem; /* Giảm từ 1rem */
+      min-height: 2rem; /* Giảm từ 2.5rem */
     }
 
     .category {
-      font-size: 0.75rem; /* Giảm từ mặc định */
+      font-size: 0.7rem; /* Giảm từ 0.75rem */
+      min-height: 1rem; /* Giảm từ 1.2rem */
     }
 
     .priceCl {
-      font-size: 1.1rem; /* Giảm từ 1.3rem */
+      font-size: 1rem; /* Giảm từ 1.1rem */
+      min-height: 1rem; /* Giảm từ 1.2rem */
     }
 
     .sizeSelector {
+      margin-bottom: 8px; /* Giảm từ 12px */
       label {
-        font-size: 0.75rem;
+        font-size: 0.7rem; /* Giảm từ 0.75rem */
       }
       select {
-        font-size: 0.75rem;
-        padding: 6px 12px;
-        min-width: 80px;
+        font-size: 0.7rem;
+        padding: 4px 8px; /* Giảm từ 6px 12px */
+        min-width: 70px; /* Giảm từ 80px */
       }
     }
 
     .addToCartBtn {
-      font-size: 0.8rem; /* Giảm từ mặc định */
-      padding: 10px;
+      font-size: 0.75rem; /* Giảm từ 0.8rem */
+      padding: 8px; /* Giảm từ 10px */
+      margin-top: 6px; /* Giảm từ 8px */
+    }
+  }
+
+  .buttonContainer {
+    margin-top: 20px; /* Giảm từ 30px */
+    .button {
+      padding: 10px 25px; /* Giảm từ 12px 30px */
+      font-size: 0.8rem; /* Giảm từ 0.9rem */
     }
   }
 }
@@ -365,8 +377,8 @@
 .loadingContainer,
 .errorContainer {
   text-align: center;
-  padding: 20px;
-  font-size: 18px;
+  padding: 15px; /* Giảm từ 20px */
+  font-size: 16px; /* Giảm từ 18px */
 }
 
 .productImage {
@@ -377,9 +389,9 @@
 }
 
 .carousel-container {
-  padding: 0 10px;
+  padding: 0 5px; /* Giảm từ 0 10px */
 }
 
 .carousel-item {
-  padding: 0 5px;
+  padding: 0 3px; /* Giảm từ 0 5px */
 }

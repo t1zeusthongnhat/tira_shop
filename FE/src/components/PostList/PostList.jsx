@@ -14,24 +14,14 @@ function PostList() {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
 
-     
       const url = "http://localhost:8080/tirashop/posts?author=duo";
       const response = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response.status === 401) {
-      
-        localStorage.removeItem("token");
-        navigate("/auth");
-        return;
-      }
 
       if (!response.ok) {
         throw new Error(`Failed to fetch posts: ${response.status}`);
