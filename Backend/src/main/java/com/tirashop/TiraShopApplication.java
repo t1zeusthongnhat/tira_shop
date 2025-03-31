@@ -12,3 +12,4 @@ public class TiraShopApplication {
 		SpringApplication.run(TiraShopApplication.class, args);
 	}
 }
+ 
