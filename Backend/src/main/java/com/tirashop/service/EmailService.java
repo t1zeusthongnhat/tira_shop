@@ -5,6 +5,8 @@ import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.request.EmailRequest;
 import com.tirashop.dto.request.SendEmailRequest;
 import com.tirashop.dto.response.EmailResponse;
+import com.tirashop.model.RegistrationEmail;
+import com.tirashop.model.ResetPassword;
 import com.tirashop.persitence.entity.Order;
 import com.tirashop.persitence.entity.User;
 import com.tirashop.persitence.repository.OrderRepository;
@@ -138,31 +140,32 @@ public class EmailService {
     }
 
 
-    public void sendRegistrationEmail(String toEmail, String username) {
+    public void sendRegistrationEmail(RegistrationEmail registrationEmail) {
         String subject = "🎉 Welcome to TiraShop!";
-        String content = "<p>Hello " + username + ",</p>"
+        String content = "<p>Hello " + registrationEmail.getUsername() + ",</p>"
                 + "<p>You have successfully registered at TiraShop!</p>"
                 + "<p>Enjoy your shopping experience.</p>";
-        sendEmail(new SendEmailRequest(toEmail, subject, content));
+        sendEmail(new SendEmailRequest(registrationEmail.getToEmail(), subject, content));
     }
 
-    public void resetPassword(String toEmail, String resetCode, String newPassword) {
-        Optional<User> userOpt = userRepository.findByEmail(toEmail);
+    public void resetPassword(ResetPassword resetPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(resetPassword.getToEmail());
         if (userOpt.isEmpty()) {
             throw new RuntimeException("Email does not exist.");
         }
 
         User user = userOpt.get();
-        if (!user.getResetCode().equals(resetCode)) {
+        if (!user.getResetCode().equals(resetPassword.getResetCode())) {
             throw new RuntimeException("Invalid verification code.");
         }
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(resetPassword.getNewPassword()));
         user.setResetCode(null);
         userRepository.save(user);
     }
 
     public void sendForgotPasswordEmail(String toEmail) {
+        log.info("To Email: "+toEmail);
         Optional<User> userOpt = userRepository.findByEmail(toEmail);
         if (userOpt.isEmpty()) {
             throw new RuntimeException("Email does not exist in our system.");

@@ -11,7 +11,7 @@ function SetNewPasswordPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const emailOrPhone = location.state?.emailOrPhone || "Your email/phone";
+  const emailOrPhone = location.state?.emailOrPhone || "your email/phone";
   const resetCode = location.state?.resetCode || "";
 
   const validatePassword = (password) => {
@@ -29,15 +29,16 @@ function SetNewPasswordPage() {
     setError("");
     setIsLoading(true);
 
+    // Client-side validation
     if (!validatePassword(password)) {
       setError(
-        "Mật khẩu phải dài 8-16 ký tự, bao gồm ít nhất một chữ cái in hoa và một chữ cái thường, và chỉ chứa các ký tự thông thường."
+        "Password must be 8-16 characters, include at least one uppercase and one lowercase letter, and contain only standard characters."
       );
       setIsLoading(false);
       return;
     }
     if (password !== confirmPassword) {
-      setError("Mật khẩu không khớp!");
+      setError("Passwords do not match!");
       setIsLoading(false);
       return;
     }
@@ -56,13 +57,17 @@ function SetNewPasswordPage() {
         }
       );
 
+      // Handle non-OK responses
       if (!response.ok) {
-        const data = await response.json();
-        setError(
-          data.message ||
-            `Yêu cầu thất bại với mã trạng thái ${response.status}`
-        );
-        toast.error(data.message || "Không thể đặt lại mật khẩu.", {
+        let errorMessage = `Request failed with status ${response.status}`;
+        try {
+          const data = await response.json();
+          errorMessage = data.message || errorMessage;
+        } catch (jsonError) {
+          console.warn("Response is not JSON:", jsonError);
+        }
+        setError(errorMessage);
+        toast.error(errorMessage || "Failed to reset password.", {
           position: "top-right",
           autoClose: 3000,
         });
@@ -74,22 +79,22 @@ function SetNewPasswordPage() {
       console.log("Reset Password Response:", data);
 
       if (response.status === 200 && data.status === "success") {
-        toast.success("Đặt lại mật khẩu thành công!", {
+        toast.success("Password reset successfully!", {
           position: "top-right",
           autoClose: 3000,
         });
         navigate("/auth");
       } else {
-        setError(data.message || "Không thể đặt lại mật khẩu.");
-        toast.error(data.message || "Không thể đặt lại mật khẩu.", {
+        setError(data.message || "Failed to reset password.");
+        toast.error(data.message || "Failed to reset password.", {
           position: "top-right",
           autoClose: 3000,
         });
       }
     } catch (err) {
-      console.error("Lỗi khi đặt lại mật khẩu:", err);
-      setError("Không thể kết nối đến server. Vui lòng thử lại sau.");
-      toast.error("Lỗi kết nối server: " + err.message, {
+      console.error("Error resetting password:", err);
+      setError("Unable to connect to the server. Please try again later.");
+      toast.error("Server connection error: " + err.message, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -101,38 +106,47 @@ function SetNewPasswordPage() {
   return (
     <div className="set-new-password-container">
       <div className="set-new-password-box">
-        <h2 className="set-new-password-title">Đặt Mật Khẩu Mới</h2>
+        <h2 className="set-new-password-title">
+          <span className="lock-icon">🔑</span> Set New Password
+        </h2>
         <p className="set-new-password-desc">
-          Tạo mật khẩu mới cho <span className="highlight">{emailOrPhone}</span>
+          Create a new password for{" "}
+          <span className="highlight">{emailOrPhone}</span>
         </p>
 
         <form onSubmit={handleSubmit}>
           <input
             type="password"
             className="password-input"
-            placeholder="Mật khẩu mới"
+            placeholder="New Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <input
             type="password"
             className="password-input"
-            placeholder="Xác nhận mật khẩu"
+            placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
 
           {error && <p className="error-message">{error}</p>}
 
           <ul className="password-requirements">
-            <li>Ít nhất 1 chữ cái in hoa</li>
-            <li>Ít nhất 1 chữ cái thường</li>
-            <li>Dài 8-16 ký tự</li>
-            <li>Chỉ chứa chữ, số và ký tự thông thường</li>
+            <li>At least 1 uppercase letter</li>
+            <li>At least 1 1 lowercase letter</li>
+            <li>8-16 characters</li>
+            <li>Only letters, numbers, and common symbols</li>
           </ul>
 
-          <button type="submit" className="confirm-button" disabled={isLoading}>
-            {isLoading ? "Đang xử lý..." : "Xác nhận"}
+          <button
+            type="submit"
+            className="confirm-button"
+            disabled={isLoading}
+          >
+            {isLoading ? "Processing..." : "Confirm"}
           </button>
         </form>
       </div>

@@ -1,7 +1,34 @@
 import styles from "./styles.module.scss";
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
+import { useEffect, useRef } from 'react';
+import goongjs from '@goongmaps/goong-js';
+import '@goongmaps/goong-js/dist/goong-js.css';
 
 function Footer() {
+  const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+
+  // Initialize simple map
+  useEffect(() => {
+    goongjs.accessToken = 'qM35eQ7w1or6MWNEoAXQPUQDZwIdeljIPEGaxdkF';
+
+    mapInstance.current = new goongjs.Map({
+      container: mapRef.current,
+      style: 'https://tiles.goong.io/assets/goong_map_web.json',
+      center: [105.7478, 21.0381], // BTEC FPT, Trịnh Văn Bô coordinates
+      zoom: 15,
+    });
+
+    // Add a marker at BTEC FPT
+    new goongjs.Marker()
+      .setLngLat([105.7478, 21.0381])
+      .addTo(mapInstance.current);
+
+    return () => {
+      if (mapInstance.current) mapInstance.current.remove();
+    };
+  }, []);
+
   return (
     <>
       {/* Khối màu đỏ phía trên footer */}
@@ -10,7 +37,7 @@ function Footer() {
           <div className={styles.preFooterIntro}>
             <h2 className={styles.preFooterLogo}>TIRA SHOP</h2>
             <p className={styles.preFooterText}>
-            Tira Shop is proud to be the leading high-end fashion distributor in Vietnam, bringing customers quality products from famous brands such as Playboy, True Religion, CPTN Apparel, Jungles, ALLSAINTS,... . With the mission of bringing modern and sophisticated fashion styles, Tira Shop is committed to providing the best service, from consulting to fast delivery. We always respect our customers and constantly strive to bring the best shopping experience.
+              Tira Shop is proud to be the leading high-end fashion distributor in Vietnam, bringing customers quality products from famous brands such as Playboy, True Religion, CPTN Apparel, Jungles, ALLSAINTS,... . With the mission of bringing modern and sophisticated fashion styles, Tira Shop is committed to providing the best service, from consulting to fast delivery. We always respect our customers and constantly strive to bring the best shopping experience.
             </p>
           </div>
         </div>
@@ -52,20 +79,15 @@ function Footer() {
               <a href="https://instagram.com" className={styles.socialLink}><FaInstagram /></a>
               <a href="https://youtube.com" className={styles.socialLink}><FaYoutube /></a>
             </div>
-            
-            <h2 className={styles.footerTitle}>Newsletter</h2>
+          </div>
+
+          {/* Cột 4 - Bản đồ */}
+          <div className={styles.footerColumn}>
+            <h2 className={styles.footerTitle}>Our Location</h2>
+            <div ref={mapRef} className={styles.footerMap} />
             <p className={styles.footerText}>
-              Subscribe to receive updates on our latest products and promotions.
+              BTEC FPT, Duong Trinh Van Bo, Xuan Phuong, Nam Tu Liem, Ha Noi, Viet Nam
             </p>
-            <form className={styles.emailInputContainer}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className={styles.emailInput}
-                required
-              />
-              <button type="submit" className={styles.submitButton}>Subscribe</button>
-            </form>
           </div>
         </div>
 

@@ -11,7 +11,7 @@
   align-items: center;
   z-index: 1000;
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-  height: 126px;
+  height: 96px;
   opacity: 1; /* Đảm bảo header luôn hiển thị để không ảnh hưởng MyHeader */
 
   &.fixedHeader {

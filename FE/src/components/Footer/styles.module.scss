@@ -5,6 +5,13 @@
   color: #fff;
   text-align: center; // Căn giữa nội dung
 }
+.footerMap {
+  width: 100%;
+  height: 200px; // Adjust height as needed
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
 
 .preFooterContainer {
   max-width: 800px; // Giới hạn chiều rộng để nội dung không quá dàn trải
