@@ -66,22 +66,22 @@ function FixedHeader() {
     navigate("/auth");
   };
 
-  const navigateToBestProducts = () => {
-    const bestProductsSection = document.querySelector(
-      `.${styles.productListContainer}`
-    );
-    if (bestProductsSection) {
-      bestProductsSection.scrollIntoView({ behavior: "smooth" });
-    } else {
-      navigate("/");
-      setTimeout(() => {
-        const section = document.querySelector(
-          `.${styles.productListContainer}`
-        );
-        if (section) section.scrollIntoView({ behavior: "smooth" });
-      }, 300);
-    }
-  };
+  // const navigateToBestProducts = () => {
+  //   const bestProductsSection = document.querySelector(
+  //     `.${styles.productListContainer}`
+  //   );
+  //   if (bestProductsSection) {
+  //     bestProductsSection.scrollIntoView({ behavior: "smooth" });
+  //   } else {
+  //     navigate("/");
+  //     setTimeout(() => {
+  //       const section = document.querySelector(
+  //         `.${styles.productListContainer}`
+  //       );
+  //       if (section) section.scrollIntoView({ behavior: "smooth" });
+  //     }, 300);
+  //   }
+  // };
 
   
 
@@ -117,8 +117,8 @@ function FixedHeader() {
             isScrolled || location.pathname !== "/" ? styles.showNav : ""
           }`}
         >
-          <div className={styles.navItem} onClick={navigateToBestProducts}>
-            Best Product
+          <div className={styles.navItem} onClick={() => navigate("/category/all")}>
+            Shop
           </div>
          
           <div className={styles.navItem} onClick={() => navigate("/stores")}>
@@ -180,7 +180,7 @@ function FixedHeader() {
           <img src={closeIcon} alt="Close" />
         </button>
         <ul className={styles.menuList}>
-          <li onClick={navigateToBestProducts}>Best Product</li>
+          <li onClick={() => navigate("/category/all")}>Shop</li>
          
           <li onClick={() => navigate("/stores")}>Store System</li>
           <li onClick={() => navigate("/vouchers")}>Voucher</li>

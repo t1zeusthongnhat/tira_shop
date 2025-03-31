@@ -8,27 +8,19 @@ import Footer from "../Footer/Footer";
 const VoucherPage = () => {
   const navigate = useNavigate();
   const [vouchers, setVouchers] = useState([]);
-  const [loading, setLoading] = useState(true); // Bắt đầu với loading = true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchVouchers = async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to view vouchers");
-        navigate("/auth");
-        return;
-      }
-
       const response = await fetch(
         "http://localhost:8080/tirashop/voucher/list",
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -49,8 +41,8 @@ const VoucherPage = () => {
   };
 
   useEffect(() => {
-    fetchVouchers(); // Chỉ gọi một lần khi component mount
-  }, []); // Loại bỏ phụ thuộc navigate
+    fetchVouchers();
+  }, []);
 
   // Phân trang
   const [currentPage, setCurrentPage] = useState(1);

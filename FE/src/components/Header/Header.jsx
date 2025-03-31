@@ -252,14 +252,14 @@ function MyHeader() {
     }
   };
 
-  const navigateToBestProducts = () => {
-    const bestProductsSection = document.querySelector(
-      `.${styles.productListContainer}`
-    );
-    if (bestProductsSection) {
-      bestProductsSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  // const navigateToBestProducts = () => {
+  //   const bestProductsSection = document.querySelector(
+  //     `.${styles.productListContainer}`
+  //   );
+  //   if (bestProductsSection) {
+  //     bestProductsSection.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // };
 
  
   const isHomepage = location.pathname === "/";
@@ -357,7 +357,7 @@ function MyHeader() {
           <img src={closeIcon} alt="Close" />
         </button>
         <ul className={styles.menuList}>
-          <li onClick={navigateToBestProducts}>Best Product</li>
+          <li onClick={() => navigate("/category/all")}>Shop</li>
         
           <li onClick={() => navigate("/stores")}>Store System</li>
           <li>Voucher</li>
