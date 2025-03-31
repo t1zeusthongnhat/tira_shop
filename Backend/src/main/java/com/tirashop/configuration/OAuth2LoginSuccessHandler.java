@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
@@ -35,7 +36,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws IOException {
+                                        Authentication authentication) throws IOException {
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oauthUser = oauthToken.getPrincipal();
 
@@ -71,8 +72,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         AuthenticationResponse authResponse = authenticationService.authenticatedGoogleUser(user);
 
-        response.setContentType("application/json");
+        response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(authResponse));
+        String script = "<script>" +
+                "window.opener.postMessage(" + objectMapper.writeValueAsString(authResponse) + ", 'http://localhost:5173');" +
+                "window.close();" +
+                "</script>";
+        response.getWriter().write(script);
     }
 }

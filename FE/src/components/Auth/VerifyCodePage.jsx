@@ -9,15 +9,15 @@ function VerifyCodePage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
 
-  const emailOrPhone = location.state?.emailOrPhone || "Your email/phone";
+  const emailOrPhone = location.state?.emailOrPhone || "your email/phone";
 
   const handleChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return; // Chỉ cho phép số
+    if (!/^\d*$/.test(value)) return; // Only allow numbers
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Chuyển focus sang ô tiếp theo nếu nhập số
+    // Move focus to the next input if a digit is entered
     if (value && index < otp.length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -25,10 +25,10 @@ function VerifyCodePage() {
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      // Chuyển focus về ô trước nếu xóa
+      // Move focus to the previous input if backspace is pressed on an empty field
       inputRefs.current[index - 1]?.focus();
     } else if (e.key === "Enter" && otp.every((digit) => digit)) {
-      // Gửi form nếu nhấn Enter và đã nhập đủ 6 số
+      // Submit form if Enter is pressed and all 6 digits are filled
       handleSubmit(e);
     }
   };
@@ -42,7 +42,7 @@ function VerifyCodePage() {
         state: { emailOrPhone, resetCode: otpCode },
       });
     } else {
-      toast.error("Vui lòng nhập mã OTP 6 chữ số.", {
+      toast.error("Please enter a 6-digit OTP.", {
         position: "top-right",
         autoClose: 3000,
       });
@@ -52,17 +52,17 @@ function VerifyCodePage() {
   const handleResend = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8080/api/email/forget-password",
+        "http://localhost:8080/api/email/forgot-password",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ toEmail: emailOrPhone }),
+          headers: { "Content-Type": "text/plain" }, // Match ForgotPasswordPage
+          body: emailOrPhone, // Use emailOrPhone from location.state
         }
       );
 
       if (!response.ok) {
         const data = await response.json();
-        toast.error(data.message || "Không thể gửi lại mã OTP.", {
+        toast.error(data.message || "Failed to resend OTP.", {
           position: "top-right",
           autoClose: 3000,
         });
@@ -71,19 +71,19 @@ function VerifyCodePage() {
 
       const data = await response.json();
       if (response.status === 200 && data.status === "success") {
-        toast.success("Mã OTP đã được gửi lại thành công!", {
+        toast.success("OTP has been resent successfully!", {
           position: "top-right",
           autoClose: 3000,
         });
       } else {
-        toast.error(data.message || "Không thể gửi lại mã OTP.", {
+        toast.error(data.message || "Failed to resend OTP.", {
           position: "top-right",
           autoClose: 3000,
         });
       }
     } catch (err) {
-      console.error("Lỗi khi gửi lại mã OTP:", err);
-      toast.error("Lỗi kết nối server: " + err.message, {
+      console.error("Error resending OTP:", err);
+      toast.error("Server connection error: " + err.message, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -93,9 +93,11 @@ function VerifyCodePage() {
   return (
     <div className="verify-code-container">
       <div className="verify-code-box">
-        <h2 className="verify-code-title">Nhập Mã Xác Nhận</h2>
+        <h2 className="verify-code-title">
+          <span className="lock-icon">🔑</span> Verify Your Code
+        </h2>
         <p className="verify-code-desc">
-          Mã xác nhận đã được gửi đến {emailOrPhone}
+          A verification code has been sent to {emailOrPhone}.
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -114,13 +116,13 @@ function VerifyCodePage() {
             ))}
           </div>
 
-          <p className="verify-code-desc">Không nhận được mã?</p>
+          <p className="verify-code-desc">Didn’t receive the code?</p>
           <p
-            className="verify-code-desc-1"
+            className="verify-code-resend"
             onClick={handleResend}
             style={{ cursor: "pointer" }}
           >
-            Gửi lại
+            Resend
           </p>
 
           <button
@@ -128,7 +130,7 @@ function VerifyCodePage() {
             className="verify-code-btn"
             disabled={otp.includes("")}
           >
-            TIẾP THEO
+            Next
           </button>
         </form>
       </div>

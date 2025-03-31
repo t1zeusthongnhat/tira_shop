@@ -24,7 +24,7 @@ import VoucherPage from "./components/Voucher/VoucherPage";
 import PostList from "./components/PostList/PostList";
 import DetailPostList from "./components/PostList/DetailPostList";
 import CategoryPage from "./components/CategoryPage/CategoryPage";
-import TryOn from "./components/HomePage/TryOn";
+import VirtualTryOn from "./components/HomePage/VirtualTryOn";
 import TryOnButton from "./components/HomePage/TryonButton";
 import "./assets/style/toastifyCustom.module.scss";
 import StoreSystem from "./components/StoreSystem/StoreSystem";
@@ -121,7 +121,7 @@ function App() {
           </main>
           <ChatBox />
           <TryOnButton onClick={openTryOn} />
-          <TryOn isOpen={isTryOnOpen} onClose={closeTryOn} />
+          <VirtualTryOn isOpen={isTryOnOpen} onClose={closeTryOn} />
         </div>
         <ToastContainer
           position="top-right"

@@ -1,31 +1,89 @@
+/* Style cho khối màu đỏ phía trên footer */
+.preFooter {
+  background: #c8102e; // Màu đỏ đậm
+  padding: 60px 20px;
+  color: #fff;
+  text-align: center; // Căn giữa nội dung
+}
+.footerMap {
+  width: 100%;
+  height: 200px; // Adjust height as needed
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.preFooterContainer {
+  max-width: 800px; // Giới hạn chiều rộng để nội dung không quá dàn trải
+  margin: 0 auto;
+}
+
+.preFooterIntro {
+  margin-bottom: 40px;
+}
+
+.preFooterLogo {
+  font-size: 2.5rem; // Tăng kích thước logo
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.preFooterText {
+  font-size: 1rem;
+  line-height: 1.8; // Tăng khoảng cách dòng cho dễ đọc
+  margin: 0 auto;
+}
+
+/* Style cho footer hiện tại */
 .footer {
-  background: #f5f5f5; // Nền nhạt tương tự các trang khác
-  padding: 40px 20px;
-  border-top: 1px solid #e5e5e5;
+  background: #f8f9fa;
+  padding: 60px 0px 0;
+  color: #333;
+  position: relative;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .footerContainer {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 20px;
-  max-width: 1200px;
+  gap: 30px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
 .footerColumn {
   flex: 1;
-  min-width: 250px;
-  margin-bottom: 20px;
+  min-width: 200px;
+  margin-bottom: 30px;
 }
 
 .footerTitle {
-  margin: 0 0 20px;
-  font-size: 1.5rem;
+  margin: 0 0 25px;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #222;
+  color: #2c3e50;
   text-transform: uppercase;
   letter-spacing: 1px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #2c3e50;
+    transition: width 0.3s ease;
+  }
+
+  &:hover::after {
+    width: 50px;
+  }
 }
 
 .footerList {
@@ -34,34 +92,44 @@
   margin: 0;
 
   li {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 }
 
 .footerLink {
-  color: #777;
+  color: #7f8c8d;
   text-decoration: none;
-  font-size: 1rem;
-  transition: color 0.3s ease;
+  font-size: 0.95rem;
+  transition: color 0.3s ease, transform 0.3s ease;
 
   &:hover {
-    color: #222;
+    color: #2c3e50;
+    transform: translateX(5px);
   }
 }
 
 .footerText {
-  color: #777;
+  color: #7f8c8d;
   font-size: 0.9rem;
-  line-height: 1.5;
-  margin: 10px 0;
+  line-height: 1.6;
+  margin-bottom: 15px;
 }
 
-.footerTextBold {
-  color: #222;
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 10px 0;
-  text-transform: uppercase;
+.socialIcons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.socialLink {
+  color: #7f8c8d;
+  font-size: 1.5rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+
+  &:hover {
+    color: #2c3e50;
+    transform: scale(1.2);
+  }
 }
 
 .emailInputContainer {
@@ -72,32 +140,51 @@
 
 .emailInput {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #e5e5e5;
-  border-radius: 5px;
-  font-size: 1rem;
-  color: #222;
+  padding: 12px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  color: #333;
   background: #fff;
   outline: none;
+  transition: border-color 0.3s ease;
 
   &:focus {
-    border-color: #ccc;
+    border-color: #2c3e50;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 }
 
 .submitButton {
-  background: #222;
+  background: #2c3e50;
   border: none;
   color: #fff;
-  padding: 10px 20px;
-  font-size: 1rem;
+  padding: 12px 25px;
+  font-size: 0.95rem;
   font-weight: 600;
   text-transform: uppercase;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
 
   &:hover {
-    background: #555;
+    background: #34495e;
+    transform: translateY(-2px);
   }
+}
+
+.footerBottom {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background: #e9ecef;
+}
+
+.footerBottomContainer {
+  text-align: center;
+}
+
+.footerCopyright {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin: 0;
 }
