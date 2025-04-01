@@ -6,6 +6,7 @@ import { useAppContext } from "../../context/AppContext";
 
 function Cart() {
   const { isSidebarOpen, setIsSidebarOpen, cart, fetchCart } = useAppContext();
+  
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const navigate = useNavigate();
 
@@ -17,6 +18,14 @@ function Cart() {
   const closeSidebar = () => setIsSidebarOpen(false);
 
   const handleQuantityChange = async (cartItem, newQuantity) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to update your cart");
+      closeSidebar();
+      navigate("/auth");
+      return;
+    }
+
     if (newQuantity < 1) {
       handleRemoveItem(cartItem.cartId);
       return;
@@ -28,6 +37,7 @@ function Cart() {
         {
           method: "PUT",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -40,6 +50,13 @@ function Cart() {
       );
 
       const data = await response.json();
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/auth");
+        return;
+      }
+
       if (data.status === "success") {
         toast.success("Cart updated successfully!");
         await fetchCart();
@@ -53,18 +70,33 @@ function Cart() {
   };
 
   const handleRemoveItem = async (itemId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to remove items from cart");
+      navigate("/auth");
+      return;
+    }
+
     try {
       const response = await fetch(
         `http://localhost:8080/tirashop/cart/remove/${itemId}`,
         {
           method: "DELETE",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
 
       const data = await response.json();
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/auth");
+        return;
+      }
+
       if (data.status === "success") {
         toast.success("Item removed from cart!");
         await fetchCart();
@@ -78,12 +110,21 @@ function Cart() {
   };
 
   const clearCart = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to clear your cart");
+      closeSidebar();
+      navigate("/auth");
+      return;
+    }
+
     try {
       const response = await fetch(
         "http://localhost:8080/tirashop/cart/clear",
         {
           method: "DELETE",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -92,20 +133,37 @@ function Cart() {
       const data = await response.json();
       console.log("Clear cart response:", data); // Debug
 
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/auth");
+        return;
+      }
+
       if (data.status === "success") {
         toast.success("Cart cleared successfully!");
         await fetchCart(); // Cập nhật giỏ hàng từ server
         console.log("Cart after clear:", cart); // Debug
       } else {
         toast.error(`Failed to clear cart: ${data.message}`);
+        setCart([]); // Đặt lại cart về rỗng nếu API không cập nhật đúng
       }
     } catch (error) {
       console.error("Error clearing cart:", error);
       toast.error("Error clearing cart. Please try again.");
+      setCart([]); // Đặt lại cart về rỗng trong trường hợp lỗi
     }
   };
 
   const handleCheckout = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please log in to checkout");
+      closeSidebar();
+      navigate("/auth");
+      return;
+    }
+
     setIsCheckingOut(true);
     try {
       if (cart.length === 0) {
@@ -139,7 +197,7 @@ function Cart() {
           <p className={styles.emptyMessage}>Your cart is empty</p>
         ) : (
           cart.map((item) => (
-            <div key={item.cartId} className={styles.cartItem}>
+            <div key={item.id} className={styles.cartItem}>
               <img
                 src={item.productImage || "https://via.placeholder.com/80"}
                 alt={item.productName}
