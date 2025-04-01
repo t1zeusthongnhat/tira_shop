@@ -25,10 +25,12 @@ function ProductList({ isAuthenticated, categoryId }) {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
       };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const url = categoryId
         ? `http://localhost:8080/tirashop/product?categoryId=${categoryId}`
@@ -74,7 +76,8 @@ function ProductList({ isAuthenticated, categoryId }) {
 
   const handleAddToCart = useCallback(
     async (product) => {
-      if (!isAuthenticated) {
+      const token = localStorage.getItem("token");
+      if (!token || !isAuthenticated) {
         toast.error("Please log in to add to cart");
         navigate("/auth");
         return;
@@ -85,6 +88,7 @@ function ProductList({ isAuthenticated, categoryId }) {
           {
             method: "POST",
             headers: {
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
