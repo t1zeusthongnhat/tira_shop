@@ -252,6 +252,16 @@ function MyHeader() {
     }
   };
 
+  const handleCartClick = () => {
+    console.log("Cart clicked, isAuthenticated:", isAuthenticated);
+    if (!isAuthenticated) {
+      toast.error("Please log in to view your cart");
+      navigate("/auth");
+      return;
+    }
+    setIsSidebarOpen(true);
+  };
+
   // const navigateToBestProducts = () => {
   //   const bestProductsSection = document.querySelector(
   //     `.${styles.productListContainer}`
@@ -288,6 +298,7 @@ function MyHeader() {
                 src={cartIcon}
                 alt="Cart Icon"
                 className={styles.headerIcon}
+                onClick={handleCartClick}
               />
               {cart.length > 0 && (
                 <span className={styles.cartCount}>{cart.length}</span>

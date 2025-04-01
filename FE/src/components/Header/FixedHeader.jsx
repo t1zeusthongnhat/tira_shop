@@ -66,22 +66,22 @@ function FixedHeader() {
     navigate("/auth");
   };
 
-  const navigateToBestProducts = () => {
-    const bestProductsSection = document.querySelector(
-      `.${styles.productListContainer}`
-    );
-    if (bestProductsSection) {
-      bestProductsSection.scrollIntoView({ behavior: "smooth" });
-    } else {
-      navigate("/");
-      setTimeout(() => {
-        const section = document.querySelector(
-          `.${styles.productListContainer}`
-        );
-        if (section) section.scrollIntoView({ behavior: "smooth" });
-      }, 300);
-    }
-  };
+  // const navigateToBestProducts = () => {
+  //   const bestProductsSection = document.querySelector(
+  //     `.${styles.productListContainer}`
+  //   );
+  //   if (bestProductsSection) {
+  //     bestProductsSection.scrollIntoView({ behavior: "smooth" });
+  //   } else {
+  //     navigate("/");
+  //     setTimeout(() => {
+  //       const section = document.querySelector(
+  //         `.${styles.productListContainer}`
+  //       );
+  //       if (section) section.scrollIntoView({ behavior: "smooth" });
+  //     }, 300);
+  //   }
+  // };
 
   
 

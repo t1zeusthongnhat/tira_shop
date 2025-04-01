@@ -478,3 +478,22 @@
 .flyUp .cartCount {
   display: flex !important;
 }
+
+.cartSidebar {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 450px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -10px 0 30px rgba(192, 9, 0, 0.1);
+  transition: all 0.4s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Arial', sans-serif;
+
+  &.open {
+    right: 0;
+  }
+}
