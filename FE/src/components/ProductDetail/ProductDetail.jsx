@@ -26,8 +26,7 @@ const responsiveThumbnails = {
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, setIsAuthenticated, setIsSidebarOpen, fetchCart } =
-    useAppContext();
+  const { isAuthenticated, setIsSidebarOpen, fetchCart } = useAppContext();
   const [product, setProduct] = useState(null);
   const [imageUrls, setImageUrls] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -40,22 +39,13 @@ function ProductDetail() {
     const fetchProduct = async () => {
       try {
         if (!isAuthenticated) {
-          toast.error("Please log in to view product details", {
-            position: "top-right",
-            autoClose: 3000,
-          });
+         
           navigate("/auth");
           return;
         }
 
-        const token = localStorage.getItem("token");
         const productResponse = await fetch(
-          `http://localhost:8080/tirashop/product/get/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `http://localhost:8080/tirashop/product/get/${id}`
         );
         const productData = await productResponse.json();
         console.log("Product data:", productData);
@@ -71,12 +61,7 @@ function ProductDetail() {
         }
 
         const imagesResponse = await fetch(
-          `http://localhost:8080/tirashop/product/${id}/images`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `http://localhost:8080/tirashop/product/${id}/images`
         );
         const imagesData = await imagesResponse.json();
         console.log("Images data:", imagesData);
@@ -97,7 +82,7 @@ function ProductDetail() {
       }
     };
     fetchProduct();
-  }, [id, navigate, isAuthenticated]); // Thêm isAuthenticated vào dependencies
+  }, [id, navigate, isAuthenticated]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -111,17 +96,6 @@ function ProductDetail() {
 
     setIsAdding(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setIsAuthenticated(false);
-        toast.error("Please log in to add items to cart", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        navigate("/auth");
-        return;
-      }
-
       const parsedProductId = parseInt(product.id);
       if (isNaN(parsedProductId)) {
         toast.error("Invalid product ID", {
@@ -144,7 +118,6 @@ function ProductDetail() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           productId: parsedProductId,
@@ -152,14 +125,6 @@ function ProductDetail() {
           productSize: selectedSize,
         }),
       });
-
-      if (response.status === 401) {
-        localStorage.removeItem("token");
-        setIsAuthenticated(false);
-       
-        navigate("/auth");
-        return;
-      }
 
       const data = await response.json();
       if (data.status === "success") {
@@ -245,7 +210,6 @@ function ProductDetail() {
         <div className={styles.productDetailContainer}>
           <div className={styles.productDetail}>
             <div className={styles.imageGallery}>
-              {/* Main Image Carousel */}
               <div className={styles.mainImage}>
                 <Carousel
                   responsive={responsiveMain}
@@ -287,7 +251,6 @@ function ProductDetail() {
                 </Carousel>
               </div>
 
-              {/* Thumbnail Gallery */}
               {imageUrls.length > 1 && (
                 <div className={styles.thumbnailGallery}>
                   <Carousel

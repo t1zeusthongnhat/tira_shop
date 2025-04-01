@@ -22,25 +22,11 @@ function CategoryPage() {
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [productSizes, setProductSizes] = useState({});
-  const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const checkToken = () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setIsSessionExpired(true);
-   
-      navigate("/auth");
-      return false;
-    }
-    return true;
-  };
-
   const fetchCategories = useCallback(async () => {
-    if (!checkToken()) return;
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch(
         "http://localhost:8080/tirashop/category/list",
         {
@@ -48,40 +34,33 @@ function CategoryPage() {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json(); 
-      if (data.status === "success" && data.data?.elementList) {
-        setCategories(data.data.elementList);
-      }
-    } catch (err) {}
-  }, [navigate, isSessionExpired]);
-
-  const fetchBrands = useCallback(async () => {
-    if (!checkToken()) return;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:8080/tirashop/brand/list",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
-      
+      if (data.status === "success" && data.data?.elementList) {
+        setCategories(data.data.elementList);
+      }
+    } catch (err) {
+      toast.error(`Error fetching categories: ${err.message}`);
+    }
+  }, []);
+
+  const fetchBrands = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:8080/tirashop/brand/list", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
       if (data.status === "success" && data.data) {
-        
         setBrands(data.data);
       } else {
         toast.error(data.message || "Failed to fetch brands");
@@ -89,20 +68,14 @@ function CategoryPage() {
     } catch (err) {
       toast.error(`Error fetching brands: ${err.message}`);
     }
-  }, [navigate, isSessionExpired]);
+  }, []);
 
   const fetchAllProducts = useCallback(async () => {
     setLoading(true);
-    if (!checkToken()) {
-      setLoading(false);
-      return;
-    }
     try {
-      const token = localStorage.getItem("token");
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: `Bearer ${token}`,
       };
 
       setCategory({
@@ -136,7 +109,7 @@ function CategoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, isSessionExpired]);
+  }, []);
 
   useEffect(() => {
     fetchCategories();
@@ -221,10 +194,11 @@ function CategoryPage() {
   };
 
   const handleAddToCart = async (product) => {
-    if (!checkToken()) return;
-    const token = localStorage.getItem("token");
-    if (!token || !isAuthenticated) {
-      toast.error("Please log in to add to cart");
+    if (!isAuthenticated) {
+      toast.error("Please log in to add to cart", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       navigate("/auth");
       return;
     }
@@ -232,7 +206,6 @@ function CategoryPage() {
       const response = await fetch("http://localhost:8080/tirashop/cart/add", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -255,7 +228,6 @@ function CategoryPage() {
     }
   };
 
-  
   const resetFilters = () => {
     setPriceRange([0, 15000]);
     setSelectedCategories([]);
