@@ -109,17 +109,14 @@ public class OpenAiModerationService {
             System.out.println("API Response: " + response.getBody());
 
             JsonObject responseJson = JsonParser.parseString(response.getBody()).getAsJsonObject();
-
             if (responseJson.has("candidates")) {
                 JsonArray candidates = responseJson.getAsJsonArray("candidates");
                 for (int i = 0; i < candidates.size(); i++) {
                     JsonObject candidate = candidates.get(i).getAsJsonObject();
                     if (candidate.has("content")) {
-                        JsonArray parts = candidate.getAsJsonObject("content")
-                                .getAsJsonArray("parts");
+                        JsonArray parts = candidate.getAsJsonObject("content").getAsJsonArray("parts");
                         for (int j = 0; j < parts.size(); j++) {
-                            String responseText = parts.get(j).getAsJsonObject().get("text")
-                                    .getAsString().toLowerCase();
+                            String responseText = parts.get(j).getAsJsonObject().get("text").getAsString().toLowerCase();
                             if (responseText.contains("yes")) {
                                 System.out.println("This content is prohibited by Gemini AI!");
                                 return false;
@@ -128,11 +125,25 @@ public class OpenAiModerationService {
                     }
                 }
             }
+
+            // Additional checks for specific words and phrases
+            String[] forbiddenTerms = new String[] {
+                    "nôn mửa", "buồn nôn", "bốc mùi", "vô giáo dục", "bạo lực", "phân biệt giới tính",
+                    "phân biệt chủng tộc", "phân biệt tôn giáo", "đả kích","muốn mửa"
+            };
+
+            for (String term : forbiddenTerms) {
+                if (text.toLowerCase().contains(term)) {
+                    System.out.println("Text contains prohibited term: " + term);
+                    return false;
+                }
+            }
+
             return true;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return true;
+            return false;
         }
     }
 }

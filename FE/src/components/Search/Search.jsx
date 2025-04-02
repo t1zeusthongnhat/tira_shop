@@ -124,10 +124,16 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8080/tirashop/search/image", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "http://localhost:8080/tirashop/product/search-by-image?page=0&size=10&sort=createdAt",
+        {
+          method: "POST",
+          headers: {
+            "accept": "*/*",
+          },
+          body: formData,
+        }
+      );
 
       const data = await response.json();
       if (response.ok && data.status === "success") {
