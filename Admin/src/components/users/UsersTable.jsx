@@ -103,10 +103,9 @@ const UsersTable = () => {
 						<Search className='absolute left-3 top-2.5 text-gray-500' size={18} />
 					</div>
 					<button onClick={() => setIsAddModalOpen(true)} className='bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2'>
-						<Plus size={18} /> Add New Product
+						<Plus size={18} /> Add New User
 					</button>
 				</div>
-
 			</div>
 			{/* Thêm thanh scroll ngang */}
 			<div className='overflow-x-auto w-full'>
@@ -116,7 +115,6 @@ const UsersTable = () => {
 							<th className='w-20 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase '>User ID</th>
 							<th className='w-40 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase '>Username</th>
 							<th className='w-32 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase'>Avatar</th>
-							{/* <th className='w-48 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase'>Password</th> */}
 							<th className='w-36 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase '>Birthday</th>
 							<th className='w-36 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase '>First Name</th>
 							<th className='w-36 py-3 px-4 text-left text-xs font-medium text-gray-700 uppercase '>Last Name</th>
@@ -134,7 +132,6 @@ const UsersTable = () => {
 								<td className='py-3 px-4 text-sm text-gray-700'>
 									<img src={`http://localhost:8080${user.avatar}`} alt="Avatar" className='w-[65px] h-[65px] rounded-full' />
 								</td>
-								{/* <td className='py-3 px-4 text-sm text-gray-700'>{user.password}</td> */}
 								<td className='py-3 px-4 text-sm text-gray-700'>{user.birthday}</td>
 								<td className='py-3 px-4 text-sm text-gray-700'>{user.firstname}</td>
 								<td className='py-3 px-4 text-sm text-gray-700'>{user.lastname}</td>
@@ -144,11 +141,6 @@ const UsersTable = () => {
 									
 								</td>
 								<td className='pt-9 px-4 text-sm text-gray-700 flex space-x-4'>
-									{/* <button className='text-blue-600 hover:text-blue-500' onClick={() => handleEditClick(user)}>
-										<Edit size={18} />
-									</button> */}
-
-									
 									<button className='text-green-600 hover:text-green-500'  onClick={() => handleOpenSendEmailModal(user.email)}>
 										<Mail size={18} />
 									</button>

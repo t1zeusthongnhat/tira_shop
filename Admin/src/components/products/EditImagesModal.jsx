@@ -70,7 +70,6 @@ const EditImagesModal = ({ isOpen, onClose, productId }) => {
                 }
             }
         }
-
         showToast("Images updated successfully!", "success");
         onClose();
         setImages([]);
