@@ -233,7 +233,7 @@ const ProductsTable = () => {
                                     )}
                                 </td>
                                 <td className='py-4 text-sm text-gray-700 min-w-[200px]'>{product.name}</td>
-                                <td className='pr-8 py-4 text-sm text-gray-700 min-w-[200px]'>
+                                <td className='pr-8 py-4 text-sm text-gray-700 min-w-[400px]'>
                                     {expandedDescription === product.id ? (
                                         <span>{product.description}</span>
                                     ) : (

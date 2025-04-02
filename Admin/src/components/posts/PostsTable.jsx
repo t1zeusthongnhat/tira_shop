@@ -117,7 +117,6 @@ const PostsTable = () => {
             setCurrentPage(newPage);
         }
     };
-
     //xử lí ngắn content lại 
     const truncateContent = (content, wordLimit = 30) => {
         const words = content.split(' ');
@@ -196,7 +195,6 @@ const PostsTable = () => {
                 </table>
 
             </div>
-
             {/* Pagination */}
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
             <AddPostUsingAI isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onPostAdded={handlePostAdded} />
@@ -221,5 +219,4 @@ const PostsTable = () => {
         </div>
     );
 };
-
 export default PostsTable;

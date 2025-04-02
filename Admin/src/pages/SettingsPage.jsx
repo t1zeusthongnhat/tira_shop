@@ -17,8 +17,7 @@ const SettingsPage = () => {
 				<Security />
 				<ConnectedAccounts />
 				<Logout/>		
-				<ToastContainer position="top-right" autoClose={2000} />
-		
+				<ToastContainer position="top-right" autoClose={2000} />	
 			</main>
 		</div>
 	);

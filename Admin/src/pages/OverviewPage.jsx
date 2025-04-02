@@ -1,12 +1,9 @@
-import {  BarChart2, ShoppingBag, Users } from "lucide-react";
+import {ShoppingBag, Users } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
-import SalesOverviewChart from "../components/overview/SalesOverviewChart";
-import CategoryDistributionChart from "../components/overview/CategoryDistributionChart";
 import BasicInforChart from "../components/overview/BasicInforChart";
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ReviewRatingChart from "../components/overview/ReviewRatingChart";
@@ -40,8 +37,6 @@ const OverviewPage = () => {
 			console.error("Error fetching stats:", err);
 		}
 	};
-
-
 	return (
 		<div className='flex-1 overflow-auto relative z-10'>
 			<Header title='Overview' />
@@ -71,12 +66,9 @@ const OverviewPage = () => {
 				{/* CHARTS */}
 
 				<div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-					{/* <SalesOverviewChart /> */}
 					<ReviewTrendChart/>
-					{/* <CategoryDistributionChart /> */}
 					<ReviewRatingChart/>
 					<BasicInforChart />
-
 				</div>
 			</main>
 		</div>

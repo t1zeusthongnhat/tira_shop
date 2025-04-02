@@ -72,9 +72,10 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
     };
 
     return (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50'>
-            <div className='bg-white p-6 rounded-lg shadow-lg w-[800px]'>
-                <div className='flex justify-between items-center mb-4'>
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto p-2'>
+            <div className='bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl max-h-[98vh] overflow-y-auto'>
+
+                <div className='flex justify-between items-center mb-2'>
                     <h2 className='text-lg font-semibold text-gray-900'>Edit Post</h2>
                     <button onClick={onClose} className='text-gray-500 hover:text-gray-700'>
                         <X size={20} />
@@ -82,32 +83,35 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div className='mb-1'>
-                        <label className='block text-gray-700 text-sm font-medium mb-1'>Post Name</label>
-                        <input
-                            type='text'
-                            name='name'
-                            value={postData.name}
-                            onChange={handleChange}
-                            className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500'
-                            required
-                        />
-                    </div>
+                    <div className="flex gap-4 mb-2">
+                        {/* Post Name group */}
+                        <div className="flex items-center gap-2 w-1/2">
+                            <label className="text-gray-700 text-sm font-medium whitespace-nowrap">Post Name:</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={postData.name}
+                                onChange={handleChange}
+                                className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                required
+                            />
+                        </div>
 
-                    <div className='mb-1'>
-                        <label className='block text-gray-700 text-sm font-medium mb-1'>Topic</label>
-                        <input
-                            type='text'
-                            name='topic'
-                            value={postData.topic}
-                            onChange={handleChange}
-                            className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500'
-                            required
-                        />
+                        {/* Topic group */}
+                        <div className="flex items-center gap-2 w-1/2">
+                            <label className="text-gray-700 text-sm font-medium whitespace-nowrap">Topic:</label>
+                            <input
+                                type="text"
+                                name="topic"
+                                value={postData.topic}
+                                onChange={handleChange}
+                                className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                required
+                            />
+                        </div>
                     </div>
-
                     <div className='mb-1'>
-                        <label className='block text-gray-700 text-sm font-medium mb-1'>Short Description</label>
+                        <label className='block text-gray-700 text-sm font-medium mb-1'>Short Description:</label>
                         <textarea
                             name='shortDescription'
                             value={postData.short_description}
@@ -116,30 +120,22 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
                         />
                     </div>
 
-                    {/* <div className='mb-1'>
-                        <label className='block text-gray-700 text-sm font-medium mb-1'>Content</label>
-                        <textarea
-                            name='content'
-                            value={postData.content}
-                            onChange={handleChange}
-                            className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 h-40'
-                            required
-                        />
-                    </div> */}
                     <div className='mb-1'>
-                        <label className='block text-gray-700 text-sm font-medium mb-1'>Content</label>
-                        <div className="grid grid-cols-2 gap-4">
+                        <label className='block text-gray-700 text-sm font-medium mb-1'>Content:</label>
+                        <div className="grid grid-cols-2 gap-2">
                             {/* Left: Markdown Editor */}
                             <textarea
                                 name='content'
                                 value={postData.content}
                                 onChange={handleChange}
-                                className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 h-40 resize-none'
+                                className='w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 h-72 resize-none'
+
                                 required
                             />
 
                             {/* Right: Live Preview */}
-                            <div className="border rounded-lg p-3 bg-gray-50 overflow-auto h-40 prose prose-sm max-w-full text-gray-800">
+                            <div className="border rounded-lg p-3 bg-gray-50 overflow-auto h-72 prose prose-sm max-w-full text-gray-800">
+
                                 <ReactMarkdown>{postData.content}</ReactMarkdown>
                             </div>
                         </div>
@@ -147,7 +143,7 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
 
 
                     <div className='mb-1'>
-                        <label className='block text-gray-700 text-sm font-medium mb-1'>Image</label>
+                        <label className='block text-gray-700 text-sm font-medium mb-1'>Image:</label>
                         <input
                             type='file'
                             name='image'
@@ -171,7 +167,7 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdated }) => {
                         )}
                     </div>
 
-                    <div className='flex justify-end gap-2 mt-2'>
+                    <div className='flex justify-end gap-2'>
                         <button type='button' onClick={onClose} className='px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600'>
                             Cancel
                         </button>

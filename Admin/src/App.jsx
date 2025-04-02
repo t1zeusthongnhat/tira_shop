@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Sidebar from "./components/common/Sidebar";
 import OverviewPage from "./pages/OverviewPage";
 import ProductsPage from "./pages/ProductsPage";
@@ -19,8 +19,6 @@ import PostsPage from "./pages/PostsPage";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
-
-
   useEffect(() => {
  
     const token = localStorage.getItem("token");
@@ -31,7 +29,6 @@ function App() {
     setIsAuthenticated(true);
     navigate("/"); // Chuyển đến dashboard sau khi đăng nhập thành công
   };
-
 
   return (
     <div className="flex h-screen text-gray-100 overflow-hidden bg-gray-100">
@@ -55,11 +52,9 @@ function App() {
             <Route path="/posts" element={<PostsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
-
         </>
       )}
     </div>
   );
 }
-
 export default App;
