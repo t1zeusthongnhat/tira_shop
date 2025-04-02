@@ -7,6 +7,10 @@ spring:
       - classpath:application-jwt.yml
       - classpath:application-security.yml
       - classpath:application-email.yml
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 logging:
   level:
     org:

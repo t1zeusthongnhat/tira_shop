@@ -300,20 +300,16 @@ public class ProductService {
                 .orElseThrow(
                         () -> new RuntimeException("Cannot find product with ID: " + productId));
 
-        // Tạo URL tạm thời để kiểm tra (trước khi lưu file)
         String tempFileName = file.getOriginalFilename();
         String tempFileUrl = "/uploads/product/image/" + tempFileName;
 
-        // Kiểm tra xem ảnh đã tồn tại chưa
         boolean imageExists = imageRepository.existsByUrl(tempFileUrl);
         if (imageExists) {
             throw new RuntimeException("This image already exists in the database.");
         }
 
-        // Lưu file vào thư mục
         String imagePath = handleImageUpload(file, UPLOAD_DIR);
 
-        // Tạo đối tượng Image
         Image image = new Image();
         image.setFileName(file.getOriginalFilename());
         image.setFileType(file.getContentType());

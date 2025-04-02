@@ -184,6 +184,21 @@ const VirtualTryOn = ({ isOpen, onClose }) => {
       URL.revokeObjectURL(generatedImage);
       setGeneratedImage(null);
     }
+    // Xóa model image
+    setModelFile(null);
+    if (modelPreview) {
+      URL.revokeObjectURL(modelPreview);
+      setModelPreview(null);
+    }
+    // Xóa dress image
+    setDressFile(null);
+    if (dressPreview) {
+      URL.revokeObjectURL(dressPreview);
+      setDressPreview(null);
+    }
+    // Reset các trạng thái khác nếu cần
+    setSelectedProduct(null);
+    setTaskId(null);
   };
 
   const filteredProducts = products.filter((product) =>
