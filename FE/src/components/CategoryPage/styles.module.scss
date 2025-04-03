@@ -180,9 +180,9 @@
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex; /* Use flexbox to control layout */
-    flex-direction: column; /* Stack children vertically */
-    height: 100%; /* Ensure all cards take up the same height */
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Linh hoạt chiều cao để chứa ảnh đầy đủ */
 
     &:hover {
       transform: translateY(-5px);
@@ -193,33 +193,37 @@
       position: relative;
       overflow: hidden;
       cursor: pointer;
+      width: 100%; /* Đảm bảo container ảnh chiếm toàn bộ chiều rộng */
+      height: auto; /* Loại bỏ chiều cao cố định */
+    }
 
-      img {
-        width: 100%;
-        height: 350px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
+    .productImage img {
+      width: 100%; /* Ảnh chiếm toàn bộ chiều rộng */
+      height: auto; /* Chiều cao tự điều chỉnh theo tỷ lệ */
+      max-height: 350px; /* Giới hạn chiều cao tối đa nếu cần */
+      object-fit: contain; /* Hiển thị toàn bộ ảnh, không cắt */
+      transition: transform 0.3s ease;
+      display: block; /* Loại bỏ khoảng trống bên dưới ảnh */
 
-        &:hover {
-          transform: scale(1.05);
-        }
+      &:hover {
+        transform: scale(1.05); /* Giữ hiệu ứng phóng to khi hover */
       }
     }
 
     .productInfo {
       padding: 1rem;
-      display: flex; /* Use flexbox to control layout */
-      flex-direction: column; /* Stack children vertically */
-      flex-grow: 1; /* Allow this section to grow and take up remaining space */
-      justify-content: space-between; /* Push content and button apart */
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1; /* Cho phép phần thông tin mở rộng để đẩy nút xuống dưới */
+      justify-content: space-between;
 
       h3 {
         color: var(--text-color);
         margin-bottom: 0.5rem;
         font-weight: 600;
-        min-height: 3rem; /* Ensure consistent height for product names */
+        min-height: 3rem; /* Đảm bảo chiều cao tối thiểu cho tên sản phẩm */
         display: -webkit-box;
-        -webkit-line-clamp: 2; /* Limit to 2 lines */
+        -webkit-line-clamp: 2; /* Giới hạn 2 dòng */
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -229,14 +233,14 @@
         color: #666;
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
-        min-height: 1.5rem; /* Ensure consistent height for category */
+        min-height: 1.5rem; /* Đảm bảo chiều cao tối thiểu cho danh mục */
       }
 
       .productPrice {
         color: var(--primary-color);
         font-weight: 700;
         margin-bottom: 1rem;
-        min-height: 1.5rem; /* Ensure consistent height for price */
+        min-height: 1.5rem; /* Đảm bảo chiều cao tối thiểu cho giá */
       }
 
       .sizeSelector {
@@ -269,7 +273,7 @@
         font-weight: 600;
         cursor: pointer;
         transition: background-color 0.3s ease;
-        margin-top: auto; /* Push the button to the bottom */
+        margin-top: auto; /* Đẩy nút xuống dưới cùng */
 
         &:hover {
           background-color: var(--hover-color);
