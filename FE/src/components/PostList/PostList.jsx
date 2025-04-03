@@ -4,17 +4,16 @@ import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
 
 function PostList() {
-  const [posts, setPosts] = useState([]); // Tất cả bài post
-  const [currentPosts, setCurrentPosts] = useState([]); // Bài post hiển thị trong trang hiện tại
+  const [posts, setPosts] = useState([]);
+  const [currentPosts, setCurrentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại
-  const postsPerPage = 3; // Số bài hiển thị mỗi lần
+  const [currentPage, setCurrentPage] = useState(0);
+  const postsPerPage = 3;
   const navigate = useNavigate();
 
   const fetchPosts = async () => {
     try {
       setLoading(true);
-
       const url = "http://localhost:8080/tirashop/posts?author=duo";
       const response = await fetch(url, {
         method: "GET",
@@ -28,10 +27,8 @@ function PostList() {
       }
 
       const data = await response.json();
-      console.log("API Response Data:", data);
-
       if (data.status === "success" && data.data?.elementList?.length > 0) {
-        setPosts(data.data.elementList); // Tất cả bài viết
+        setPosts(data.data.elementList);
       }
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -41,7 +38,6 @@ function PostList() {
     }
   };
 
-  // Cập nhật các bài post hiển thị theo trang
   useEffect(() => {
     if (posts.length > 0) {
       const indexOfLastPost = (currentPage + 1) * postsPerPage;
@@ -50,39 +46,15 @@ function PostList() {
     }
   }, [posts, currentPage]);
 
-  // Tự động chuyển trang nếu có dữ liệu mới
   useEffect(() => {
     fetchPosts();
-  }, []); // Chỉ chạy khi mount
+  }, []);
 
   const handlePostClick = (postId) => {
     navigate(`/post/${postId}`);
   };
 
-  const goToNextPage = () => {
-    if ((currentPage + 1) * postsPerPage < posts.length) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const goToPreviousPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // Tự động chuyển trang sau một khoảng thời gian hoặc khi bài viết mới được tải
-  useEffect(() => {
-    if (currentPosts.length === postsPerPage) {
-      const nextPage = currentPage + 1;
-      if (nextPage * postsPerPage <= posts.length) {
-        const timeout = setTimeout(() => {
-          setCurrentPage(nextPage); // Tự động chuyển sang trang tiếp theo
-        }, 5000); // Chuyển trang sau 5 giây (hoặc thay đổi thời gian)
-        return () => clearTimeout(timeout);
-      }
-    }
-  }, [currentPosts, currentPage, posts]);
+  const totalPages = Math.ceil(posts.length / postsPerPage);
 
   if (loading) {
     return (
@@ -94,18 +66,13 @@ function PostList() {
   }
 
   return (
-    <>
-      <div className={styles.postListContainer}>
-        <div className={styles.postHeader}>
-          <h2 className={styles.postTitle}>News</h2>
-          <div className={styles.postFilter}>
-            <span className={styles.activeFilter}>All</span>
-            <span>Latest</span>
-            <span>Popular</span>
-          </div>
-        </div>
+    <div className={styles.postListContainer}>
+      <div className={styles.postHeader}>
+        <h1 className={styles.postTitle}>News</h1>
+      </div>
 
-        {currentPosts.length > 0 ? (
+      {currentPosts.length > 0 ? (
+        <>
           <div className={styles.postGrid}>
             {currentPosts.map((post) => {
               const imageUrl = post.imageUrl
@@ -144,44 +111,45 @@ function PostList() {
                           {post.authorName || "Anonymous"}
                         </span>
                       </div>
-                      <span className={styles.postDate}>
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </span>
+                      <span className={styles.postDate}>{post.createdAt}</span>
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        ) : (
-          <div className={styles.emptyPostContainer}>
-            <div className={styles.emptyPostIcon}>📭</div>
-            <p>No news available at the moment</p>
-            <button className={styles.refreshButton} onClick={fetchPosts}>
-              Refresh
+          <div className={styles.pagination}>
+            <button
+              className={styles.pageButton}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+              disabled={currentPage === 0}
+            >
+              Previous
+            </button>
+            <span className={styles.pageNumber}>
+              Page {currentPage + 1} of {totalPages}
+            </span>
+            <button
+              className={styles.pageButton}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))
+              }
+              disabled={currentPage === totalPages - 1}
+            >
+              Next
             </button>
           </div>
-        )}
-
-        {/* Các nút chuyển trang */}
-        <div className={styles.pagination}>
-          <button
-            onClick={goToPreviousPage}
-            disabled={currentPage === 0}
-            className={styles.paginationButton}
-          >
-            Previous
-          </button>
-          <button
-            onClick={goToNextPage}
-            disabled={(currentPage + 1) * postsPerPage >= posts.length}
-            className={styles.paginationButton}
-          >
-            Next
+        </>
+      ) : (
+        <div className={styles.emptyPostContainer}>
+          <div className={styles.emptyPostIcon}>📭</div>
+          <p>No news available at the moment</p>
+          <button className={styles.refreshButton} onClick={fetchPosts}>
+            Refresh
           </button>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
 

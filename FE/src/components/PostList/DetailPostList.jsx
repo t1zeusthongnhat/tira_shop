@@ -2,23 +2,20 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Footer from "../Footer/Footer";
-import styles from "./detailStyles.module.scss"; // Tạo file SCSS riêng cho styling
+import styles from "./detailStyles.module.scss";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 function DetailPostList() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { postId } = useParams(); // Lấy postId từ URL
+  const { postId } = useParams();
   const navigate = useNavigate();
 
   const fetchPostDetail = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-
-      // if (!token) {
-      //   throw new Error("Please login to view post details.");
-      // }
-
       const url = `http://localhost:8080/tirashop/posts/${postId}`;
       const response = await fetch(url, {
         method: "GET",
@@ -29,7 +26,6 @@ function DetailPostList() {
       });
 
       if (response.status === 401) {
-     
         localStorage.removeItem("token");
         navigate("/auth");
         return;
@@ -40,8 +36,6 @@ function DetailPostList() {
       }
 
       const data = await response.json();
-      console.log("Post Detail Data:", data);
-
       if (data.status === "success" && data.data) {
         setPost(data.data);
       } else {
@@ -50,7 +44,7 @@ function DetailPostList() {
     } catch (err) {
       console.error("Error fetching post:", err);
       toast.error(err.message);
-      navigate("/posts"); // Quay lại danh sách nếu lỗi
+      navigate("/posts");
     } finally {
       setLoading(false);
     }
@@ -58,7 +52,7 @@ function DetailPostList() {
 
   useEffect(() => {
     fetchPostDetail();
-  }, [postId]); // Chạy lại khi postId thay đổi
+  }, [postId]);
 
   if (loading) {
     return (
@@ -70,7 +64,7 @@ function DetailPostList() {
   }
 
   if (!post) {
-    return null; // Hoặc có thể hiển thị thông báo "Post not found"
+    return null;
   }
 
   return (
@@ -94,30 +88,29 @@ function DetailPostList() {
                 {post.authorName || "Anonymous"}
               </span>
             </div>
-            <span className={styles.postDate}>
-              {new Date(post.createdAt).toLocaleDateString()}
-            </span>
+            <span className={styles.postDate}>{post.createdAt}</span>
           </div>
         </div>
 
         <div className={styles.postContent}>
           <img
-            src={post.imageUrl || "https://via.placeholder.com/800x400"}
+            src={
+              post.imageUrl
+                ? `http://localhost:8080${post.imageUrl}`
+                : "https://via.placeholder.com/800x400"
+            }
             alt={post.name || "Post Image"}
             className={styles.postImage}
           />
-          <div className={styles.postTopic}>{post.topic || "General"}</div>
-
-          <div className={styles.postDescription}>
-            <h3>Description</h3>
-            <p>{post.shortDescription || "No description available"}</p>
-          </div>
-
-          {/* Nếu API có nội dung chi tiết thì thêm phần này */}
+          {post.topic && <div className={styles.postTopic}>{post.topic}</div>}
           {post.content && (
             <div className={styles.postFullContent}>
-              <h3>Content</h3>
-              <div dangerouslySetInnerHTML={{ __html: post.content }} />
+              <div
+                className={styles.markdownContent}
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(marked.parse(post.content)),
+                }}
+              />
             </div>
           )}
         </div>

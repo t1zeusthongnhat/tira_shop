@@ -3,12 +3,13 @@
   margin: 0 auto;
   margin-top: 120px;
   padding: 20px;
+  background-color: #FFFFFF;
 }
 
 .backButton {
   background: none;
   border: none;
-  color: #007bff;
+  color: #960900;
   cursor: pointer;
   font-size: 16px;
   margin-bottom: 20px;
@@ -26,6 +27,7 @@
 .postTitle {
   font-size: 2rem;
   margin-bottom: 10px;
+  color: #960900;
 }
 
 .postMeta {
@@ -46,11 +48,15 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #007bff;
-  color: white;
+  background: #960900;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.authorName {
+  color: #960900;
 }
 
 .postContent {
@@ -67,26 +73,52 @@
 
 .postTopic {
   display: inline-block;
-  background: #f0f0f0;
+  background: rgba(150, 9, 0, 0.1);
   padding: 5px 10px;
   border-radius: 15px;
   font-size: 0.9rem;
+  color: #960900;
   margin-bottom: 20px;
 }
 
-.postDescription {
-  margin: 20px 0;
-
-  h3 {
-    margin-bottom: 10px;
-  }
-}
-
 .postFullContent {
-  margin: 20px 0;
+  margin-top: 20px;
 
-  h3 {
-    margin-bottom: 10px;
+  .markdownContent {
+    text-align: justify;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+    color: #333;
+
+    h1, h2, h3 {
+      margin: 1.5rem 0 1rem;
+      color: #960900;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      list-style-type: disc;
+    }
+
+    pre {
+      background: rgba(150, 9, 0, 0.05);
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    code {
+      background: rgba(150, 9, 0, 0.1);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #960900;
+    }
   }
 }
 
@@ -96,13 +128,14 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
+  background-color: #FFFFFF;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border: 4px solid rgba(150, 9, 0, 0.1);
+  border-top: 4px solid #960900;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
