@@ -26,28 +26,21 @@ function FixedHeader() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Xử lý trạng thái cuộn dựa trên đường dẫn
   useEffect(() => {
-    // Reset isScrolled về false khi chuyển trang
     setIsScrolled(false);
-
     if (location.pathname === "/") {
-      // Logic cuộn chỉ áp dụng cho trang chủ
       const handleScroll = () => {
         setIsScrolled(window.scrollY > 100);
       };
-      // Đặt trạng thái ban đầu dựa trên vị trí cuộn hiện tại
       setIsScrolled(window.scrollY > 100);
       window.addEventListener("scroll", handleScroll);
       return () => window.removeEventListener("scroll", handleScroll);
     } else {
-      // Nếu không phải trang chủ, luôn hiển thị FixedHeader
       setIsScrolled(true);
     }
-  }, [location.pathname]); // Chạy lại effect khi pathname thay đổi
+  }, [location.pathname]);
 
   const handleCartClick = () => {
-    console.log("Cart clicked, isAuthenticated:", isAuthenticated);
     if (!isAuthenticated) {
       toast.error("Please log in to view your cart");
       navigate("/auth");
@@ -57,41 +50,15 @@ function FixedHeader() {
   };
 
   const handleUserClick = () => {
-    console.log("User Icon clicked");
     navigate("/auth");
   };
-
-  const handleSignInClick = () => {
-    console.log("Sign In clicked");
-    navigate("/auth");
-  };
-
-  // const navigateToBestProducts = () => {
-  //   const bestProductsSection = document.querySelector(
-  //     `.${styles.productListContainer}`
-  //   );
-  //   if (bestProductsSection) {
-  //     bestProductsSection.scrollIntoView({ behavior: "smooth" });
-  //   } else {
-  //     navigate("/");
-  //     setTimeout(() => {
-  //       const section = document.querySelector(
-  //         `.${styles.productListContainer}`
-  //       );
-  //       if (section) section.scrollIntoView({ behavior: "smooth" });
-  //     }, 300);
-  //   }
-  // };
-
-  
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
   };
 
-  // Chỉ render FixedHeader khi isScrolled là true hoặc không phải trang chủ
   if (location.pathname === "/" && !isScrolled) {
-    return null; // Ẩn FixedHeader khi ở trang chủ và chưa cuộn
+    return null;
   }
 
   return (
@@ -109,7 +76,7 @@ function FixedHeader() {
           }`}
           onClick={() => navigate("/")}
         >
-         <img src={logo} alt="TIRA Logo" className={styles.logo} />
+          <img src={logo} alt="TIRA Logo" className={styles.logo} />
         </h1>
 
         <div
@@ -117,10 +84,12 @@ function FixedHeader() {
             isScrolled || location.pathname !== "/" ? styles.showNav : ""
           }`}
         >
-          <div className={styles.navItem} onClick={() => navigate("/category/all")}>
+          <div
+            className={styles.navItem}
+            onClick={() => navigate("/category/all")}
+          >
             Shop
           </div>
-         
           <div className={styles.navItem} onClick={() => navigate("/stores")}>
             Store System
           </div>
@@ -181,11 +150,10 @@ function FixedHeader() {
         </button>
         <ul className={styles.menuList}>
           <li onClick={() => navigate("/category/all")}>Shop</li>
-         
           <li onClick={() => navigate("/stores")}>Store System</li>
           <li onClick={() => navigate("/vouchers")}>Voucher</li>
           {!isAuthenticated ? (
-            <li onClick={handleSignInClick}>Sign In</li>
+            <li onClick={() => navigate("/auth")}>Sign In</li>
           ) : (
             <li onClick={handleLogout}>Logout</li>
           )}

@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 import { FaRegCommentDots } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
 import { FiX } from "react-icons/fi";
 import styles from "./chatbot.module.scss";
 import { useAppContext } from "../../context/AppContext";
 
-const API_URL = "https://df37-118-70-118-224.ngrok-free.app"; // Cập nhật API của bạn
+const API_URL = "https://df37-118-70-118-224.ngrok-free.app22";
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();
@@ -19,7 +18,6 @@ const ChatBox = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Initial welcome message
   useEffect(() => {
     if (messages.length === 0 && isOpen) {
       setIsTyping(true);
@@ -36,12 +34,10 @@ const ChatBox = () => {
     }
   }, [isOpen, messages.length]);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input when chat opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -57,6 +53,33 @@ const ChatBox = () => {
     }
     navigate(`/product/${productId}`);
     setIsOpen(false);
+  };
+
+  // Hàm xử lý và render nội dung tin nhắn, bao gồm các liên kết
+  const renderMessageContent = (content) => {
+    const linkRegex = /http:\/\/localhost:5173\/product\/(\d+)/g;
+    const parts = content.split(linkRegex);
+
+    return parts.map((part, index) => {
+      const match = content.match(linkRegex);
+      if (match && index % 2 === 1) {
+        const productId = match[Math.floor(index / 2)].split("/").pop();
+        return (
+          <a
+            key={index}
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLinkClick(productId);
+            }}
+            className={styles.messageLink}
+          >
+            View Product {productId}
+          </a>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   const sendMessage = async () => {
@@ -87,31 +110,17 @@ const ChatBox = () => {
       });
       const data = await response.json();
 
-      console.log(data);
-
-      console.log(data);
       let botMessage;
       if (!isAuthenticated) {
         botMessage = {
           role: "assistant",
           content:
-            "Please log in to view product details. You can log in [here](/auth).",
+            "Please log in to view product details. You can log in here: http://localhost:5173/auth",
         };
       } else {
-        // Replace links with clickable text
-        const contentWithLinks = data.replace(
-          /http:\/\/localhost:5173\/product\/(\d+)/g,
-          (match, productId) => {
-            return `[View Product ${productId}](#product-${productId})`;
-          }
-        );
-        botMessage = {
-          role: "assistant",
-          content: contentWithLinks,
-        };
+        botMessage = { role: "assistant", content: data };
       }
 
-      // Simulate natural response time
       setTimeout(() => {
         setMessages((prev) => [...prev, botMessage]);
         setIsTyping(false);
@@ -175,29 +184,9 @@ const ChatBox = () => {
                         : styles.assistantMessage
                     }
                   >
-                    <ReactMarkdown
-                      components={{
-                        a: ({ href, children }) => {
-                          if (href && href.startsWith("#product-")) {
-                            const productId = href.replace("#product-", "");
-                            return (
-                              <a
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleLinkClick(productId);
-                                }}
-                              >
-                                {children}
-                              </a>
-                            );
-                          }
-                          return <a href={href}>{children}</a>;
-                        },
-                      }}
-                    >
-                      {msg.content}
-                    </ReactMarkdown>
+                    <div className={styles.messageContent}>
+                      {renderMessageContent(msg.content)}
+                    </div>
                   </div>
                 </div>
               ))

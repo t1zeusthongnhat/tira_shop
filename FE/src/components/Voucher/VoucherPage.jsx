@@ -51,7 +51,6 @@ const VoucherPage = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentVouchers = vouchers.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(vouchers.length / itemsPerPage);
-
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
