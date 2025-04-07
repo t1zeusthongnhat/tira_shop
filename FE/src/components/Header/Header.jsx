@@ -11,7 +11,7 @@ import bannerGucci from "../../assets/icons/images/bannerGucci.png";
 import Cart from "../Cart/Cart";
 import Search from "../Search/Search";
 import FixedHeader from "./FixedHeader";
-import { useAppContext } from "../../Context/AppContext"; // Thêm import
+import { useAppContext } from "../../Context/AppContext";
 
 function MyHeader() {
   const navigate = useNavigate();
@@ -21,13 +21,13 @@ function MyHeader() {
     setIsAuthenticated,
     cart,
     setCart,
-    isSidebarOpen, // Sử dụng từ context
-    setIsSidebarOpen, // Sử dụng từ context
+    isSidebarOpen,
+    setIsSidebarOpen,
     isMenuOpen,
     setIsMenuOpen,
     isSearchOpen,
     setIsSearchOpen,
-  } = useAppContext(); // Sử dụng context
+  } = useAppContext();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -87,6 +87,7 @@ function MyHeader() {
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
+    setIsMenuOpen(false); // Đóng cả sidebar menu khi nhấp vào overlay
   };
 
   const handleLogout = () => {
@@ -101,22 +102,13 @@ function MyHeader() {
     navigate("/");
   };
 
-  const handleUpdateQuantity = async (cartId, productId, newQuantity, size) => {
-    // (Giữ nguyên logic như cũ)
-  };
-
-  const handleRemoveItem = async (cartId) => {
-    // (Giữ nguyên logic như cũ)
-  };
-
   const handleCartClick = () => {
-    console.log("Cart clicked, isAuthenticated:", isAuthenticated);
     if (!isAuthenticated) {
       toast.error("Please log in to view your cart");
       navigate("/auth");
       return;
     }
-    setIsSidebarOpen(true); // Dùng setIsSidebarOpen từ context
+    setIsSidebarOpen(true);
   };
 
   const isHomepage = location.pathname === "/";
@@ -175,24 +167,30 @@ function MyHeader() {
           <h1 className={styles.bannerTitle}>TIRA</h1>
         </div>
       </div>
+
+      {/* Overlay hiển thị khi sidebar menu hoặc giỏ hàng mở */}
       <div
-        className={`${styles.overlay} ${isSidebarOpen ? styles.show : ""}`}
+        className={`${styles.overlay} ${
+          isSidebarOpen || isMenuOpen ? styles.show : ""
+        }`}
         onClick={closeSidebar}
         style={{
-          opacity: isSidebarOpen ? 1 : 0,
-          visibility: isSidebarOpen ? "visible" : "hidden",
+          opacity: isSidebarOpen || isMenuOpen ? 1 : 0,
+          visibility: isSidebarOpen || isMenuOpen ? "visible" : "hidden",
         }}
       ></div>
+
       <Cart
         isSidebarOpen={isSidebarOpen}
-        closeSidebar={closeSidebar}
+        closeSidebar={() => setIsSidebarOpen(false)}
         cart={cart}
         setCart={setCart}
-        handleUpdateQuantity={handleUpdateQuantity}
-        handleRemoveItem={handleRemoveItem}
+        handleUpdateQuantity={() => {}} // Thêm logic nếu cần
+        handleRemoveItem={() => {}} // Thêm logic nếu cần
         fetchCart={fetchCart}
         navigate={navigate}
       />
+
       <div className={`${styles.sidebarMenu} ${isMenuOpen ? styles.open : ""}`}>
         <button
           className={styles.closeBtn}

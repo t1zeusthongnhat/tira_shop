@@ -252,12 +252,17 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 998; /* Giảm z-index để không đè lên sidebar */
+  z-index: 998; /* Giữ nguyên hoặc thấp hơn sidebarMenu */
   transition: opacity 0.4s ease, visibility 0s linear 0.4s;
-  pointer-events: auto; /* Đảm bảo overlay có thể tương tác */
+  pointer-events: auto;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease;
+  }
 }
 
-/* Sidebar Menu */
 .sidebarMenu {
   position: fixed;
   top: 0;
@@ -269,8 +274,10 @@
   margin: 0;
   box-shadow: -5px 0 30px rgba(0, 0, 0, 0.08);
   transition: right 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-  z-index: 1001; /* Đảm bảo sidebar cao hơn overlay */
+  z-index: 1001; /* Cao hơn overlay */
   overflow-y: auto;
+
+
 
   &.open {
     right: 0;
