@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 import { FaRegCommentDots } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
 import { FiX } from "react-icons/fi";
 import styles from "./chatbot.module.scss";
 import { useAppContext } from "../../context/AppContext";
 
-const API_URL = "https://7c21-118-70-118-224.ngrok-free.app"; // Cập nhật API của bạn
+const API_URL = "https://7c21-118-70-118-224.ngrok-free.app";
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();
@@ -19,7 +18,6 @@ const ChatBox = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Initial welcome message
   useEffect(() => {
     if (messages.length === 0 && isOpen) {
       setIsTyping(true);
@@ -27,8 +25,7 @@ const ChatBox = () => {
         setMessages([
           {
             role: "assistant",
-            content:
-              "Hello! I'm Tira's virtual assistant. How can I help you today?",
+            content: "Hello! I'm Tira's virtual assistant. How can I help you today?",
           },
         ]);
         setIsTyping(false);
@@ -36,12 +33,10 @@ const ChatBox = () => {
     }
   }, [isOpen, messages.length]);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input when chat opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -70,8 +65,7 @@ const ChatBox = () => {
     const updatedMessages = [
       {
         role: "system",
-        content:
-          "You are a virtual assistant of Tira Shop. Help customers find products or give advice.",
+        content: "You are a virtual assistant of Tira Shop. Help customers find products or give advice.",
       },
       ...messages,
       userMessage,
@@ -87,31 +81,34 @@ const ChatBox = () => {
       });
       const data = await response.json();
 
-      console.log(data);
-
-      console.log(data);
       let botMessage;
-      if (!isAuthenticated) {
-        botMessage = {
-          role: "assistant",
-          content:
-            "Please log in to view product details. You can log in [here](/auth).",
-        };
+
+      // Kiểm tra nếu người dùng yêu cầu xem sản phẩm
+      if (input.toLowerCase().includes("xem sản phẩm") || input.toLowerCase().includes("view products")) {
+        if (!isAuthenticated) {
+          botMessage = {
+            role: "assistant",
+            content: "Please log in to view product details. You can log in here.",
+          };
+        } else {
+          // Giả lập danh sách sản phẩm với hình ảnh (thay bằng dữ liệu từ API thực tế nếu có)
+          const products = [
+            { id: 1, name: "Product 1", image: "https://via.placeholder.com/240x240?text=Product+1" },
+            { id: 2, name: "Product 2", image: "https://via.placeholder.com/240x240?text=Product+2" },
+          ];
+          botMessage = {
+            role: "assistant",
+            content: "Here are some products:",
+            products: products, // Thêm danh sách sản phẩm với hình ảnh
+          };
+        }
       } else {
-        // Replace links with clickable text
-        const contentWithLinks = data.replace(
-          /http:\/\/localhost:5173\/product\/(\d+)/g,
-          (match, productId) => {
-            return `[View Product ${productId}](#product-${productId})`;
-          }
-        );
         botMessage = {
           role: "assistant",
-          content: contentWithLinks,
+          content: data.content || "Sorry, I didn't understand that.",
         };
       }
 
-      // Simulate natural response time
       setTimeout(() => {
         setMessages((prev) => [...prev, botMessage]);
         setIsTyping(false);
@@ -159,24 +156,35 @@ const ChatBox = () => {
             ) : (
               messages.map((msg, index) => (
                 <div
+                  key={index}
                   style={{
                     display: "flex",
                     justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
                   }}
                 >
-                  <div key={index} className={msg.role === "user" ? styles.userMessage : styles.assistantMessage}>
-                    <span>
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </span>
+                  <div
+                    className={
+                      msg.role === "user" ? styles.userMessage : styles.assistantMessage
+                    }
+                  >
+                    <span className={styles.messageText}>{msg.content}</span>
+                    {/* Hiển thị hình ảnh sản phẩm nếu có */}
+                    {msg.products && (
+                      <div className={styles.productList}>
+                        {msg.products.map((product) => (
+                          <div key={product.id} className={styles.productItem}>
+                            <img src={product.image} alt={product.name} />
+                            <span>{product.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
             )}
             {isTyping && (
-              <div
-                className={styles.messageRow}
-                style={{ justifyContent: "flex-start" }}
-              >
+              <div className={styles.messageRow} style={{ justifyContent: "flex-start" }}>
                 <div className={styles.assistantMessage}>
                   <div className={styles.typingIndicator}>
                     <span></span>

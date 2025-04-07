@@ -107,32 +107,17 @@
   border-radius: 20px;
 }
 
-.chatMessages img {
-  width: 100%;
-  max-width: 240px;
-  height: auto;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.chatMessages img:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
 .messageRow {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   position: relative;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeInUp 0.4s ease-out;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -142,122 +127,112 @@
 
 .userMessage {
   background: linear-gradient(135deg, #ff6b8b, #ff8e9e);
-  color: white;
-  border-radius: 18px 18px 4px 18px;
-  padding: 12px 16px;
+  border-radius: 20px 20px 8px 20px;
+  padding: 8px 12px;
   margin-left: auto;
   max-width: 80%;
-  box-shadow: 0 2px 8px rgba(255, 107, 139, 0.25);
+  box-shadow: 0 4px 12px rgba(255, 107, 139, 0.3);
+  position: relative;
+  transition: transform 0.2s ease;
 }
 
-.assistantMessage {
-  background: #fff5f7;
-  color: #333333;
-  border-radius: 18px 18px 18px 4px;
-  padding: 12px 16px;
-  margin-right: auto;
-  max-width: 80%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+.userMessage:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 139, 0.4);
 }
 
-.userMessage a,
-.assistantMessage a {
-  color: inherit;
-  text-decoration: underline;
+.userMessage .messageText {
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.5;
   font-weight: 500;
-  transition: all 0.2s;
+  display: block;
 }
 
 .userMessage a {
   color: #ffe0e0;
+  text-decoration: none;
+  border-bottom: 1px dashed #ffe0e0;
+}
+
+.userMessage a:hover {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+.assistantMessage {
+  background: #fff5f7;
+  border-radius: 20px 20px 20px 8px;
+  padding: 8px 12px;
+  margin-right: auto;
+  max-width: 80%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.assistantMessage:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.assistantMessage .messageText {
+  padding: 10px 14px;
+  color: #2c2c2c;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+  display: block;
+}
+
+/* Kiểu dáng cho danh sách sản phẩm */
+.productList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cột */
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.productItem {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.productItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.productItem img {
+  width: 100%;
+  max-width: 150px; /* Giới hạn chiều rộng hình ảnh */
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+}
+
+.productItem span {
+  display: block;
+  font-size: 14px;
+  color: #333333;
+  font-weight: 500;
 }
 
 .assistantMessage a {
   color: #ff6b8b;
+  text-decoration: none;
+  border-bottom: 1px dashed #ff6b8b;
 }
 
-.userMessage a:hover,
 .assistantMessage a:hover {
-  opacity: 0.85;
-}
-
-.placeholderText {
-  color: #9e9e9e;
-  text-align: center;
-  margin: 40px 0;
-  font-style: italic;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.6;
-  }
-}
-
-.assistantMessage ul,
-.assistantMessage ol {
-  padding-left: 20px;
-  margin: 10px 0;
-  list-style-position: outside;
-}
-
-.assistantMessage li {
-  margin-bottom: 6px;
-  padding-left: 6px;
-  line-height: 1.4;
-}
-
-.product-list {
-  background: #fff5f7;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid #ffd0d9;
-  margin-top: 16px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.product-item {
-  background: white;
-  padding: 12px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.product-list h3 {
-  color: #ff6b8b;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.product-list p {
-  margin: 5px 0;
-  font-size: 13px;
-  color: #555555;
-}
-
-.product-list img {
-  width: 100%;
-  height: 110px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  color: #ff4d6d;
+  border-bottom-color: #ff4d6d;
 }
 
 .inputContainer {
@@ -363,9 +338,34 @@
     background: #1e1e2c;
   }
 
+  .userMessage {
+    background: linear-gradient(135deg, #ff758e, #ff4d6d);
+    box-shadow: 0 4px 12px rgba(255, 107, 139, 0.4);
+  }
+
+  .userMessage .messageText {
+    color: #ffffff;
+  }
+
   .assistantMessage {
-    background: #2e2e3d;
-    color: #f0f0f5;
+    background: #353548;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .assistantMessage .messageText {
+    color: #e0e0e8;
+  }
+
+  .productList {
+    background: #353548;
+  }
+
+  .productItem {
+    background: #2a2a38;
+  }
+
+  .productItem span {
+    color: #e0e0e8;
   }
 
   .inputContainer {
@@ -386,22 +386,5 @@
 
   .inputField::placeholder {
     color: #8e8e9a;
-  }
-
-  .product-list {
-    background: #2e2a33;
-    border-color: #3d2a33;
-  }
-
-  .product-item {
-    background: #2a2a38;
-  }
-
-  .product-list p {
-    color: #b0b0ba;
-  }
-
-  .placeholderText {
-    color: #a0a0aa;
   }
 }
