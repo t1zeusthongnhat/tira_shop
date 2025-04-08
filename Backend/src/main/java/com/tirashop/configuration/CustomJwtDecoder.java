@@ -25,12 +25,10 @@ public class CustomJwtDecoder implements JwtDecoder {
             AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
 
-        // Kiểm tra nếu signerKey không hợp lệ
         if (signerKey == null || signerKey.trim().isEmpty()) {
             throw new IllegalArgumentException("JWT Signer Key must not be null or empty");
         }
 
-        // Khởi tạo NimbusJwtDecoder một lần duy nhất
         SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HmacSHA512");
         this.nimbusJwtDecoder = NimbusJwtDecoder
                 .withSecretKey(secretKeySpec)
@@ -53,16 +51,14 @@ public class CustomJwtDecoder implements JwtDecoder {
             throw new JwtException("Error while validating token: " + e.getMessage());
         }
 
-        // Giải mã token nếu hợp lệ
+
         Jwt jwt = nimbusJwtDecoder.decode(token);
 
-        // Kiểm tra token có bị vô hiệu hóa không
         String jwtId = jwt.getId();
         if (authenticationService.isTokenBlacklisted(jwtId)) {
             throw new JwtException("Token has been invalidated");
         }
 
-        // Kiểm tra claim "type" để xác định loại token
         String tokenType = jwt.getClaim("type");
         if ("refresh".equals(tokenType)) {
             throw new JwtException("Refresh Token cannot be used to access protected resources");
