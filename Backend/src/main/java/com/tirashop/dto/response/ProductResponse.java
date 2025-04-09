@@ -31,9 +31,9 @@ public class ProductResponse {
 
     private String size;
 
-    private Long categoryId; // Thay đổi thành CategoryDTO
+    private Long categoryId;
 
-    private Long brandId; // Thay đổi thành BrandDTO
+    private Long brandId;
 
     private int inventory;
 
@@ -47,5 +47,6 @@ public class ProductResponse {
     private Double averageRating;
 
     private Boolean isBestSeller;
+
 
 }
