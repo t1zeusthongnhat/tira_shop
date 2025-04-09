@@ -50,5 +50,9 @@ public class ProductDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate updatedAt;
 
-    private List<String> imageUrls; // Danh sách URL ảnh
+    private List<String> imageUrls;
+
+    private Double averageRating;
+
+    private Boolean isBestSeller;
 }

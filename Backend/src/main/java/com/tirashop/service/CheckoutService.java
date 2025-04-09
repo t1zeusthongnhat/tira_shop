@@ -35,13 +35,11 @@ public class CheckoutService {
     public OrderDTO checkout(String username, CheckoutRequestDTO request) {
         // 1. Lấy người dùng từ username
         User user = userRepository.findByUsername(username)
-                .orElseThrow(
-                        () -> new RuntimeException("User not found with username: " + username));
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
 
         // 2. Lấy giỏ hàng ACTIVE của người dùng
         Cart cart = cartRepository.findByUserIdAndStatus(user.getId(), Cart.CartStatus.ACTIVE)
-                .orElseThrow(
-                        () -> new RuntimeException("No active cart found for user: " + username));
+                .orElseThrow(() -> new RuntimeException("No active cart found for user: " + username));
 
         if (cart.getCartItems().isEmpty()) {
             throw new RuntimeException("Cart is empty, cannot proceed to checkout.");
@@ -63,8 +61,7 @@ public class CheckoutService {
         Voucher voucher = null;
         if (request.getVoucherId() != null) {
             voucher = voucherRepository.findById(request.getVoucherId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Voucher not found with ID: " + request.getVoucherId()));
+                    .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + request.getVoucherId()));
 
             if (voucher.getStatus() != Voucher.VoucherStatus.ACTIVE) {
                 throw new RuntimeException("Voucher is not active.");
@@ -90,7 +87,7 @@ public class CheckoutService {
         order.setUser(user);
         order.setShippingAddress(request.getShippingAddress());
         order.setTotalPrice(totalPrice);
-        order.setStatus(Order.OrderStatus.PENDING);
+        order.setStatus(Order.OrderStatus.COMPLETED); // Đặt trạng thái COMPLETED cho mọi trường hợp
         order.setPaymentStatus(Order.PaymentStatus.PENDING);
         order.setVoucher(voucher); // Liên kết với voucher (nếu có)
         order.setOrderItems(new ArrayList<>()); // Đảm bảo danh sách rỗng
@@ -120,8 +117,7 @@ public class CheckoutService {
         // 7. Xử lý thanh toán
         Payment payment = new Payment();
         payment.setOrder(order);
-        payment.setPaymentMethod(
-                Payment.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()));
+        payment.setPaymentMethod(Payment.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()));
         payment.setAmount(totalPrice);
         payment.setStatus(Payment.PaymentStatus.PENDING);
         payment.setCreatedAt(LocalDateTime.now());
@@ -131,15 +127,14 @@ public class CheckoutService {
         for (OrderItem orderItem : order.getOrderItems()) {
             Shipment shipment = new Shipment();
             shipment.setOrder(order);
-            shipment.setOrderItem(orderItem); // gắn với từng order item
+            shipment.setOrderItem(orderItem); // Gắn với từng OrderItem
             shipment.setTrackingNumber(UUID.randomUUID().toString());
             shipment.setShippingMethod("Standard Shipping");
-            shipment.setStatus(Shipment.ShipmentStatus.PENDING);
+            shipment.setStatus(Shipment.ShipmentStatus.PENDING); // Trạng thái PENDING cho shipment
             shipment.setCreatedAt(LocalDateTime.now());
 
             shipmentRepository.save(shipment);
         }
-
 
         // 9. Dọn dẹp giỏ hàng
         cart.getCartItems().clear(); // Xóa danh sách sản phẩm trong giỏ hàng
@@ -149,7 +144,6 @@ public class CheckoutService {
         // 10. Trả về thông tin đơn hàng qua DTO
         return toOrderDTO(order);
     }
-
 
     public OrderDTO toOrderDTO(Order order) {
         return new OrderDTO(
@@ -180,17 +174,13 @@ public class CheckoutService {
                 product.getId(),
                 product.getName(),
                 product.getBrand() != null ? product.getBrand().getName() : null,
-                // Lấy tên thương hiệu
                 product.getCategory() != null ? product.getCategory().getName() : null,
-                // Lấy tên danh mục
-                product.getSize(), // Lấy kích thước
-                product.getInventory(), // Lấy số lượng tồn kho
+                product.getSize(),
+                product.getInventory(),
                 orderItem.getQuantity(),
                 orderItem.getPrice(),
-                productImage, // URL ảnh sản phẩm
+                productImage,
                 orderItem.getCreatedAt()
         );
     }
-
-
 }

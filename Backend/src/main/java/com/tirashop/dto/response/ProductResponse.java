@@ -44,4 +44,8 @@ public class ProductResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate updatedAt;
 
+    private Double averageRating;
+
+    private Boolean isBestSeller;
+
 }
