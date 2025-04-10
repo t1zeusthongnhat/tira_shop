@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import Slider from "rc-slider"; // Import rc-slider
+import "rc-slider/assets/index.css"; // Import CSS của rc-slider
 import styles from "./styles.module.scss";
 import Footer from "../Footer/Footer";
 import { useAppContext } from "../../Context/AppContext";
@@ -17,7 +19,7 @@ function CategoryPage() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [priceRange, setPriceRange] = useState([0, 15000]);
+  const [priceRange, setPriceRange] = useState([0, 15000]); // Khoảng giá
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
@@ -30,7 +32,6 @@ function CategoryPage() {
     const token = localStorage.getItem("token");
     if (!token) {
       setIsSessionExpired(true);
-   
       navigate("/auth");
       return false;
     }
@@ -54,7 +55,7 @@ function CategoryPage() {
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json(); 
+      const data = await response.json();
       if (data.status === "success" && data.data?.elementList) {
         setCategories(data.data.elementList);
       }
@@ -79,9 +80,7 @@ function CategoryPage() {
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
-      
       if (data.status === "success" && data.data) {
-        
         setBrands(data.data);
       } else {
         toast.error(data.message || "Failed to fetch brands");
@@ -197,11 +196,9 @@ function CategoryPage() {
 
   const sizes = ["S", "M", "L", "XL"];
 
-  const handlePriceRangeChange = (e) => {
-    const { name, value } = e.target;
-    setPriceRange((prev) =>
-      name === "min" ? [parseInt(value), prev[1]] : [prev[0], parseInt(value)]
-    );
+  // Hàm xử lý thay đổi giá trị của slider
+  const handlePriceRangeChange = (value) => {
+    setPriceRange(value);
   };
 
   const handleBrandChange = (brand) => {
@@ -255,7 +252,6 @@ function CategoryPage() {
     }
   };
 
-  
   const resetFilters = () => {
     setPriceRange([0, 15000]);
     setSelectedCategories([]);
@@ -292,23 +288,25 @@ function CategoryPage() {
             <div className={styles.filterSection}>
               <h4>Price Range</h4>
               <div className={styles.priceRange}>
-                <input
-                  type="number"
-                  name="min"
-                  value={priceRange[0]}
+                {/* Sử dụng rc-slider thay vì hai ô input */}
+                <Slider
+                  range
+                  min={0}
+                  max={15000}
+                  value={priceRange}
                   onChange={handlePriceRangeChange}
-                  min="0"
-                  placeholder="Min"
+                  trackStyle={[{ backgroundColor: "var(--primary-color)" }]}
+                  handleStyle={[
+                    { borderColor: "var(--primary-color)" },
+                    { borderColor: "var(--primary-color)" },
+                  ]}
+                  railStyle={{ backgroundColor: "var(--border-color)" }}
                 />
-                <span>-</span>
-                <input
-                  type="number"
-                  name="max"
-                  value={priceRange[1]}
-                  onChange={handlePriceRangeChange}
-                  min="0"
-                  placeholder="Max"
-                />
+                <div className={styles.priceRangeValues}>
+                  <span>{priceRange[0]} $</span>
+                  <span>-</span>
+                  <span>{priceRange[1]} $</span>
+                </div>
               </div>
             </div>
             <div className={styles.filterSection}>
