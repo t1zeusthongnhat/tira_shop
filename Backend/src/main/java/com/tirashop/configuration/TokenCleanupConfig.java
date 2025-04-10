@@ -14,7 +14,7 @@ import java.util.Date;
 public class TokenCleanupConfig {
     private final InvalidatedTokenRepository invalidatedTokenRepository;
 
-    @Scheduled(cron = "0 0 0 */3 * ?") // Chạy vào 00:00, mỗi 3 ngày một lần
+    @Scheduled(cron = "0 0 0 */3 * ?")
     public void cleanExpiredTokens() {
         Date now = new Date();
         int deletedTokensCount = invalidatedTokenRepository.deleteAllByExpiryTimeBefore(now);

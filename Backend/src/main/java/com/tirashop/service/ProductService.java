@@ -5,10 +5,7 @@ import com.tirashop.dto.ProductDTO;
 import com.tirashop.dto.request.ProductRequest;
 import com.tirashop.dto.response.ProductResponse;
 import com.tirashop.model.PagedData;
-import com.tirashop.persitence.entity.Brand;
-import com.tirashop.persitence.entity.Category;
-import com.tirashop.persitence.entity.Image;
-import com.tirashop.persitence.entity.Product;
+import com.tirashop.persitence.entity.*;
 import com.tirashop.persitence.repository.BrandRepository;
 import com.tirashop.persitence.repository.CategoryRepository;
 import com.tirashop.persitence.repository.ImageRepository;
@@ -208,24 +205,36 @@ public class ProductService {
         productDTO.setStatus(product.getStatus());
         productDTO.setSize(product.getSize());
         productDTO.setTagName(product.getTagName());
-        productDTO.setCategoryId(
-                product.getCategory() != null ? product.getCategory().getId() : null);
-        productDTO.setCategoryName(
-                product.getCategory() != null ? product.getCategory().getName() : null);
+        productDTO.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        productDTO.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
         productDTO.setBrandId(product.getBrand() != null ? product.getBrand().getId() : null);
         productDTO.setBrandName(product.getBrand() != null ? product.getBrand().getName() : null);
         productDTO.setInventory(product.getInventory());
         productDTO.setCreatedAt(product.getCreatedAt());
         productDTO.setUpdatedAt(product.getUpdatedAt());
         productDTO.setOriginalPrice(product.getOriginalPrice());
-        // Lấy danh sách URL ảnh
         List<String> productUrl = product.getImages().stream().map(Image::getUrl).toList();
         productDTO.setImageUrls(productUrl);
+
+        // Tính trung bình đánh giá sao từ reviews
+        double averageRating = product.getReviews().isEmpty()
+                ? 0.0
+                : product.getReviews().stream()
+                .mapToDouble(Review::getRating) // Giả sử Review có getRating()
+                .average()
+                .orElse(0.0);
+        productDTO.setAverageRating(averageRating);
+
+        // Tính tổng số lượng bán ra từ orderItems (chỉ tính đơn hàng COMPLETED)
+        int totalSold = product.getOrderItems().stream()
+                .filter(orderItem -> orderItem.getOrder().getStatus() == Order.OrderStatus.COMPLETED)
+                .mapToInt(OrderItem::getQuantity)
+                .sum();
+        productDTO.setIsBestSeller(totalSold > 5);
 
         return productDTO;
     }
 
-    // Chuyển đổi từ Product sang ProductResponse
     private ProductResponse toResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -239,12 +248,28 @@ public class ProductService {
         response.setQuantity(product.getQuantity());
         response.setStatus(product.getStatus());
         response.setSize(product.getSize());
-        response.setCategoryId(
-                product.getCategory() != null ? product.getCategory().getId() : null);
+        response.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
         response.setBrandId(product.getBrand() != null ? product.getBrand().getId() : null);
         response.setInventory(product.getInventory());
         response.setCreatedAt(product.getCreatedAt());
         response.setUpdatedAt(product.getUpdatedAt());
+
+        // Tính trung bình đánh giá sao từ reviews
+        double averageRating = product.getReviews().isEmpty()
+                ? 0.0
+                : product.getReviews().stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0.0);
+        response.setAverageRating(averageRating);
+
+        // Tính tổng số lượng bán ra từ orderItems (chỉ tính đơn hàng COMPLETED)
+        int totalSold = product.getOrderItems().stream()
+                .filter(orderItem -> orderItem.getOrder().getStatus() == Order.OrderStatus.COMPLETED)
+                .mapToInt(OrderItem::getQuantity)
+                .sum();
+        response.setIsBestSeller(totalSold > 5);
+
         return response;
     }
 

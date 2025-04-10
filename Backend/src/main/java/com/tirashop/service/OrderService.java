@@ -91,31 +91,40 @@ public class OrderService {
         return new RevenueResponse(totalRevenue, productPerformances);
     }
 
+
     public PagedData<SearchOrderItem> searchOrders(String keyword, Pageable pageable) {
         var orderSpec = OrderSpecification.searchOrders(keyword);
         var orderPage = orderRepository.findAll(orderSpec, pageable);
 
         List<SearchOrderItem> orderItems = orderPage.getContent().stream().flatMap(order ->
-                order.getOrderItems().stream().map(orderItem ->
-                        new SearchOrderItem(
-                                order.getId(),
-                                order.getUser().getUsername(),
-                                orderItem.getProduct().getName(),
-                                orderItem.getProduct().getBrand() != null ? orderItem.getProduct()
-                                        .getBrand().getName() : null,
-                                orderItem.getProduct().getCategory() != null
-                                        ? orderItem.getProduct().getCategory().getName() : null,
-                                orderItem.getProduct().getSize(),
-                                orderItem.getQuantity(),
-                                orderItem.getPrice(),
-                                orderItem.getProduct().getImages() != null
-                                        && !orderItem.getProduct().getImages().isEmpty()
-                                        ? orderItem.getProduct().getImages().get(0).getUrl()
-                                        : null,
-                                order.getStatus().name(),
-                                order.getCreatedAt()
-                        )
-                )
+                order.getOrderItems().stream().map(orderItem -> {
+                    Shipment shipment = order.getShipments().stream()
+                            .filter(s -> s.getOrderItem() != null && s.getOrderItem().getId().equals(orderItem.getId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    String paymentMethod = order.getPayments().isEmpty()
+                            ? null
+                            : order.getPayments().get(0).getPaymentMethod().name();
+
+                    return new SearchOrderItem(
+                            order.getId(),
+                            order.getUser().getUsername(),
+                            orderItem.getProduct().getName(),
+                            orderItem.getProduct().getBrand() != null ? orderItem.getProduct().getBrand().getName() : null,
+                            orderItem.getProduct().getCategory() != null ? orderItem.getProduct().getCategory().getName() : null,
+                            orderItem.getProduct().getSize(),
+                            orderItem.getQuantity(),
+                            orderItem.getPrice(),
+                            orderItem.getProduct().getImages() != null && !orderItem.getProduct().getImages().isEmpty()
+                                    ? orderItem.getProduct().getImages().get(0).getUrl()
+                                    : null,
+                            order.getStatus().name(),
+                            paymentMethod,
+                            shipment != null ? shipment.getStatus().name() : null,
+                            order.getCreatedAt()
+                    );
+                })
         ).collect(Collectors.toList());
 
         return new PagedData<>(
@@ -133,7 +142,6 @@ public class OrderService {
             throw new RuntimeException("User must be logged in");
         }
 
-        // Chuyển đổi trạng thái từ String sang Enum
         Order.OrderStatus orderStatus;
         try {
             orderStatus = Order.OrderStatus.valueOf(status.toUpperCase());
@@ -141,10 +149,8 @@ public class OrderService {
             throw new RuntimeException("Invalid order status: " + status);
         }
 
-        // Lấy danh sách đơn hàng theo trạng thái
         List<Order> orders = orderRepository.findByUser_UsernameAndStatus(username, orderStatus);
 
-        // Lấy sản phẩm từ các đơn hàng
         return orders.stream()
                 .flatMap(order -> order.getOrderItems().stream())
                 .map(orderItem -> {
@@ -170,7 +176,6 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    // Lấy danh sách Shipment cho đơn hàng
     public List<ShipmentDetailDTO> getShipmentDetails(Long orderId, String username) {
         List<Shipment> shipments = shipmentRepository.findByOrder_Id(orderId);
 
@@ -180,16 +185,13 @@ public class OrderService {
     }
 
     public void updateOrderStatus(Long orderId, String username, String status) {
-        // Lấy thông tin đơn hàng từ ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Kiểm tra quyền sở hữu đơn hàng
         if (!order.getUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to update this order status.");
         }
 
-        // Kiểm tra trạng thái truyền vào có hợp lệ hay không
         Order.OrderStatus newStatus;
         try {
             newStatus = Order.OrderStatus.valueOf(status.toUpperCase());
@@ -197,7 +199,6 @@ public class OrderService {
             throw new RuntimeException("Invalid order status provided.");
         }
 
-        // Cập nhật trạng thái đơn hàng
         order.setStatus(newStatus);
         orderRepository.save(order);
     }
@@ -208,14 +209,12 @@ public class OrderService {
             throw new RuntimeException("User must be logged in");
         }
 
-        // Tìm danh sách các đơn hàng đã hoàn tất (COMPLETED) của người dùng
         List<Order> completedOrders = orderRepository.findByUser_UsernameAndStatus(username,
                 Order.OrderStatus.COMPLETED);
 
-        // Từ các đơn hàng, lấy danh sách sản phẩm đã mua
         return completedOrders.stream()
                 .flatMap(order -> order.getOrderItems()
-                        .stream()) // Lấy tất cả sản phẩm từ các đơn hàng
+                        .stream())
                 .map(orderItem -> {
                     Product product = orderItem.getProduct();
                     String productImage =
@@ -239,7 +238,6 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    // Xác nhận đã nhận hàng (User)
     public void confirmDelivery(Long shipmentId, String username) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new RuntimeException("Shipment not found"));
@@ -256,7 +254,6 @@ public class OrderService {
         shipmentRepository.save(shipment);
     }
 
-    // Admin: Cập nhật trạng thái giao hàng
     public void updateShipmentStatus(Long shipmentId, Shipment.ShipmentStatus status) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new RuntimeException("Shipment not found"));

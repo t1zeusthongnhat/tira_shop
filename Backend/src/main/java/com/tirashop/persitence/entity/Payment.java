@@ -40,9 +40,9 @@ public class Payment {
 
 
     public enum PaymentMethod {
-        PAYPAL,  // Thanh toán qua PayPal
-        BANK_TRANSFER,  // Thanh toán qua chuyển khoản ngân hàng
-        COD  // Thanh toán khi nhận hàng (Cash On Delivery)
+        PAYPAL,
+        BANK_TRANSFER,
+        COD
     }
 
     public enum PaymentStatus {
