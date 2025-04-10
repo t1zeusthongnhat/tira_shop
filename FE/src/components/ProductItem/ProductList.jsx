@@ -135,7 +135,7 @@ function ProductList({ isAuthenticated, categoryId }) {
           infinite
           autoPlay={false}
           keyBoardControl
-          showDots
+          
         >
           {memoizedProducts.map((product) => (
             <div key={product.id} className={styles.productItem}>

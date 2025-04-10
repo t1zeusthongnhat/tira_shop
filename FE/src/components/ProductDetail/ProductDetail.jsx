@@ -10,6 +10,7 @@ import { useAppContext } from "../../Context/AppContext";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import heart from "../../assets/icons/images/heart.png";
+import ProductList from "../ProductItem/ProductList";
 
 const responsiveMain = {
   desktop: { breakpoint: { max: 3000, min: 1024 }, items: 1 },
@@ -430,6 +431,7 @@ function ProductDetail() {
           </div>
         </div>
         <ProductReview />
+        <ProductList></ProductList>
       </div>
       <Footer />
     </>

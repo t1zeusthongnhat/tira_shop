@@ -9,8 +9,8 @@ import barIcon from "../../assets/icons/svgs/bar.svg";
 import closeIcon from "../../assets/icons/svgs/close.svg";
 import bannerGucci from "../../assets/icons/images/bannerGucci.png";
 import Cart from "../Cart/Cart";
-import Search from "../Search/Search";
 import FixedHeader from "./FixedHeader";
+import Search from "../Search/Search"; // Import Search component
 import { useAppContext } from "../../Context/AppContext";
 
 function MyHeader() {
@@ -28,6 +28,17 @@ function MyHeader() {
     isSearchOpen,
     setIsSearchOpen,
   } = useAppContext();
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    setIsScrolled(window.scrollY > 100);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -87,7 +98,7 @@ function MyHeader() {
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
-    setIsMenuOpen(false); // Đóng cả sidebar menu khi nhấp vào overlay
+    setIsMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -109,6 +120,10 @@ function MyHeader() {
       return;
     }
     setIsSidebarOpen(true);
+  };
+
+  const toggleSearch = () => {
+    setIsSearchOpen((prev) => !prev);
   };
 
   const isHomepage = location.pathname === "/";
@@ -143,11 +158,7 @@ function MyHeader() {
               src={searchIcon}
               alt="Search Icon"
               className={styles.headerIcon}
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            />
-            <Search
-              isSearchOpen={isSearchOpen}
-              setIsSearchOpen={setIsSearchOpen}
+              onClick={toggleSearch}
             />
             <img
               src={barIcon}
@@ -156,6 +167,13 @@ function MyHeader() {
               onClick={() => setIsMenuOpen(true)}
             />
           </div>
+          {/* Hiển thị Search component khi chưa cuộn */}
+          {isSearchOpen && !isScrolled && (
+            <Search
+              isSearchOpen={isSearchOpen}
+              setIsSearchOpen={setIsSearchOpen}
+            />
+          )}
         </header>
       )}
 
@@ -168,7 +186,6 @@ function MyHeader() {
         </div>
       </div>
 
-      {/* Overlay hiển thị khi sidebar menu hoặc giỏ hàng mở */}
       <div
         className={`${styles.overlay} ${
           isSidebarOpen || isMenuOpen ? styles.show : ""
@@ -185,8 +202,8 @@ function MyHeader() {
         closeSidebar={() => setIsSidebarOpen(false)}
         cart={cart}
         setCart={setCart}
-        handleUpdateQuantity={() => {}} // Thêm logic nếu cần
-        handleRemoveItem={() => {}} // Thêm logic nếu cần
+        handleUpdateQuantity={() => {}}
+        handleRemoveItem={() => {}}
         fetchCart={fetchCart}
         navigate={navigate}
       />
@@ -221,7 +238,6 @@ function MyHeader() {
             My Account
           </li>
           <li onClick={() => navigate("/orders")}>My Orders</li>
-          <li>Contact Us</li>
         </ul>
       </div>
     </>

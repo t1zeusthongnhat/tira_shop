@@ -54,7 +54,7 @@ function FixedHeader() {
   };
 
   const toggleSearch = () => {
-    setIsSearchOpen(!isSearchOpen);
+    setIsSearchOpen((prev) => !prev);
   };
 
   if (location.pathname === "/" && !isScrolled) {
@@ -128,10 +128,12 @@ function FixedHeader() {
             className={styles.headerIcon}
             onClick={toggleSearch}
           />
-          <Search
-            isSearchOpen={isSearchOpen}
-            setIsSearchOpen={setIsSearchOpen}
-          />
+          {isSearchOpen && (
+            <Search
+              isSearchOpen={isSearchOpen}
+              setIsSearchOpen={setIsSearchOpen}
+            />
+          )}
           <img
             src={barIcon}
             alt="Menu Icon"

@@ -1,171 +1,173 @@
 // styles.module.scss
 
-// Biến màu sắc
-$background-color: #ffffff; // Nền trắng
-$card-background: #f9fafb; // Nền card nhạt
-$text-color: #2d3748; // Chữ chính (xám đậm)
-$muted-text-color: #718096; // Chữ phụ (xám nhạt)
-$primary-color: #a3bffa; // Màu chính (xanh lam nhạt)
-$accent-color: #fbb6ce; // Màu điểm nhấn (hồng phấn)
-$star-color: #fbd38d; // Màu sao (vàng nhạt)
-$border-color: #e2e8f0; // Màu viền
+// Variables
+$primary-color: #C00900;
+$secondary-color: #f7f7f7;
+$text-color: #333;
+$border-color: #e0e0e0;
+$star-color: #ffce00;
+$success-color: #4caf50;
+$error-color: #f44336;
 
-// Mixin cho bóng đổ
-@mixin box-shadow($level: 1) {
-  @if $level == 1 {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  } @else if $level == 2 {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-// Mixin cho transition
-@mixin transition($property: all, $duration: 0.3s) {
-  transition: $property $duration ease-in-out;
-}
-
-// Container chính
 .reviewsContainer {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 50px 20px;
-  background-color: $background-color;
-  color: $text-color;
-}
+  padding: 2rem 1rem;
+  font-family: 'Poppins', sans-serif;
+  .reviewUserInfo {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
 
-// Tiêu đề
-.reviewsTitle {
-  font-size: 34px;
-  font-weight: 700;
-  color: $text-color;
-  text-align: center;
-  margin-bottom: 40px;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  background: linear-gradient(90deg, $primary-color, $accent-color);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-// Form thêm review
-.reviewForm {
-  margin-bottom: 50px;
-  padding: 30px;
-  background-color: $card-background;
-  border-radius: 12px;
-  border: 1px solid $accent-color;
-  @include box-shadow(1);
-
-  h4 {
-    font-size: 24px;
-    font-weight: 600;
-    color: $text-color;
-    margin-bottom: 25px;
-    text-align: center;
-    position: relative;
-
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
+    .reviewUserAvatar {
       width: 50px;
-      height: 3px;
-      background: linear-gradient(90deg, $primary-color, $accent-color);
-      border-radius: 2px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 1rem;
+    }
+
+    .avatarPlaceholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #555;
+      margin-right: 1rem;
+    }
+
+    .reviewUserDetails {
+      display: flex;
+      flex-direction: column;
+
+      .reviewUser {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .reviewUserRole {
+        color: #777;
+        font-size: 0.9rem;
+      }
     }
   }
 }
 
-.formGroup {
-  margin-bottom: 25px;
+.reviewsTitle {
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: $text-color;
+  font-weight: 600;
+  position: relative;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: $primary-color;
+  }
+}
 
+.reviewForm {
+  background-color: $secondary-color;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 3rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  
+  h4 {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    color: $text-color;
+    font-weight: 500;
+  }
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  
   label {
     display: block;
-    font-size: 16px;
+    margin-bottom: 0.5rem;
     font-weight: 500;
     color: $text-color;
-    margin-bottom: 10px;
   }
 }
 
 .reviewTextArea {
   width: 100%;
-  padding: 12px;
   border: 1px solid $border-color;
-  border-radius: 8px;
-  font-size: 14px;
-  color: $text-color;
-  background-color: #ffffff;
+  border-radius: 4px;
+  padding: 0.8rem;
   resize: vertical;
-  @include transition(border-color);
-
+  font-family: inherit;
+  
   &:focus {
     outline: none;
     border-color: $primary-color;
-    @include box-shadow(1);
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
   }
 }
 
 .imageInput {
   display: block;
-  font-size: 14px;
-  color: $text-color;
-  padding: 10px;
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  background-color: #ffffff;
-  @include transition(border-color);
-
-  &:focus {
-    outline: none;
-    border-color: $primary-color;
-  }
+  width: 100%;
+  padding: 0.5rem 0;
 }
 
 .submitButton {
-  display: block;
-  margin: 0 auto;
-  padding: 12px 35px;
   background-color: $primary-color;
-  color: #ffffff;
+  color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  @include transition(background-color);
-
+  transition: background-color 0.2s;
+  
   &:hover {
     background-color: darken($primary-color, 10%);
   }
-
+  
   &:disabled {
-    background-color: $muted-text-color;
+    background-color: lighten($primary-color, 20%);
     cursor: not-allowed;
   }
 }
 
-// Danh sách review
+// Cập nhật phần danh sách review - chuyển từ grid sang list
 .reviewsList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
-  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .reviewItem {
-  padding: 25px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid $accent-color;
-  @include box-shadow(1);
-  @include transition(transform);
-
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  
+  // Thêm border cho mỗi item trong danh sách
+  border: 1px solid $border-color;
+  
   &:hover {
-    transform: translateY(-5px);
-    @include box-shadow(2);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: darken($border-color, 10%);
   }
 }
 
@@ -173,129 +175,82 @@ $border-color: #e2e8f0; // Màu viền
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .reviewUser {
-  font-size: 18px;
   font-weight: 600;
   color: $text-color;
 }
 
 .reviewDate {
-  font-size: 14px;
-  color: $muted-text-color;
+  font-size: 0.9rem;
+  color: #777;
 }
 
 .reviewRating {
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  span {
-    font-size: 18px;
-  }
-
-  &::after {
-    content: "(5.0)";
-    font-size: 14px;
-    color: $muted-text-color;
-  }
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
 }
 
 .filledStar {
   color: $star-color;
+  margin-right: 0.2rem;
 }
 
 .emptyStar {
-  color: $border-color;
+  color: #ddd;
+  margin-right: 0.2rem;
 }
 
 .reviewText {
-  font-size: 16px;
-  color: $text-color;
+  margin-bottom: 1.5rem;
   line-height: 1.6;
-  margin-bottom: 20px;
+  color: $text-color;
 }
 
 .reviewImage {
-  max-width: 150px;
-  margin-top: 15px;
-
+  margin-bottom: 1.5rem;
+  
   img {
-    width: 100%;
-    border-radius: 8px;
-    @include box-shadow(1);
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 4px;
+    display: block;
   }
 }
 
 .reviewUserInfo {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-
+  border-top: 1px solid $border-color;
+  padding-top: 1rem;
+  
   img {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
+    margin-right: 1rem;
     object-fit: cover;
-    border: 2px solid $primary-color;
   }
 }
 
 .reviewUserDetails {
   display: flex;
   flex-direction: column;
+}
 
-  .reviewUser {
-    font-size: 16px;
-    font-weight: 600;
-    color: $text-color;
-  }
-
-  .reviewUserRole {
-    font-size: 14px;
-    color: $muted-text-color;
-  }
+.reviewUserRole {
+  font-size: 0.8rem;
+  color: #777;
 }
 
 .noReviews {
-  font-size: 18px;
-  color: $muted-text-color;
-  font-style: italic;
   text-align: center;
-  padding: 30px;
-  background-color: $card-background;
-  border-radius: 12px;
-  border: 1px solid $accent-color;
-  @include box-shadow(1);
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .reviewsContainer {
-    padding: 30px 15px;
-  }
-
-  .reviewsTitle {
-    font-size: 28px;
-  }
-
-  .reviewForm {
-    padding: 20px;
-
-    h4 {
-      font-size: 20px;
-    }
-  }
-
-  .reviewsList {
-    grid-template-columns: 1fr;
-  }
-
-  .reviewItem {
-    padding: 20px;
-  }
+  padding: 2rem;
+  color: #777;
+  font-style: italic;
+  background-color: $secondary-color;
+  border-radius: 8px;
+  border: 1px solid $border-color;
 }

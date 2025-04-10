@@ -9,7 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000 !important;
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   height: 96px;
   opacity: 1; /* Đảm bảo header luôn hiển thị để không ảnh hưởng MyHeader */
@@ -276,8 +276,6 @@
   transition: right 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 1001; /* Cao hơn overlay */
   overflow-y: auto;
-
-
 
   &.open {
     right: 0;

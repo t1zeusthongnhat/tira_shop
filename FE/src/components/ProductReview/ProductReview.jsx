@@ -1,19 +1,59 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom"; // Thêm useNavigate
 import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
 
 function ProductReview() {
   const { id } = useParams();
+  const navigate = useNavigate(); // Thêm navigate
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userProfile, setUserProfile] = useState(null); // Thêm state để lưu thông tin user
 
   // State cho form thêm review
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [image, setImage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Fetch user profile để lấy avatar
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setReviews([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/tirashop/user/my-profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/auth");
+          return;
+        }
+
+        const data = await response.json();
+        if (data.status === "success" && data.data) {
+          setUserProfile(data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
 
   // Fetch reviews
   useEffect(() => {
@@ -37,7 +77,7 @@ function ProductReview() {
 
         if (response.status === 401) {
           localStorage.removeItem("token");
-         
+          navigate("/auth");
           setLoading(false);
           return;
         }
@@ -65,7 +105,7 @@ function ProductReview() {
     };
 
     fetchReviews();
-  }, [id]);
+  }, [id, navigate]);
 
   // Hàm xử lý gửi review
   const handleSubmitReview = async (e) => {
@@ -85,6 +125,7 @@ function ProductReview() {
         position: "top-right",
         autoClose: 3000,
       });
+      navigate("/auth");
       return;
     }
 
@@ -109,7 +150,7 @@ function ProductReview() {
 
       if (response.status === 401) {
         localStorage.removeItem("token");
-       
+        navigate("/auth");
         setSubmitting(false);
         return;
       }
@@ -122,7 +163,14 @@ function ProductReview() {
           autoClose: 3000,
         });
 
-        setReviews((prevReviews) => [data.data, ...prevReviews]);
+        // Thêm avatar của người dùng hiện tại vào review mới
+        const newReview = {
+          ...data.data,
+          username: userProfile?.username || "Anonymous",
+          avatar: userProfile?.avatar || null, // Thêm avatar
+        };
+
+        setReviews((prevReviews) => [newReview, ...prevReviews]);
         setRating(0);
         setReviewText("");
         setImage(null);
@@ -265,10 +313,18 @@ function ProductReview() {
               )}
 
               <div className={styles.reviewUserInfo}>
-                <img
-                  src="https://via.placeholder.com/50"
-                  alt={review.username}
-                />
+                {/* Hiển thị avatar của người dùng */}
+                {review.username === userProfile?.username && userProfile?.avatar ? (
+                  <img
+                    src={`http://localhost:8080${userProfile.avatar}`}
+                    alt={review.username}
+                    className={styles.reviewUserAvatar}
+                  />
+                ) : (
+                  <div className={styles.avatarPlaceholder}>
+                    {review.username?.charAt(0) || "U"}
+                  </div>
+                )}
                 <div className={styles.reviewUserDetails}>
                   <span className={styles.reviewUser}>{review.username}</span>
                   <span className={styles.reviewUserRole}>Customer</span>

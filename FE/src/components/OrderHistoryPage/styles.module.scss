@@ -22,7 +22,7 @@ $border-light: #E0E0E0;
   background-color: $light-gray;
   min-height: 100vh;
   padding: 2rem 0;
-  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-family: "Inter", "Helvetica Neue", sans-serif;
 
   .orderHistoryPage {
     max-width: 1300px;
@@ -31,8 +31,7 @@ $border-light: #E0E0E0;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba($primary-red, 0.08);
     padding: 2.5rem;
-    
-    // Page Title
+
     h1 {
       color: $primary-red;
       text-align: center;
@@ -40,9 +39,9 @@ $border-light: #E0E0E0;
       font-weight: 700;
       margin-bottom: 2rem;
       position: relative;
-      
+
       &::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: -10px;
         left: 50%;
@@ -54,7 +53,6 @@ $border-light: #E0E0E0;
     }
   }
 
-  // Order Sections
   .orderSection {
     margin-bottom: 2.5rem;
 
@@ -67,14 +65,12 @@ $border-light: #E0E0E0;
       border-left: 5px solid $primary-red;
     }
 
-    // Order Items Grid
     .orderItems {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 1.5rem;
     }
 
-    // Individual Order Item
     .orderItem {
       @include flex-center;
       background-color: $white;
@@ -85,21 +81,22 @@ $border-light: #E0E0E0;
       @include smooth-transition;
 
       &:hover {
-        transform: translateY(-8px);
         box-shadow: 0 10px 25px rgba($primary-red, 0.12);
       }
 
-      // Image Container
       .itemImageContainer {
         position: relative;
         margin-right: 1.5rem;
+        width: 150px;
+        height: 150px;
 
         .itemImage {
-          width: 150px;
-          height: 150px;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
           border-radius: 12px;
           border: 2px solid $border-light;
+          display: block;
         }
 
         .itemQuantity {
@@ -117,7 +114,6 @@ $border-light: #E0E0E0;
         }
       }
 
-      // Item Details
       .itemDetails {
         flex-grow: 1;
 
@@ -142,7 +138,38 @@ $border-light: #E0E0E0;
     }
   }
 
-  // Back to Shop Button
+  .pagination {
+    @include flex-center;
+    gap: 1rem;
+    margin-top: 2rem;
+
+    .pageBtn {
+      background-color: $primary-red;
+      color: $white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      @include smooth-transition;
+
+      &:hover:not(:disabled) {
+        background-color: darken($primary-red, 8%);
+        transform: translateY(-2px);
+      }
+
+      &:disabled {
+        background-color: lighten($primary-red, 20%);
+        cursor: not-allowed;
+      }
+    }
+
+    .pageInfo {
+      color: $text-gray;
+      font-size: 1rem;
+    }
+  }
+
   .backToShop {
     @include flex-center;
     margin-top: 2.5rem;
@@ -168,7 +195,6 @@ $border-light: #E0E0E0;
   }
 }
 
-// Empty and Loading States
 p {
   &:first-child {
     text-align: center;
@@ -178,7 +204,6 @@ p {
   }
 }
 
-// Responsive Design
 @media screen and (max-width: 768px) {
   .orderHistoryPageWrapper {
     .orderHistoryPage {
@@ -199,6 +224,11 @@ p {
             margin-bottom: 1.5rem;
           }
         }
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 0.8rem;
       }
     }
   }
