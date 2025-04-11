@@ -264,6 +264,9 @@ function ProductDetail() {
                   {imageUrls.length > 0 ? (
                     imageUrls.map((url, index) => (
                       <div className={styles.mainImageWrapper} key={index}>
+                      {product.isBestSeller === true && (
+            <span className={styles.bestSellerBadge}>BestSeller</span>
+          )}
                         <img
                           src={`http://localhost:8080${url}`}
                           alt={`${product.name} ${index + 1}`}

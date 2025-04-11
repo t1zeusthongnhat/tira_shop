@@ -419,6 +419,9 @@ function CategoryPage() {
                 filteredProducts.map((product) => (
                   <div key={product.id} className={styles.productItem}>
                     <div className={styles.productImage}>
+                    {product.isBestSeller && (
+        <span className={styles.bestSellerBadge}>BestSeller</span>
+      )}
                       <img
                         src={
                           product.imageUrls?.[0]

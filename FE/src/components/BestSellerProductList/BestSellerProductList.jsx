@@ -143,6 +143,9 @@ function BestsellerProductList({ isAuthenticated }) {
                 className={styles.boxImg}
                 onClick={() => handleProductClick(product.id)}
               >
+              {product.isBestSeller && (
+        <span className={styles.bestSellerBadge}>BestSeller</span>
+      )}
                 <img
                   src={
                     product.imageUrls?.[0]

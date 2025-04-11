@@ -639,3 +639,17 @@ $success-color: #00a650;
 .mainCarousel{
   z-index: 0;
 }
+
+.bestSellerBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #ff4d4f; /* Màu đỏ nổi bật, bạn có thể thay đổi */
+  color: white;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  z-index: 10;
+  text-transform: uppercase;
+}
