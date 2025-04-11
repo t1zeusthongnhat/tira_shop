@@ -3,12 +3,12 @@ import Footer from "../Footer/Footer";
 import Brand from "../Brand/Brand";
 import Men from "../Men/BannerGucciMen";
 import Women from "../Women/BannerGucciWomen";
-import Sneaker from "../Sneaker/Sneaker";
 import PostList from "../PostList/PostList";
 import ProductList from "../ProductItem/ProductList";
 import ChatBox from "./ChatBox";
 import AIButton from "./AIButton";
 import { useAppContext } from "../../context/AppContext";
+import BestSellerProductList from "../BestSellerProductList/BestSellerProductList";
 
 function HomePage() {
   const { isAuthenticated, addToCart } = useAppContext();
@@ -19,7 +19,7 @@ function HomePage() {
       <div style={{ flex: '1 0 auto' }}>
         <Brand />
         <Men />
-        <Sneaker />
+        <BestSellerProductList></BestSellerProductList>
         <Women />
         <ProductList handleAddToCart={addToCart} isAuthenticated={isAuthenticated} />
         <PostList />

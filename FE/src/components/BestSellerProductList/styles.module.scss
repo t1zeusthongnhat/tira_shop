@@ -1,0 +1,113 @@
+.bestsellerListContainer {
+  padding: 20px;
+  background-color: #f9f9f9;
+
+  .bestProduct {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .productGrid {
+    display: flex;
+    gap: 20px;
+  }
+
+  .productItem {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    .boxImg {
+      cursor: pointer;
+      img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 500;
+      margin: 10px 0;
+      color: #333;
+    }
+
+    .category {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 10px;
+    }
+
+    .priceCl {
+      font-size: 16px;
+      font-weight: bold;
+      color: #e91e63;
+      margin-bottom: 10px;
+    }
+
+    .sizeSelector {
+      margin-bottom: 10px;
+      label {
+        font-size: 14px;
+        margin-right: 10px;
+      }
+      select {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+    }
+
+    .addToCartBtn {
+      background: #e91e63;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #d81b60;
+      }
+    }
+  }
+
+  .buttonContainer {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .button {
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #555;
+    }
+  }
+}

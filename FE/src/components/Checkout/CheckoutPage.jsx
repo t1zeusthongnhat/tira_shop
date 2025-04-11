@@ -19,7 +19,7 @@ function CheckoutPage() {
   const [pendingItems, setPendingItems] = useState([]); // Lưu danh sách sản phẩm PENDING
   const [orderId, setOrderId] = useState(null); // Lưu orderId sau khi tạo đơn hàng
   const [shipmentId, setShipmentId] = useState(null); // Lưu shipmentId
-  const shippingFee = 5.0;
+  const shippingFee = 0;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -431,7 +431,7 @@ function CheckoutPage() {
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Shipping Fee:</span>
-                  <span>${shippingFee.toFixed(2)}</span>
+                  <span>{shippingFee === 0 ? "Free" : `$${shippingFee.toFixed(2)}`}</span>
                 </div>
                 {voucherDiscount > 0 && (
                   <div className={styles.summaryRow}>

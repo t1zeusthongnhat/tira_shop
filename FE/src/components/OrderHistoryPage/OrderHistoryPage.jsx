@@ -144,6 +144,7 @@ function OrderHistoryPage() {
         ) : (
           <>
             {renderOrderItems(pendingItems, "Pending Orders")}
+            {renderOrderItems(purchasedItems, "Purchased")}
           
           </>
         )}

@@ -173,7 +173,6 @@ function FixedHeader() {
             My Account
           </li>
           <li onClick={() => navigate("/orders")}>My Orders</li>
-          <li onClick={() => navigate("/contact")}>Contact Us</li>
         </ul>
       </div>
     </>
