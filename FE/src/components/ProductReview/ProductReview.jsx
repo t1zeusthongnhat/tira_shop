@@ -1,17 +1,15 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Thêm useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
 
 function ProductReview() {
   const { id } = useParams();
-  const navigate = useNavigate(); // Thêm navigate
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userProfile, setUserProfile] = useState(null); // Thêm state để lưu thông tin user
-
-  // State cho form thêm review
+  const [userProfile, setUserProfile] = useState(null);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [image, setImage] = useState(null);
@@ -107,7 +105,6 @@ function ProductReview() {
     fetchReviews();
   }, [id, navigate]);
 
-  // Hàm xử lý gửi review
   const handleSubmitReview = async (e) => {
     e.preventDefault();
 
@@ -163,11 +160,10 @@ function ProductReview() {
           autoClose: 3000,
         });
 
-        // Thêm avatar của người dùng hiện tại vào review mới
         const newReview = {
           ...data.data,
           username: userProfile?.username || "Anonymous",
-          avatar: userProfile?.avatar || null, // Thêm avatar
+          avatar: userProfile?.avatar || null,
         };
 
         setReviews((prevReviews) => [newReview, ...prevReviews]);
@@ -193,7 +189,6 @@ function ProductReview() {
     }
   };
 
-  // Hàm render sao
   const renderStars = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -209,7 +204,6 @@ function ProductReview() {
     return stars;
   };
 
-  // Hàm chọn sao cho form
   const handleStarClick = (selectedRating) => {
     setRating(selectedRating);
   };
@@ -240,6 +234,59 @@ function ProductReview() {
 
   return (
     <div className={styles.reviewsContainer}>
+      {/* Danh sách review */}
+      {reviews.length === 0 ? (
+        <p className={styles.noReviews}>No reviews yet for this product.</p>
+      ) : (
+        <div className={styles.reviewsList}>
+          {reviews.map((review) => (
+            <div key={review.id} className={styles.reviewItem}>
+              <div className={styles.reviewHeader}>
+                <div className={styles.reviewUser}>{review.username}</div>
+                <div className={styles.reviewDate}>
+                  {formatDate(review.createdAt)}
+                </div>
+              </div>
+
+              <div className={styles.reviewRating}>
+                {renderStars(review.rating)}
+              </div>
+
+              <div className={styles.reviewText}>{review.reviewText}</div>
+
+              {review.image && (
+                <div className={styles.reviewImage}>
+                  <img
+                    src={`http://localhost:8080${review.image}`}
+                    alt="Review"
+                    className={styles.reviewImg}
+                  />
+                </div>
+              )}
+
+              <div className={styles.reviewUserInfo}>
+                {review.username === userProfile?.username && userProfile?.avatar ? (
+                  <img
+                    src={`http://localhost:8080${userProfile.avatar}`}
+                    alt={review.username}
+                    className={styles.reviewUserAvatar}
+                  />
+                ) : (
+                  <div className={styles.avatarPlaceholder}>
+                    {review.username?.charAt(0) || "U"}
+                  </div>
+                )}
+                <div className={styles.reviewUserDetails}>
+                  <span className={styles.reviewUser}>{review.username}</span>
+                  <span className={styles.reviewUserRole}>Customer</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tiêu đề */}
       <h3 className={styles.reviewsTitle}>What Our Customers Say</h3>
 
       {/* Form thêm review */}
@@ -281,59 +328,6 @@ function ProductReview() {
           </button>
         </form>
       </div>
-
-      {/* Danh sách review */}
-      {reviews.length === 0 ? (
-        <p className={styles.noReviews}>No reviews yet for this product.</p>
-      ) : (
-        <div className={styles.reviewsList}>
-          {reviews.map((review) => (
-            <div key={review.id} className={styles.reviewItem}>
-              <div className={styles.reviewHeader}>
-                <div className={styles.reviewUser}>{review.username}</div>
-                <div className={styles.reviewDate}>
-                  {formatDate(review.createdAt)}
-                </div>
-              </div>
-
-              <div className={styles.reviewRating}>
-                {renderStars(review.rating)}
-              </div>
-
-              <div className={styles.reviewText}>{review.reviewText}</div>
-
-              {review.image && (
-                <div className={styles.reviewImage}>
-                  <img
-                    src={`http://localhost:8080${review.image}`}
-                    alt="Review"
-                    className={styles.reviewImg}
-                  />
-                </div>
-              )}
-
-              <div className={styles.reviewUserInfo}>
-                {/* Hiển thị avatar của người dùng */}
-                {review.username === userProfile?.username && userProfile?.avatar ? (
-                  <img
-                    src={`http://localhost:8080${userProfile.avatar}`}
-                    alt={review.username}
-                    className={styles.reviewUserAvatar}
-                  />
-                ) : (
-                  <div className={styles.avatarPlaceholder}>
-                    {review.username?.charAt(0) || "U"}
-                  </div>
-                )}
-                <div className={styles.reviewUserDetails}>
-                  <span className={styles.reviewUser}>{review.username}</span>
-                  <span className={styles.reviewUserRole}>Customer</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
