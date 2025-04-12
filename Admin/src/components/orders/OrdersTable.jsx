@@ -4,7 +4,6 @@ import { Eye } from 'lucide-react';
 import { toast } from 'react-toastify';
 import OrderDetailModal from './OrderDetailModal';
 import Pagination from '../common/Pagination';
-import { GiConfirmed } from "react-icons/gi";
 
 const OrdersTable = () => {
   const [orders, setOrders] = useState([]);
@@ -19,28 +18,47 @@ const OrdersTable = () => {
 
   const statusOptions = ['PENDING', 'COMPLETED', 'CANCELLED'];
 
+
   useEffect(() => {
     fetchOrders();
   }, [currentPage]);
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/tirashop/orders`);
-      const allOrders = response.data.data.elementList || [];
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:8080/tirashop/orders', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-      const formattedOrders = allOrders.map((o) => ({
+      let fetchedOrders = response.data?.data?.elementList || [];
+
+      setTotalPages(Math.ceil(fetchedOrders.length / pageSize));
+
+      const paginatedOrders = fetchedOrders.slice(
+        currentPage * pageSize,
+        (currentPage + 1) * pageSize
+      );
+
+      // ✅ Format nếu cần (gán thêm id chẳng hạn)
+      const formattedOrders = paginatedOrders.map(o => ({
         ...o,
-        id: o.order_id 
+        id: o.orderId
       }));
-      
-      setTotalPages(Math.ceil(formattedOrders.length / pageSize));
-      const paginated = formattedOrders.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
-      setOrders(paginated);
+
+      setOrders(formattedOrders);
     } catch (err) {
-      console.error("Error fetching orders:", err);
-      toast.error("Failed to load orders.");
+      console.error("❌ Lỗi khi fetchOrders:", err);
+      toast.error("Không thể tải danh sách đơn hàng.");
     }
   };
+
+
+  const handleShipmentStatusUpdated = () => {
+    fetchOrders(); // cập nhật lại danh sách đơn hàng sau khi shipment đổi trạng thái
+  };
+
 
   const handlePageChange = (page) => {
     if (page >= 0 && page < totalPages) {
@@ -54,10 +72,10 @@ const OrdersTable = () => {
 
 
   const handleViewDetail = (order) => {
-    console.log(selectedOrder?.id)
     setSelectedOrder(order);
     setIsDetailModalOpen(true);
   };
+
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -78,11 +96,12 @@ const OrdersTable = () => {
         <table className="min-w-full divide-y divide-gray-300 text-sm">
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Username</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Customer</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Product</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Size</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Quantity</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Price</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Payment Method</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date and Time</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Image</th>
               <th className="pl-12 pr-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
@@ -97,6 +116,7 @@ const OrdersTable = () => {
                 <td className="px-4 py-4 min-w-[60px]">{item.size}</td>
                 <td className="px-4 py-4 min-w-[80px]">{item.quantity}</td>
                 <td className="px-4 py-4 min-w-[120px]">${item.price?.toLocaleString()}</td>
+                <td className="px-4 py-4 min-w-[120px]">{item.paymentMethod}</td>
                 <td className="px-4 py-4 min-w-[180px]">{item.createdAt}</td>
                 <td className="px-4 py-4 min-w-[80px]">
                   <img
@@ -145,14 +165,6 @@ const OrdersTable = () => {
                       >
                         <Eye size={18} />
                       </button>
-
-                      <button
-                        className="text-green-600 hover:text-green-500"
-                        onClick={() => handleConfirmShipment(item.id)}
-                        title="Xác nhận giao hàng"
-                      >
-                        <GiConfirmed size={18} />
-                      </button>
                     </div>
                   ) : (
                     <Eye size={18} className="text-gray-400 cursor-not-allowed" />
@@ -171,6 +183,7 @@ const OrdersTable = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         orderId={selectedOrder?.id}
+        onShipmentUpdated={handleShipmentStatusUpdated}
       />
 
     </div>
