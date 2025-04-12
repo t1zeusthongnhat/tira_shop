@@ -22,6 +22,7 @@ public class SearchOrderItem {
 
     private String orderStatus;
     private String paymentMethod;
+    private Long shipmentId; 
     private String shipmentStatus;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")

@@ -121,6 +121,7 @@ public class OrderService {
                                     : null,
                             order.getStatus().name(),
                             paymentMethod,
+                            shipment.getId(),
                             shipment != null ? shipment.getStatus().name() : null,
                             order.getCreatedAt()
                     );
@@ -270,6 +271,7 @@ public class OrderService {
                 : null;
 
         return new ShipmentDetailDTO(
+                shipment.getId(),
                 shipment.getTrackingNumber(),
                 shipment.getShippingMethod(),
                 shipment.getStatus().name(),

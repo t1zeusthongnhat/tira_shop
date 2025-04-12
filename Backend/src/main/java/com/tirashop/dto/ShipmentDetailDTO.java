@@ -11,15 +11,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShipmentDetailDTO {
-    private String trackingNumber;      // Mã vận chuyển
-    private String shippingMethod;      // Phương thức giao hàng
-    private String status;              // Trạng thái giao hàng
-    private Long productId;             // Mã sản phẩm
-    private String productName;         // Tên sản phẩm
-    private String productImage;        // Ảnh sản phẩm
-    private int quantity;               // Số lượng
+    private Long shipmentId;
+    private String trackingNumber;
+    private String shippingMethod;
+    private String status;
+    private Long productId;
+    private String productName;
+    private String productImage;
+    private int quantity;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
-    private LocalDateTime createdAt;    // Ngày tạo vận chuyển
+    private LocalDateTime createdAt;
 }
 
