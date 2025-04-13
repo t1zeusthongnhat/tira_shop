@@ -72,7 +72,7 @@ const VirtualTryOn = ({ isOpen, onClose }) => {
           clearInterval(interval);
           alert("An error occurred while checking the result.");
         }
-      }, 15000);
+      }, 15500);
 
       return () => clearInterval(interval);
     }

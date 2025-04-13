@@ -415,8 +415,7 @@ function CheckoutPage() {
                     <p className={styles.itemPrice}>
                       $
                       {(
-                        (item.productPrice || 0) * (item.quantity || 0)
-                      ).toFixed(2)}
+                        (item.productPrice * item.quantity).toLocaleString("en-US"))}
                     </p>
                   </div>
                 ))}
@@ -427,17 +426,17 @@ function CheckoutPage() {
               <div className={styles.summaryDetails}>
                 <div className={styles.summaryRow}>
                   <span>Subtotal:</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{subtotal.toLocaleString("en-US")} $</span>
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Shipping Fee:</span>
-                  <span>{shippingFee === 0 ? "Free" : `$${shippingFee.toFixed(2)}`}</span>
+                  <span>{shippingFee === 0 ? "Free" : `{shippingFee.toLocaleString("en-US")} $`}</span>
                 </div>
                 {voucherDiscount > 0 && (
                   <div className={styles.summaryRow}>
                     <span>Discount:</span>
                     <span className={styles.discountValue}>
-                      -${voucherDiscount.toFixed(2)}
+                    {voucherDiscount.toLocaleString("en-US")} $
                     </span>
                   </div>
                 )}
@@ -447,7 +446,7 @@ function CheckoutPage() {
                 <div className={`${styles.summaryRow} ${styles.totalRow}`}>
                   <span>Total:</span>
                   <span className={styles.totalAmount}>
-                    ${total.toFixed(2)}
+                  {total.toLocaleString("en-US")} $
                   </span>
                 </div>
 

@@ -206,7 +206,7 @@ function Cart() {
               <div className={styles.itemDetails}>
                 <h4>{item.productName}</h4>
                 <p className={styles.price}>
-                  ${item.productPrice.toFixed(2)} × {item.quantity}
+                {item.productPrice.toLocaleString()} $ × {item.quantity}
                 </p>
                 <div className={styles.quantityControls}>
                   <button
@@ -238,7 +238,7 @@ function Cart() {
         <div className={styles.cartFooter}>
           <div className={styles.total}>
             <span>Total:</span>
-            <h3>${total.toFixed(2)}</h3>
+            <h3>{total.toLocaleString()} $</h3> 
           </div>
           <div className={styles.footerButtons}>
             <button onClick={clearCart} className={styles.clearCartButton}>

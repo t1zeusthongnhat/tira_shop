@@ -14,6 +14,30 @@ const responsive = {
   mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
 };
 
+// Helper function to format price with commas, without .00
+const formatPrice = (price) => {
+  if (!price) return "N/A";
+  return Math.floor(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " $";
+};
+
+// Helper function to render star rating
+const renderStars = (rating) => {
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+  const emptyStars = 5 - fullStars - halfStar;
+  return (
+    <>
+      {[...Array(fullStars)].map((_, i) => (
+        <span key={`full-${i}`} className={styles.star}>★</span>
+      ))}
+      {halfStar ? <span className={styles.star}>☆</span> : null}
+      {[...Array(emptyStars)].map((_, i) => (
+        <span key={`empty-${i}`} className={styles.star}>☆</span>
+      ))}
+    </>
+  );
+};
+
 function BestsellerProductList({ isAuthenticated }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,21 +56,17 @@ function BestsellerProductList({ isAuthenticated }) {
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch(
-        "http://localhost:8080/tirashop/product",
-        { method: "GET", headers }
-      );
+      const response = await fetch("http://localhost:8080/tirashop/product/bestsellers", {
+        method: "GET",
+        headers,
+      });
       const data = await response.json();
       if (data.status === "success") {
-        const productList = data.data.elementList || [];
-        // Lọc các sản phẩm có isBestSeller: true
-        const bestSellerProducts = productList.filter(
-          (product) => product.isBestSeller === true
-        );
+        const bestSellerProducts = data.data || [];
         setProducts(bestSellerProducts);
         setSelectedSizes(
           bestSellerProducts.reduce((acc, product) => {
-            acc[product.id] = "M";
+            acc[product.id] = product.size; // Chỉ gán trực tiếp size từ API
             return acc;
           }, {})
         );
@@ -71,49 +91,40 @@ function BestsellerProductList({ isAuthenticated }) {
     [navigate]
   );
 
-  const handleSizeChange = useCallback((productId, size) => {
-    setSelectedSizes((prev) => ({ ...prev, [productId]: size }));
-  }, []);
-
   const handleAddToCart = useCallback(
     async (product) => {
       const token = localStorage.getItem("token");
-      if (!token) {
+      if (!token || !isAuthenticated) {
         toast.error("Please log in to add to cart");
         navigate("/auth");
         return;
       }
       try {
-        const response = await fetch(
-          "http://localhost:8080/tirashop/cart/add",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              productId: product.id,
-              quantity: 1,
-              productSize: selectedSizes[product.id] || "M",
-            }),
-          }
-        );
+        const response = await fetch("http://localhost:8080/tirashop/cart/add", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: product.id,
+            quantity: 1,
+            productSize: selectedSizes[product.id] || "M",
+          }),
+        });
         const data = await response.json();
         if (response.ok && data.status === "success") {
           toast.success("Added to cart successfully!");
           await fetchCart();
           setIsSidebarOpen(true);
         } else {
-          toast.error(
-            `Unable to add to cart: ${data.message || "Unknown error"}`
-          );
+          toast.error(`Unable to add to cart: ${data.message || "Unknown error"}`);
         }
       } catch (error) {
         toast.error("Error adding to cart. Please try again.");
       }
     },
-    [navigate, fetchCart, setIsSidebarOpen, selectedSizes]
+    [isAuthenticated, navigate, fetchCart, setIsSidebarOpen, selectedSizes]
   );
 
   const memoizedProducts = useMemo(() => products.slice(0, 7), [products]);
@@ -143,9 +154,9 @@ function BestsellerProductList({ isAuthenticated }) {
                 className={styles.boxImg}
                 onClick={() => handleProductClick(product.id)}
               >
-              {product.isBestSeller && (
-        <span className={styles.bestSellerBadge}>BestSeller</span>
-      )}
+                {product.isBestSeller && (
+                  <span className={styles.bestSellerBadge}>BestSeller</span>
+                )}
                 <img
                   src={
                     product.imageUrls?.[0]
@@ -162,19 +173,23 @@ function BestsellerProductList({ isAuthenticated }) {
                 {product.brandName || "Unknown brand"} -{" "}
                 {product.categoryName || "No category"}
               </div>
-              <div className={styles.priceCl}>
-                {product.price ? product.price.toFixed(2) : "N/A"} $
+              <div className={styles.priceContainer}>
+                <span className={styles.priceCl}>
+                  {formatPrice(product.price)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className={styles.originalPrice}>
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
               </div>
-              <div className={styles.sizeSelector}>
-                <label>Select Size:</label>
-                <select
-                  onChange={(e) => handleSizeChange(product.id, e.target.value)}
-                  value={selectedSizes[product.id] || "M"}
-                >
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                </select>
+              <div className={styles.ratingSizeContainer}>
+                <div className={styles.rating}>
+                  {renderStars(product.averageRating || 0)}
+                </div>
+                <div className={styles.sizeDisplay}>
+                  <span>Size: {selectedSizes[product.id] || "N/A"}</span>
+                </div>
               </div>
               <button
                 onClick={() => handleAddToCart(product)}
@@ -188,7 +203,7 @@ function BestsellerProductList({ isAuthenticated }) {
       </div>
       <div className={styles.buttonContainer}>
         <button className={styles.button} onClick={handleSeeMore}>
-          See More Products 
+          See More Products
         </button>
       </div>
     </div>

@@ -14,6 +14,30 @@ const responsive = {
   mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
 };
 
+// Helper function to format price with commas, without .00
+const formatPrice = (price) => {
+  if (!price) return "N/A";
+  return Math.floor(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " $";
+};
+
+// Helper function to render star rating
+const renderStars = (rating) => {
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+  const emptyStars = 5 - fullStars - halfStar;
+  return (
+    <>
+      {[...Array(fullStars)].map((_, i) => (
+        <span key={`full-${i}`} className={styles.star}>★</span>
+      ))}
+      {halfStar ? <span className={styles.star}>☆</span> : null}
+      {[...Array(emptyStars)].map((_, i) => (
+        <span key={`empty-${i}`} className={styles.star}>☆</span>
+      ))}
+    </>
+  );
+};
+
 function ProductList({ isAuthenticated, categoryId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,10 +66,14 @@ function ProductList({ isAuthenticated, categoryId }) {
       const data = await response.json();
       if (data.status === "success") {
         const productList = data.data.elementList || [];
-        setProducts(productList);
+        // Lọc bỏ các sản phẩm có isBestSeller: true
+        const filteredProducts = productList.filter(
+          (product) => product.isBestSeller !== true
+        );
+        setProducts(filteredProducts);
         setSelectedSizes(
-          productList.reduce((acc, product) => {
-            acc[product.id] = "M";
+          filteredProducts.reduce((acc, product) => {
+            acc[product.id] = product.size || "M";
             return acc;
           }, {})
         );
@@ -70,10 +98,6 @@ function ProductList({ isAuthenticated, categoryId }) {
     [navigate]
   );
 
-  const handleSizeChange = useCallback((productId, size) => {
-    setSelectedSizes((prev) => ({ ...prev, [productId]: size }));
-  }, []);
-
   const handleAddToCart = useCallback(
     async (product) => {
       const token = localStorage.getItem("token");
@@ -83,30 +107,25 @@ function ProductList({ isAuthenticated, categoryId }) {
         return;
       }
       try {
-        const response = await fetch(
-          "http://localhost:8080/tirashop/cart/add",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              productId: product.id,
-              quantity: 1,
-              productSize: selectedSizes[product.id] || "M",
-            }),
-          }
-        );
+        const response = await fetch("http://localhost:8080/tirashop/cart/add", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: product.id,
+            quantity: 1,
+            productSize: selectedSizes[product.id] || "M",
+          }),
+        });
         const data = await response.json();
         if (response.ok && data.status === "success") {
           toast.success("Added to cart successfully!");
           await fetchCart();
           setIsSidebarOpen(true);
         } else {
-          toast.error(
-            `Unable to add to cart: ${data.message || "Unknown error"}`
-          );
+          toast.error(`Unable to add to cart: ${data.message || "Unknown error"}`);
         }
       } catch (error) {
         toast.error("Error adding to cart. Please try again.");
@@ -118,7 +137,7 @@ function ProductList({ isAuthenticated, categoryId }) {
   const memoizedProducts = useMemo(() => products.slice(0, 7), [products]);
 
   const handleSeeMore = useCallback(() => {
-    navigate("/category/all"); // Navigate to the page showing all products
+    navigate("/category/all");
   }, [navigate]);
 
   if (loading) return <p>Loading products...</p>;
@@ -135,7 +154,6 @@ function ProductList({ isAuthenticated, categoryId }) {
           infinite
           autoPlay={false}
           keyBoardControl
-          
         >
           {memoizedProducts.map((product) => (
             <div key={product.id} className={styles.productItem}>
@@ -143,9 +161,6 @@ function ProductList({ isAuthenticated, categoryId }) {
                 className={styles.boxImg}
                 onClick={() => handleProductClick(product.id)}
               >
-              {product.isBestSeller && (
-        <span className={styles.bestSellerBadge}>BestSeller</span>
-      )}
                 <img
                   src={
                     product.imageUrls?.[0]
@@ -162,19 +177,23 @@ function ProductList({ isAuthenticated, categoryId }) {
                 {product.brandName || "Unknown brand"} -{" "}
                 {product.categoryName || "No category"}
               </div>
-              <div className={styles.priceCl}>
-                {product.price ? product.price.toFixed(2) : "N/A"} $
+              <div className={styles.priceContainer}>
+                <span className={styles.priceCl}>
+                  {formatPrice(product.price)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className={styles.originalPrice}>
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
               </div>
-              <div className={styles.sizeSelector}>
-                <label>Select Size:</label>
-                <select
-                  onChange={(e) => handleSizeChange(product.id, e.target.value)}
-                  value={selectedSizes[product.id] || "M"}
-                >
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                </select>
+              <div className={styles.ratingSizeContainer}>
+                <div className={styles.rating}>
+                  {renderStars(product.averageRating || 0)}
+                </div>
+                <div className={styles.sizeDisplay}>
+                  <span>Size: {selectedSizes[product.id] || "N/A"}</span>
+                </div>
               </div>
               <button
                 onClick={() => handleAddToCart(product)}

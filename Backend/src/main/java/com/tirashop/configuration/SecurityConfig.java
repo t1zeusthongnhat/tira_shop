@@ -33,7 +33,7 @@ public class SecurityConfig {
             "/uploads/**",
             "/tirashop/cart/**",
             "/oauth2/authorization/facebook",
-            "/tirashop/product",
+            "/tirashop/product/**",
             "/tirashop/posts",
             "/tirashop/reviews/product/{productId}",
             "/tirashop/reviews/user/{username}",
@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/tirashop/try-on/**",
             "/api/email/**",
             "/tirashop/brand/**",
-            "/tirashop/voucher/**"
+            "/tirashop/voucher/**",
+            "/tirashop/reviews/product/{productId}"
     };
     public final String[] SWAGGER_WHITELIST = {"/v3/api-docs/**", "/swagger-ui/**",
             "/swagger-ui.html"};

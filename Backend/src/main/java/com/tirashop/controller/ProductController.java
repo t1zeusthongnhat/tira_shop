@@ -13,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,16 @@ public class ProductController {
 
     ProductService productService;
 
+
+    @GetMapping("/bestsellers")
+    @Operation(summary = "Get all bestseller products", description = "Retrieve all bestseller products without pagination")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Bestseller products retrieved successfully")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<ProductDTO>> getAllBestSellerProducts() {
+        List<ProductDTO> bestSellers = productService.getAllBestSellerProducts();
+        return new ApiResponse<>("success", 200, "All bestseller products retrieved successfully", bestSellers);
+    }
+
     @GetMapping()
     @Operation(summary = "Filter products with pagination", description = "Filter products by size, price range, category, and brand with pagination support")
     public ApiResponse<PagedData<ProductDTO>> getFilteredProducts(
@@ -41,14 +53,17 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
-            @PageableDefault(page = 0, size = Integer.MAX_VALUE, sort = "createdAt", direction = Direction.DESC) Pageable pageable
-
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "33") int elementPerPage
     ) {
+        Pageable pageable = PageRequest.of(pageNo, elementPerPage, Sort.by(Sort.Direction.DESC, "createdAt"));
+
         PagedData<ProductDTO> pagedData = productService.filterProductsWithPaging(name, size,
                 minPrice, maxPrice, category, brand, pageable);
-        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully",
-                pagedData);
+
+        return new ApiResponse<>("success", 200, "Filtered products retrieved successfully", pagedData);
     }
+
 
     @PostMapping("/add")
     @Operation(summary = "Add new product", description = "Add a new product with its details")
@@ -83,8 +98,8 @@ public class ProductController {
     @Operation(summary = "Get product by ID", description = "Retrieve product details by its ID")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product retrieved successfully")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ProductResponse> getProductById(@PathVariable Long id) {
-        ProductResponse response = productService.getProductById(id);
+    public ApiResponse<ProductDTO> getProductById(@PathVariable Long id) {
+        ProductDTO response = productService.getProductById(id);
         return new ApiResponse<>("success", 200, "Get Product success", response);
     }
 

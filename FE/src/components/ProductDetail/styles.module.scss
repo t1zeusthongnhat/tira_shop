@@ -6,7 +6,40 @@ $secondary-color: #333;
 $border-color: #e0e0e0;
 $light-bg: #f8f8f8;
 $success-color: #00a650;
+$star-filled-color: #fadb14; // Màu vàng cho sao đầy
+$star-empty-color: #d1d5db; // Màu xám nhạt cho sao rỗng
 
+.rating {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  font-size: 16px;
+  margin-right: 2px;
+}
+
+.filledStar {
+  color: $star-filled-color; // Màu vàng cho sao đầy
+}
+
+.halfStar {
+  color: $star-filled-color; // Màu vàng cho sao nửa
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  width: 8px; // Chỉ hiển thị nửa sao
+}
+
+.emptyStar {
+  color: $star-empty-color; // Màu xám nhạt cho sao rỗng
+}
+
+.ratingStars {
+  display: flex;
+  align-items: center;
+}
 .productDetailPage {
   max-width: 1200px;
   margin: 0 auto;
@@ -149,11 +182,16 @@ $success-color: #00a650;
   }
 }
 
+.priceContainer {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
 .price {
   font-size: 24px;
   font-weight: 700;
   color: $primary-color;
-  margin-bottom: 5px;
 }
 
 .originalPrice {
@@ -168,6 +206,22 @@ $success-color: #00a650;
   font-weight: 500;
   color: $primary-color;
   margin-left: 5px;
+}
+
+.rating {
+  margin-top: 10px;
+}
+
+.star {
+  font-size: 16px;
+  &:before {
+    content: "★";
+    color: $star-filled-color; // Màu vàng cho sao đầy
+  }
+  &:after {
+    content: "☆";
+    color: $star-empty-color; // Màu xám nhạt cho sao rỗng
+  }
 }
 
 .productMeta {
@@ -261,113 +315,6 @@ $success-color: #00a650;
   }
 }
 
-.quantitySelector {
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-
-  label {
-    font-size: 14px;
-    font-weight: 500;
-    margin-right: 15px;
-  }
-}
-
-.quantityControls {
-  display: flex;
-  align-items: center;
-  border: 1px solid $border-color;
-  border-radius: 4px;
-  overflow: hidden;
-
-  button {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    background: $light-bg;
-    border: none;
-    cursor: pointer;
-
-    &:hover {
-      background: darken($light-bg, 5%);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  input {
-    width: 60px;
-    height: 40px;
-    border: none;
-    border-left: 1px solid $border-color;
-    border-right: 1px solid $border-color;
-    text-align: center;
-    font-size: 16px;
-
-    &:focus {
-      outline: none;
-    }
-  }
-}
-
-.availability {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-
-  .inStock {
-    display: flex;
-    align-items: center;
-    color: $success-color;
-    font-size: 14px;
-    font-weight: 500;
-
-    &::before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: $success-color;
-      border-radius: 50%;
-      margin-right: 5px;
-    }
-  }
-}
-
-.promotions {
-  margin-bottom: 25px;
-
-  h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    color: $primary-color;
-  }
-
-  .promotionItem {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 10px;
-
-    .icon {
-      flex-shrink: 0;
-      margin-right: 10px;
-      color: $primary-color;
-    }
-
-    .text {
-      font-size: 14px;
-      line-height: 1.5;
-    }
-  }
-}
-
 .actionWrapper {
   display: flex;
   gap: 15px;
@@ -375,7 +322,6 @@ $success-color: #00a650;
 }
 
 .addToCartBtn,
-.buyNowBtn,
 .wishlistBtn {
   height: 46px;
   border-radius: 4px;
@@ -405,17 +351,6 @@ $success-color: #00a650;
   }
 }
 
-.buyNowBtn {
-  flex: 1;
-  background-color: $primary-color;
-  color: white;
-  border: 1px solid $primary-color;
-
-  &:hover {
-    background-color: darken($primary-color, 10%);
-  }
-}
-
 .wishlistBtn {
   width: 46px;
   background-color: #fff;
@@ -428,7 +363,6 @@ $success-color: #00a650;
   }
 }
 
-// Loading state
 .loadingContainer {
   display: flex;
   flex-direction: column;
@@ -456,7 +390,6 @@ $success-color: #00a650;
   }
 }
 
-// Error state
 .errorContainer {
   display: flex;
   flex-direction: column;
@@ -497,102 +430,89 @@ $success-color: #00a650;
   }
 }
 
-// Additional Vietnamese e-commerce styling from screenshot
-.stockIndicator {
+.customerReviews {
+  margin: 40px 0;
+  padding: 20px;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+}
+
+.reviewSummary {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ratingAverage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ratingValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: $secondary-color;
+  margin-bottom: 5px;
+}
+
+.ratingStars {
+  margin-bottom: 5px;
+}
+
+.reviewCount {
+  font-size: 14px;
+  color: #666;
+}
+
+.ratingDistribution {
+  flex: 1;
+  min-width: 200px;
+}
+
+.ratingBar {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-
-  .stockText {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    font-weight: 500;
-    color: $success-color;
-
-    &::before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: $success-color;
-      margin-right: 6px;
-    }
-  }
+  margin-bottom: 10px;
 }
 
-.colorSelector {
-  margin-bottom: 20px;
-
-  h3 {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 10px;
-  }
-
-  .colorOptions {
-    display: flex;
-    gap: 10px;
-  }
-
-  .colorOption {
-    width: 40px;
-    height: 40px;
-    border: 1px solid #ddd;
-    border-radius: 50%;
-    overflow: hidden;
-    cursor: pointer;
-
-    &.active {
-      border: 2px solid $primary-color;
-    }
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
+.starLabel {
+  width: 60px;
+  font-size: 14px;
+  color: #666;
 }
 
-.promotionSection {
-  margin: 20px 0;
-  border: 1px solid #f0f0f0;
+.barContainer {
+  flex: 1;
+  height: 8px;
+  background-color: $light-bg;
   border-radius: 4px;
-  padding: 15px;
-
-  h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: $primary-color;
-    margin-bottom: 10px;
-  }
-
-  .promotionItem {
-    display: flex;
-    margin-bottom: 8px;
-    align-items: flex-start;
-
-    .promotionIcon {
-      margin-right: 8px;
-      color: $primary-color;
-      flex-shrink: 0;
-    }
-
-    .promotionText {
-      font-size: 14px;
-      line-height: 1.5;
-
-      .highlightText {
-        color: $primary-color;
-        font-weight: 500;
-      }
-    }
-  }
+  overflow: hidden;
+  margin-right: 10px;
 }
 
-// Loading animation for Add to Cart button
+.barFill {
+  height: 100%;
+  background-color: #f97316; // Màu cam cho thanh đánh giá
+  transition: width 0.3s ease;
+}
+
+.barCount {
+  width: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  color: $secondary-color;
+  text-align: right;
+}
+
 .addingText {
   display: flex;
   align-items: center;
@@ -631,12 +551,13 @@ $success-color: #00a650;
     opacity: 0.5;
   }
 }
+
 .heartIcon {
-  width: 24px; /* hoặc kích thước phù hợp */
+  width: 24px;
   height: 24px;
 }
 
-.mainCarousel{
+.mainCarousel {
   z-index: 0;
 }
 
@@ -644,7 +565,7 @@ $success-color: #00a650;
   position: absolute;
   top: 10px;
   left: 10px;
-  background-color: #ff4d4f; /* Màu đỏ nổi bật, bạn có thể thay đổi */
+  background-color: #ff4d4f;
   color: white;
   padding: 5px 10px;
   font-size: 12px;

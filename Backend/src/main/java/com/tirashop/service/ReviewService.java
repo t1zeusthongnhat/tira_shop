@@ -52,6 +52,8 @@ public class ReviewService {
                 .elementList(reviewItem)
                 .build();
     }
+
+
     private ReviewDTO toDTO(Review review) {
         return ReviewDTO.builder()
                 .id(review.getId())
@@ -113,6 +115,7 @@ public class ReviewService {
         reviewRepository.deleteById(id);
         return true;
     }
+
     public PagedData<ReviewDTO> getReviewsByProductId(Long productId, Pageable pageable) {
         if (!productRepository.existsById(productId)) {
             throw new RuntimeException("Product not found with ID: " + productId);

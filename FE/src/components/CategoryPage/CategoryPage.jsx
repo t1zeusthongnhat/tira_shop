@@ -1,11 +1,35 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import Slider from "rc-slider"; // Import rc-slider
-import "rc-slider/assets/index.css"; // Import CSS của rc-slider
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 import styles from "./styles.module.scss";
 import Footer from "../Footer/Footer";
 import { useAppContext } from "../../Context/AppContext";
+
+// Helper function to format price with commas, without .00
+const formatPrice = (price) => {
+  if (!price) return "N/A";
+  return Math.floor(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " $";
+};
+
+// Helper function to render star rating
+const renderStars = (rating) => {
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+  const emptyStars = 5 - fullStars - halfStar;
+  return (
+    <>
+      {[...Array(fullStars)].map((_, i) => (
+        <span key={`full-${i}`} className={styles.star}>★</span>
+      ))}
+      {halfStar ? <span className={styles.star}>☆</span> : null}
+      {[...Array(emptyStars)].map((_, i) => (
+        <span key={`empty-${i}`} className={styles.star}>☆</span>
+      ))}
+    </>
+  );
+};
 
 function CategoryPage() {
   const { categoryId } = useParams();
@@ -16,69 +40,47 @@ function CategoryPage() {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [priceRange, setPriceRange] = useState([0, 15000]); // Khoảng giá
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 15000]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [productSizes, setProductSizes] = useState({});
-  const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const checkToken = () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setIsSessionExpired(true);
-      navigate("/auth");
-      return false;
-    }
-    return true;
-  };
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [elementsPerPage] = useState(12);
 
   const fetchCategories = useCallback(async () => {
-    if (!checkToken()) return;
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:8080/tirashop/category/list",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      const response = await fetch("http://localhost:8080/tirashop/category/list", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       if (data.status === "success" && data.data?.elementList) {
         setCategories(data.data.elementList);
       }
-    } catch (err) {}
-  }, [navigate, isSessionExpired]);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  }, []);
 
   const fetchBrands = useCallback(async () => {
-    if (!checkToken()) return;
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:8080/tirashop/brand/list",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      const response = await fetch("http://localhost:8080/tirashop/brand/list", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       if (data.status === "success" && data.data) {
         setBrands(data.data);
@@ -86,22 +88,16 @@ function CategoryPage() {
         toast.error(data.message || "Failed to fetch brands");
       }
     } catch (err) {
-      toast.error(`Error fetching brands: ${err.message}`);
+      console.error("Error fetching brands:", err);
     }
-  }, [navigate, isSessionExpired]);
+  }, []);
 
   const fetchAllProducts = useCallback(async () => {
     setLoading(true);
-    if (!checkToken()) {
-      setLoading(false);
-      return;
-    }
     try {
-      const token = localStorage.getItem("token");
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: `Bearer ${token}`,
       };
 
       setCategory({
@@ -109,8 +105,17 @@ function CategoryPage() {
         description: "View all products in the store.",
       });
 
+      const queryParams = new URLSearchParams({
+        pageNo: currentPage,
+        elementPerPage: elementsPerPage,
+        ...(priceRange[0] !== 0 && { minPrice: priceRange[0] }),
+        ...(priceRange[1] !== 15000 && { maxPrice: priceRange[1] }),
+        ...(selectedSizes.length > 0 && { size: selectedSizes.join(",") }),
+        ...(selectedBrands.length > 0 && { brand: selectedBrands.join(",") }),
+      }).toString();
+
       const productResponse = await fetch(
-        `http://localhost:8080/tirashop/product`,
+        `http://localhost:8080/tirashop/product?${queryParams}`,
         { method: "GET", headers }
       );
       if (!productResponse.ok)
@@ -119,10 +124,10 @@ function CategoryPage() {
       if (productData.status === "success") {
         const productsList = productData.data.elementList || [];
         setProducts(productsList);
-        setFilteredProducts(productsList);
+        setTotalPages(productData.data.totalPages || 0);
         setProductSizes(
           productsList.reduce((acc, product) => {
-            acc[product.id] = "M";
+            acc[product.id] = product.size || "M";
             return acc;
           }, {})
         );
@@ -131,11 +136,11 @@ function CategoryPage() {
       }
     } catch (err) {
       setError(err.message);
-      toast.error(`Error: ${err.message}`);
+      console.error("Error fetching products:", err);
     } finally {
       setLoading(false);
     }
-  }, [navigate, isSessionExpired]);
+  }, [currentPage, priceRange, selectedSizes, selectedBrands]);
 
   useEffect(() => {
     fetchCategories();
@@ -147,38 +152,26 @@ function CategoryPage() {
     if (location.state?.searchResults) {
       setSearchResults(location.state.searchResults);
       setSearchQuery(location.state.query || "");
+      setCurrentPage(0);
+      setTotalPages(1);
+      setProductSizes(
+        location.state.searchResults.reduce((acc, product) => {
+          acc[product.id] = product.size || "M";
+          return acc;
+        }, {})
+      );
     } else {
       setSearchResults([]);
       setSearchQuery("");
+      fetchAllProducts();
     }
-  }, [location.state]);
+  }, [location.state, fetchAllProducts]);
 
   useEffect(() => {
     if (location.state?.resetFilters) {
       resetFilters();
     }
   }, [location.state]);
-
-  useEffect(() => {
-    let filtered = products;
-    if (priceRange[0] !== 0 || priceRange[1] !== 15000) {
-      filtered = filtered.filter(
-        (product) =>
-          product.price >= priceRange[0] && product.price <= priceRange[1]
-      );
-    }
-    if (selectedBrands.length > 0) {
-      filtered = filtered.filter((product) =>
-        selectedBrands.includes(product.brandName)
-      );
-    }
-    if (selectedSizes.length > 0) {
-      filtered = filtered.filter((product) =>
-        selectedSizes.includes(product.size)
-      );
-    }
-    setFilteredProducts(filtered);
-  }, [priceRange, selectedBrands, selectedSizes, products]);
 
   const mapCategoryDisplay = (categoryName) => {
     const categoryMap = {
@@ -196,21 +189,23 @@ function CategoryPage() {
 
   const sizes = ["S", "M", "L", "XL"];
 
-  // Hàm xử lý thay đổi giá trị của slider
   const handlePriceRangeChange = (value) => {
     setPriceRange(value);
+    setCurrentPage(0);
   };
 
   const handleBrandChange = (brand) => {
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
+    setCurrentPage(0);
   };
 
   const handleSizeChange = (size) => {
     setSelectedSizes((prev) =>
       prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
     );
+    setCurrentPage(0);
   };
 
   const handleProductSizeChange = (productId, size) => {
@@ -218,10 +213,14 @@ function CategoryPage() {
   };
 
   const handleAddToCart = async (product) => {
-    if (!checkToken()) return;
-    const token = localStorage.getItem("token");
-    if (!token || !isAuthenticated) {
+    if (!isAuthenticated) {
       toast.error("Please log in to add to cart");
+      navigate("/auth");
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Session expired. Please log in again.");
       navigate("/auth");
       return;
     }
@@ -254,15 +253,103 @@ function CategoryPage() {
 
   const resetFilters = () => {
     setPriceRange([0, 15000]);
-    setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedSizes([]);
+    setCurrentPage(0);
   };
 
-  if (loading) return <p>Loading products...</p>;
+  const handlePageChange = (page) => {
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const maxButtons = 5;
+    const buttons = [];
+    let startPage = Math.max(0, currentPage - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxButtons - 1);
+
+    if (endPage - startPage + 1 < maxButtons) {
+      startPage = Math.max(0, endPage - maxButtons + 1);
+    }
+
+    buttons.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 0}
+        className={styles.pageButton}
+      >
+        Previous
+      </button>
+    );
+
+    if (startPage > 0) {
+      buttons.push(
+        <button
+          key={0}
+          onClick={() => handlePageChange(0)}
+          className={styles.pageButton}
+        >
+          1
+        </button>
+      );
+      if (startPage > 1) {
+        buttons.push(<span key="start-ellipsis" className={styles.ellipsis}>...</span>);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`${styles.pageButton} ${
+            currentPage === i ? styles.active : ""
+          }`}
+        >
+          {i + 1}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages - 1) {
+      if (endPage < totalPages - 2) {
+        buttons.push(<span key="end-ellipsis" className={styles.ellipsis}>...</span>);
+      }
+      buttons.push(
+        <button
+          key={totalPages - 1}
+          onClick={() => handlePageChange(totalPages - 1)}
+          className={styles.pageButton}
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    buttons.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages - 1}
+        className={styles.pageButton}
+      >
+        Next
+      </button>
+    );
+
+    return <div className={styles.pagination}>{buttons}</div>;
+  };
+
+  if (loading) return <p className={styles.loading}>Loading products...</p>;
   if (error)
     return (
-      <div>
+      <div className={styles.error}>
         <p>{error}</p>
         <button onClick={() => navigate("/category/all")}>
           View All Products
@@ -271,7 +358,7 @@ function CategoryPage() {
     );
   if (!category)
     return (
-      <div>
+      <div className={styles.error}>
         <p>Category not found.</p>
         <button onClick={() => navigate("/category/all")}>
           View All Products
@@ -288,7 +375,6 @@ function CategoryPage() {
             <div className={styles.filterSection}>
               <h4>Price Range</h4>
               <div className={styles.priceRange}>
-                {/* Sử dụng rc-slider thay vì hai ô input */}
                 <Slider
                   range
                   min={0}
@@ -348,7 +434,12 @@ function CategoryPage() {
                   <div className={styles.productList}>
                     {searchResults.map((product) => (
                       <div key={product.id} className={styles.productItem}>
-                        <div className={styles.productImage}>
+                        <div className={styles.imageContainer}>
+                          {product.isBestSeller && (
+                            <span className={styles.bestSellerBadge}>
+                              BestSeller
+                            </span>
+                          )}
                           <img
                             src={
                               product.imageUrls?.[0]
@@ -356,56 +447,56 @@ function CategoryPage() {
                                 : "https://via.placeholder.com/250"
                             }
                             alt={product.name || "Unnamed product"}
+                            className={styles.productImage}
                             onClick={() => navigate(`/product/${product.id}`)}
                           />
                         </div>
-                        <div className={styles.productInfo}>
-                          <h3>{product.name || "Unnamed product"}</h3>
-                          <p className={styles.productCategory}>
-                            {product.brandName || "Unknown brand"} -{" "}
-                            {mapCategoryDisplay(
-                              product.categoryName || "No category"
-                            )}
-                          </p>
-                          <p className={styles.productPrice}>
-                            {product.price ? product.price.toFixed(2) : "N/A"} $
-                          </p>
-                          <div className={styles.sizeSelector}>
-                            <label>Size:</label>
-                            <select
-                              value={productSizes[product.id] || "M"}
-                              onChange={(e) =>
-                                handleProductSizeChange(
-                                  product.id,
-                                  e.target.value
-                                )
-                              }
-                            >
-                              {sizes.map((size) => (
-                                <option key={size} value={size}>
-                                  {size}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <button
-                            className={styles.addToCartBtn}
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            Add to Cart
-                          </button>
+                        <div className={styles.title}>
+                          {product.name || "Unnamed product"}
                         </div>
+                        <div className={styles.category}>
+                          {product.brandName || "Unknown brand"} -{" "}
+                          {mapCategoryDisplay(
+                            product.categoryName || "No category"
+                          )}
+                        </div>
+                        <div className={styles.priceContainer}>
+                          <span className={styles.priceCl}>
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.originalPrice &&
+                            product.originalPrice > product.price && (
+                              <span className={styles.originalPrice}>
+                                {formatPrice(product.originalPrice)}
+                              </span>
+                            )}
+                        </div>
+                        <div className={styles.ratingSizeContainer}>
+                          <div className={styles.rating}>
+                            {renderStars(product.averageRating || 0)}
+                          </div>
+                          <div className={styles.sizeDisplay}>
+                            <span>Size: {productSizes[product.id] || "M"}</span>
+                          </div>
+                        </div>
+                        <button
+                          className={styles.addToCartBtn}
+                          onClick={() => handleAddToCart(product)}
+                        >
+                          Add to Cart
+                        </button>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p>No matching products were found.</p>
                 )}
+                {renderPagination()}
               </div>
             )}
             <p>{category.description || "No description available."}</p>
             <div className={styles.productList}>
-              {filteredProducts.length === 0 ? (
+              {products.length === 0 ? (
                 <div className={styles.noProducts}>
                   <p>No products found.</p>
                   <button
@@ -416,12 +507,14 @@ function CategoryPage() {
                   </button>
                 </div>
               ) : (
-                filteredProducts.map((product) => (
+                products.map((product) => (
                   <div key={product.id} className={styles.productItem}>
-                    <div className={styles.productImage}>
-                    {product.isBestSeller && (
-        <span className={styles.bestSellerBadge}>BestSeller</span>
-      )}
+                    <div className={styles.imageContainer}>
+                      {product.isBestSeller && (
+                        <span className={styles.bestSellerBadge}>
+                          BestSeller
+                        </span>
+                      )}
                       <img
                         src={
                           product.imageUrls?.[0]
@@ -429,46 +522,47 @@ function CategoryPage() {
                             : "https://via.placeholder.com/250"
                         }
                         alt={product.name || "Unnamed product"}
+                        className={styles.productImage}
                         onClick={() => navigate(`/product/${product.id}`)}
                       />
                     </div>
-                    <div className={styles.productInfo}>
-                      <h3>{product.name || "Unnamed product"}</h3>
-                      <p className={styles.productCategory}>
-                        {product.brandName || "Unknown brand"} -{" "}
-                        {mapCategoryDisplay(
-                          product.categoryName || "No category"
-                        )}
-                      </p>
-                      <p className={styles.productPrice}>
-                        {product.price ? product.price.toFixed(2) : "N/A"} $
-                      </p>
-                      <div className={styles.sizeSelector}>
-                        <label>Size:</label>
-                        <select
-                          value={productSizes[product.id] || "M"}
-                          onChange={(e) =>
-                            handleProductSizeChange(product.id, e.target.value)
-                          }
-                        >
-                          {sizes.map((size) => (
-                            <option key={size} value={size}>
-                              {size}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <button
-                        className={styles.addToCartBtn}
-                        onClick={() => handleAddToCart(product)}
-                      >
-                        Add to Cart
-                      </button>
+                    <div className={styles.title}>
+                      {product.name || "Unnamed product"}
                     </div>
+                    <div className={styles.category}>
+                      {product.brandName || "Unknown brand"} -{" "}
+                      {mapCategoryDisplay(product.categoryName || "No category")}
+                    </div>
+                    <div className={styles.priceContainer}>
+                      <span className={styles.priceCl}>
+                        {formatPrice(product.price)}
+                      </span>
+                      {product.originalPrice &&
+                        product.originalPrice > product.price && (
+                          <span className={styles.originalPrice}>
+                            {formatPrice(product.originalPrice)}
+                          </span>
+                        )}
+                    </div>
+                    <div className={styles.ratingSizeContainer}>
+                      <div className={styles.rating}>
+                        {renderStars(product.averageRating || 0)}
+                      </div>
+                      <div className={styles.sizeDisplay}>
+                        <span>Size: {productSizes[product.id] || "M"}</span>
+                      </div>
+                    </div>
+                    <button
+                      className={styles.addToCartBtn}
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </button>
                   </div>
                 ))
               )}
             </div>
+            {renderPagination()}
           </div>
         </div>
       </div>

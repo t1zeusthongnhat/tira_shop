@@ -36,25 +36,19 @@ function ProductDetail() {
   const [error, setError] = useState(null);
   const [selectedSize, setSelectedSize] = useState("M");
   const [isAdding, setIsAdding] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [ratingDistribution, setRatingDistribution] = useState([]);
+  const [totalReviews, setTotalReviews] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        if (!isAuthenticated) {
-          toast.error("Please log in to view product details", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-          navigate("/auth");
-          return;
-        }
-
-        const token = localStorage.getItem("token");
         const productResponse = await fetch(
           `http://localhost:8080/tirashop/product/get/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
           }
         );
@@ -62,6 +56,7 @@ function ProductDetail() {
         console.log("Product data:", productData);
         if (productData.status === "success" && productData.data) {
           setProduct(productData.data);
+          setSelectedSize(productData.data.size || "M");
         } else {
           setError(productData.message || "Failed to fetch product");
           toast.error(productData.message || "Failed to fetch product", {
@@ -75,7 +70,8 @@ function ProductDetail() {
           `http://localhost:8080/tirashop/product/${id}/images`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
           }
         );
@@ -84,7 +80,7 @@ function ProductDetail() {
         if (imagesData.status === "success" && imagesData.data) {
           setImageUrls(imagesData.data.map((img) => img.url));
         } else {
-          setImageUrls([]);
+          setImageUrls(productData.data.imageUrls || []);
           console.warn("No images found for this product:", imagesData.message);
         }
       } catch (err) {
@@ -97,8 +93,53 @@ function ProductDetail() {
         setLoading(false);
       }
     };
+
+    const fetchReviews = async () => {
+      try {
+        const reviewsResponse = await fetch(
+          `http://localhost:8080/tirashop/reviews/product/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        );
+        const reviewsData = await reviewsResponse.json();
+        console.log("Reviews data:", reviewsData);
+        if (reviewsData.status === "success" && reviewsData.data) {
+          const reviewList = reviewsData.data.elementList || [];
+          setReviews(reviewList);
+          setTotalReviews(reviewsData.data.totalElements || 0);
+
+          // Tính phân bố sao
+          const distribution = Array(5).fill(0); // [0, 0, 0, 0, 0] cho 1 đến 5 sao
+          reviewList.forEach((review) => {
+            if (review.rating >= 1 && review.rating <= 5) {
+              distribution[5 - review.rating]++; // 5 sao ở index 0, 1 sao ở index 4
+            }
+          });
+          const formattedDistribution = distribution.map((count, index) => ({
+            stars: 5 - index,
+            count,
+          }));
+          setRatingDistribution(formattedDistribution);
+        } else {
+          setReviews([]);
+          setTotalReviews(0);
+          setRatingDistribution([]);
+        }
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+        setReviews([]);
+        setTotalReviews(0);
+        setRatingDistribution([]);
+      }
+    };
+
     fetchProduct();
-  }, [id, navigate, isAuthenticated]); // Thêm isAuthenticated vào dependencies
+    fetchReviews();
+  }, [id, navigate]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -132,9 +173,9 @@ function ProductDetail() {
         return;
       }
 
-      const validSizes = ["S", "M", "L"];
+      const validSizes = ["S", "M", "L", "XL"];
       if (!validSizes.includes(selectedSize)) {
-        toast.error("Invalid size. Please select S, M, or L.", {
+        toast.error("Invalid size. Please select S, M, L, or XL.", {
           position: "top-right",
           autoClose: 3000,
         });
@@ -157,7 +198,10 @@ function ProductDetail() {
       if (response.status === 401) {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
-       
+        toast.error("Session expired. Please log in again.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
         navigate("/auth");
         return;
       }
@@ -190,6 +234,49 @@ function ProductDetail() {
 
   const handleThumbnailClick = (index) => {
     setSelectedImageIndex(index);
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return "N/A";
+    return Math.floor(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " $";
+  };
+
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating); // Số sao đầy
+    const decimalPart = rating % 1; // Phần thập phân
+    const hasHalfStar = decimalPart >= 0.3 && decimalPart < 0.8; // Hiển thị sao nửa nếu phần thập phân từ 0.3 đến dưới 0.8
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Số sao rỗng
+  
+    const stars = [];
+  
+    // Thêm sao đầy
+    for (let i = 1; i <= fullStars; i++) {
+      stars.push(
+        <span key={`full-${i}`} className={styles.filledStar}>
+          ★
+        </span>
+      );
+    }
+  
+    // Thêm sao nửa nếu có
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className={styles.halfStar}>
+          ★
+        </span>
+      );
+    }
+  
+    // Thêm sao rỗng
+    for (let i = 1; i <= emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className={styles.emptyStar}>
+          ★
+        </span>
+      );
+    }
+  
+    return stars;
   };
 
   if (loading)
@@ -246,7 +333,6 @@ function ProductDetail() {
         <div className={styles.productDetailContainer}>
           <div className={styles.productDetail}>
             <div className={styles.imageGallery}>
-              {/* Main Image Carousel */}
               <div className={styles.mainImage}>
                 <Carousel
                   responsive={responsiveMain}
@@ -264,9 +350,9 @@ function ProductDetail() {
                   {imageUrls.length > 0 ? (
                     imageUrls.map((url, index) => (
                       <div className={styles.mainImageWrapper} key={index}>
-                      {product.isBestSeller === true && (
-            <span className={styles.bestSellerBadge}>BestSeller</span>
-          )}
+                        {product.isBestSeller && (
+                          <span className={styles.bestSellerBadge}>BestSeller</span>
+                        )}
                         <img
                           src={`http://localhost:8080${url}`}
                           alt={`${product.name} ${index + 1}`}
@@ -291,7 +377,6 @@ function ProductDetail() {
                 </Carousel>
               </div>
 
-              {/* Thumbnail Gallery */}
               {imageUrls.length > 1 && (
                 <div className={styles.thumbnailGallery}>
                   <Carousel
@@ -340,17 +425,35 @@ function ProductDetail() {
                     {product.categoryName}
                   </span>
                 </p>
-                <div className={styles.price}>${product.price.toFixed(2)}</div>
+                <div className={styles.priceContainer}>
+                  <span className={styles.price}>
+                    {formatPrice(product.price)}
+                  </span>
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <span className={styles.originalPrice}>
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                  )}
+                </div>
+                <div className={styles.rating}>
+                  {renderStars(product.averageRating || 0)}
+                </div>
               </div>
 
               <div className={styles.productMeta}>
                 <div className={styles.metaItem}>
                   <span className={styles.metaLabel}>SKU:</span>
-                  <span className={styles.metaValue}>PRD-{product.id}</span>
+                  <span className={styles.metaValue}>{product.code}</span>
                 </div>
                 <div className={styles.metaItem}>
                   <span className={styles.metaLabel}>Availability:</span>
-                  <span className={styles.metaValue}>In Stock</span>
+                  <span className={styles.metaValue}>
+                    {product.status || "In Stock"}
+                  </span>
+                </div>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>Inventory:</span>
+                  <span className={styles.metaValue}>{product.inventory}</span>
                 </div>
               </div>
 
@@ -362,36 +465,28 @@ function ProductDetail() {
                   {product.description ||
                     "No description available for this product."}
                 </p>
+                {product.material && (
+                  <p>
+                    <strong>Material:</strong> {product.material}
+                  </p>
+                )}
               </div>
 
               <div className={styles.productOptions}>
                 <div className={styles.sizeSelector}>
                   <label>Size:</label>
                   <div className={styles.sizeOptions}>
-                    <button
-                      className={`${styles.sizeBtn} ${
-                        selectedSize === "S" ? styles.active : ""
-                      }`}
-                      onClick={() => setSelectedSize("S")}
-                    >
-                      S
-                    </button>
-                    <button
-                      className={`${styles.sizeBtn} ${
-                        selectedSize === "M" ? styles.active : ""
-                      }`}
-                      onClick={() => setSelectedSize("M")}
-                    >
-                      M
-                    </button>
-                    <button
-                      className={`${styles.sizeBtn} ${
-                        selectedSize === "L" ? styles.active : ""
-                      }`}
-                      onClick={() => setSelectedSize("L")}
-                    >
-                      L
-                    </button>
+                    {["S", "M", "L", "XL"].map((size) => (
+                      <button
+                        key={size}
+                        className={`${styles.sizeBtn} ${
+                          selectedSize === size ? styles.active : ""
+                        }`}
+                        onClick={() => setSelectedSize(size)}
+                      >
+                        {size}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -418,7 +513,7 @@ function ProductDetail() {
                     onClick={() => navigate("/auth")}
                     className={styles.addToCartBtn}
                   >
-                    Sign In to Add
+                    Add To Cart
                   </button>
                 )}
 
@@ -432,9 +527,43 @@ function ProductDetail() {
               </div>
             </div>
           </div>
+
+          {/* Customer Reviews Section */}
+          <div className={styles.customerReviews}>
+            <h3>Customer Reviews</h3>
+            {totalReviews > 0 ? (
+              <div className={styles.reviewSummary}>
+              <div className={styles.ratingAverage}>
+  <span className={styles.ratingValue}>
+    {(product.averageRating || 0).toFixed(1)}/5
+  </span>
+  <div className={styles.ratingStars}>
+    {renderStars(product.averageRating || 0)}
+  </div>
+  <span className={styles.reviewCount}>{totalReviews} reviews</span>
+</div>
+                <div className={styles.ratingDistribution}>
+                  {ratingDistribution.map((dist) => (
+                    <div key={dist.stars} className={styles.ratingBar}>
+                      <span className={styles.starLabel}>{dist.stars} stars</span>
+                      <div className={styles.barContainer}>
+                        <div
+                          className={styles.barFill}
+                          style={{ width: `${(dist.count / totalReviews) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className={styles.barCount}>{dist.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p>No reviews yet for this product.</p>
+            )}
+          </div>
         </div>
         <ProductReview />
-        <ProductList></ProductList>
+        <ProductList />
       </div>
       <Footer />
     </>

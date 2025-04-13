@@ -6,7 +6,7 @@ import { useAppContext } from "../../context/AppContext";
 import { useState, useEffect, useRef } from "react";
 
 function AuthPage() {
-  const { setIsAuthenticated } = useAppContext();
+  const { setIsAuthenticated, isAuthenticated, setIsMenuOpen } = useAppContext();
   const [signIn, setSignIn] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -26,16 +26,37 @@ function AuthPage() {
   const popupRef = useRef(null);
   const currentProviderRef = useRef(null);
 
+  // Chuyển hướng khi isAuthenticated thay đổi
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("isAuthenticated is true, navigating to /");
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Xử lý postMessage từ popup (OAuth login)
   useEffect(() => {
     const handleMessage = (event) => {
-      if (event.origin !== "http://localhost:8080") return;
-      const data = event.data;
+      console.log("Received message from popup:", event.data, "Origin:", event.origin);
+
+      let data = event.data;
+
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch (err) {
+          console.error("Failed to parse message data:", err);
+          return;
+        }
+      }
 
       if (data && data.token) {
+        console.log("Token received:", data.token);
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId || "unknown");
         localStorage.setItem("username", data.username || "social-user");
         setIsAuthenticated(true);
+        setIsMenuOpen(false); // Đóng menu sau khi đăng nhập OAuth
 
         const provider = currentProviderRef.current || "social";
         toast.success(`Login with ${provider} successful!`, {
@@ -43,8 +64,12 @@ function AuthPage() {
           autoClose: 3000,
         });
 
-        popupRef.current?.close();
-        navigate("/");
+        if (popupRef.current) {
+          popupRef.current.close();
+          popupRef.current = null;
+        }
+      } else {
+        console.error("No token found in message data:", data);
       }
     };
 
@@ -52,21 +77,25 @@ function AuthPage() {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [navigate, setIsAuthenticated]);
+  }, [setIsAuthenticated, setIsMenuOpen]);
 
+  // Kiểm tra token khi tải trang
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
     if (token && userId) {
+      console.log("Found token in localStorage, validating...");
       validateToken(token).then((isValid) => {
         if (isValid) {
+          console.log("Token is valid, setting isAuthenticated to true");
           setIsAuthenticated(true);
+          setIsMenuOpen(false); // Đóng menu nếu đã có token hợp lệ
           toast.info("You are already logged in", {
             position: "top-right",
             autoClose: 3000,
           });
-          navigate("/");
         } else {
+          console.log("Token is invalid, clearing localStorage");
           localStorage.removeItem("token");
           localStorage.removeItem("userId");
           localStorage.removeItem("username");
@@ -74,10 +103,11 @@ function AuthPage() {
         }
       });
     }
-  }, [navigate, setIsAuthenticated]);
+  }, [setIsAuthenticated, setIsMenuOpen]);
 
   const validateToken = async (token) => {
     try {
+      console.log("Validating token:", token);
       const response = await fetch(
         "http://localhost:8080/tirashop/auth/validate-token",
         {
@@ -89,6 +119,7 @@ function AuthPage() {
         }
       );
       const data = await response.json();
+      console.log("Validate token response:", response.status, data);
       return response.status === 200 && data.status === "success";
     } catch (err) {
       console.error("Token validation error:", err);
@@ -98,6 +129,15 @@ function AuthPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Hàm xử lý khi nhấp vào container để đóng menu
+  const handleContainerClick = (e) => {
+    if (e.target.closest("form") || e.target.closest("button")) {
+      return;
+    }
+    console.log("Container clicked, closing menu");
+    setIsMenuOpen(false);
   };
 
   const handleAuth = async (e) => {
@@ -171,16 +211,15 @@ function AuthPage() {
             localStorage.setItem("userId", data.data.userId || "unknown");
             localStorage.setItem("username", formData.username);
             setIsAuthenticated(true);
+            setIsMenuOpen(false); // Đóng menu sau khi đăng nhập form
             toast.success("Login successful!", {
               position: "top-right",
               autoClose: 3000,
             });
-            navigate("/");
           } else {
             setError("Login successful but no token received.");
           }
         } else {
-          // Handle successful registration - send email right after registration
           try {
             const emailPayload = {
               toEmail: formData.email,
@@ -189,7 +228,7 @@ function AuthPage() {
             console.log("Sending email request with payload:", emailPayload);
 
             const emailResponse = await fetch(
-              "http://localhost:8080/api/email/send-registration", // Đổi endpoint đúng
+              "http://localhost:8080/api/email/send-registration",
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -198,11 +237,7 @@ function AuthPage() {
             );
             const emailData = await emailResponse.json();
 
-            console.log(
-              "Email response:",
-              emailResponse.status,
-              emailData
-            );
+            console.log("Email response:", emailResponse.status, emailData);
 
             if (emailResponse.status === 200 && emailData.status === "success") {
               toast.success("Registration successful! Welcome email sent.", {
@@ -222,7 +257,6 @@ function AuthPage() {
             });
           }
 
-          // Proceed with auto-login after registration
           const loginResponse = await fetch(
             "http://localhost:8080/tirashop/auth/login",
             {
@@ -245,13 +279,10 @@ function AuthPage() {
           ) {
             const token = loginData.data.token;
             localStorage.setItem("token", token);
-            localStorage.setItem(
-              "userId",
-              loginData.data.userId || "unknown"
-            );
+            localStorage.setItem("userId", loginData.data.userId || "unknown");
             localStorage.setItem("username", formData.username);
             setIsAuthenticated(true);
-            navigate("/");
+            setIsMenuOpen(false); // Đóng menu sau khi đăng ký và đăng nhập
           }
         }
       } else {
@@ -274,6 +305,15 @@ function AuthPage() {
   };
 
   const handleSocialLogin = (provider) => {
+    if (isAuthenticated) {
+      toast.info("You are already logged in!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      navigate("/");
+      return;
+    }
+
     currentProviderRef.current = provider;
 
     const authUrl =
@@ -308,9 +348,9 @@ function AuthPage() {
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
+      onClick={handleContainerClick}
     >
       <Components.Container>
-        {/* SIGN UP */}
         <Components.SignUpContainer signinIn={signIn}>
           <Components.Form onSubmit={handleAuth}>
             <Components.Title>Create Account</Components.Title>
@@ -399,7 +439,6 @@ function AuthPage() {
           </Components.Form>
         </Components.SignUpContainer>
 
-        {/* SIGN IN */}
         <Components.SignInContainer signinIn={signIn}>
           <Components.Form onSubmit={handleAuth}>
             <Components.Title>Sign In</Components.Title>
@@ -434,14 +473,15 @@ function AuthPage() {
               <FaGoogle style={{ marginRight: "10px" }} />
               Sign in with Google
             </Components.SocialButton>
-            <Components.SocialButton onClick={() => handleSocialLogin("facebook")}>
+            <Components.SocialButton
+              onClick={() => handleSocialLogin("facebook")}
+            >
               <FaFacebookF style={{ marginRight: "10px" }} />
               Sign in with Facebook
             </Components.SocialButton>
           </Components.Form>
         </Components.SignInContainer>
 
-        {/* OVERLAY */}
         <Components.OverlayContainer signinIn={signIn}>
           <Components.Overlay signinIn={signIn}>
             <Components.LeftOverlayPanel signinIn={signIn}>

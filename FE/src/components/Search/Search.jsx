@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
@@ -8,65 +8,146 @@ import imageSearchIcon from "../../assets/icons/images/imageSearch.png";
 const Search = ({ isSearchOpen, setIsSearchOpen }) => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const [isListening, setIsListening] = useState(false);
-  const [language, setLanguage] = useState("en"); // Ngôn ngữ mặc định là tiếng Anh
+  const [isRecording, setIsRecording] = useState(false);
+  const [language, setLanguage] = useState("en");
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timeoutRef = useRef(null);
 
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+  const RECORDING_DURATION = 1500; // 1.5 giây
+
+  const startRecording = () => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        mediaRecorderRef.current = new MediaRecorder(stream);
+        audioChunksRef.current = [];
+
+        mediaRecorderRef.current.ondataavailable = (event) => {
+          audioChunksRef.current.push(event.data);
+        };
+
+        mediaRecorderRef.current.onstop = async () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          await sendVoiceSearch(audioBlob);
+          stream.getTracks().forEach((track) => track.stop());
+          setIsRecording(false);
+        };
+
+        mediaRecorderRef.current.start();
+        setIsRecording(true);
+
+        // Tự động dừng sau 1.5 giây
+        timeoutRef.current = setTimeout(() => {
+          if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+            mediaRecorderRef.current.stop();
+          }
+        }, RECORDING_DURATION);
+      })
+      .catch((err) => {
+        toast.error(`Microphone access error: ${err.message}`);
+        setIsRecording(false);
+      });
+  };
 
   const handleVoiceSearch = () => {
-    if (!SpeechRecognition) {
-      toast.error(
-        "Your browser does not support voice recognition. Please use Chrome or Edge."
-      );
+    if (!isRecording) {
+      startRecording();
+    }
+  };
+
+  const sendVoiceSearch = async (audioBlob) => {
+    if (audioChunksRef.current.length === 0) {
+      toast.error("No audio recorded.");
       return;
     }
 
-    recognition.lang = language === "en" ? "en-US" : "vi-VN"; // Chọn ngôn ngữ
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    const formData = new FormData();
+    formData.append("file", audioBlob, "voice-search.webm");
+    formData.append("language", language);
 
-    setIsListening(true);
-    recognition.start();
+    try {
+      const response = await fetch("http://localhost:8080/tirashop/product/search", {
+        method: "POST",
+        body: formData,
+      });
 
-    recognition.onresult = async (event) => {
-      const transcript = event.results[0][0].transcript;
-      setIsListening(false);
-      toast.info(`You said: "${transcript}"`);
-
-      // Nếu là tiếng Việt, dịch sang tiếng Anh trước khi tìm kiếm
-      if (language === "vi") {
-        const translatedText = await translateToEnglish(transcript);
-        searchProducts(translatedText, "en"); // Gửi từ khóa đã dịch với language=en
+      const data = await response.json();
+      if (response.ok && data.status === "success") {
+        const products = data.data.elementList || [];
+        if (products.length === 0) {
+          toast.info("No matching products found.");
+          navigate("/category/all", { state: { searchResults: [], query: "Voice Search" } });
+        } else {
+          navigate("/category/all", { state: { searchResults: products, query: "Voice Search" } });
+        }
       } else {
-        searchProducts(transcript, language); // Tiếng Anh thì gửi trực tiếp
+        toast.error(data.message || "Voice search failed.");
       }
-    };
-
-    recognition.onerror = (event) => {
-      setIsListening(false);
-      toast.error(`Voice recognition error: ${event.error}`);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+    } catch (err) {
+      toast.error(`Voice search error: ${err.message}`);
+    }
   };
 
-  // Hàm dịch từ tiếng Việt sang tiếng Anh
-  const translateToEnglish = async (vietnameseText) => {
+  // Dọn dẹp timeout khi component unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleImageSearch = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      toast.error("Please select an image to search.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
     try {
       const response = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(vietnameseText)}&langpair=vi|en`
+        "http://localhost:8080/tirashop/product/search-by-image?page=0&size=10&sort=createdAt",
+        {
+          method: "POST",
+          headers: {
+            accept: "*/*",
+          },
+          body: formData,
+        }
       );
+
       const data = await response.json();
-      const translatedText = data.responseData.translatedText;
-  
-      return translatedText;
+      if (response.ok && data.status === "success") {
+        const products = data.data.elementList || [];
+        if (products.length === 0) {
+          toast.info("No matching products found for this image.");
+          navigate("/category/all", { state: { searchResults: [], query: "Image Search" } });
+        } else {
+          navigate("/category/all", {
+            state: { searchResults: products, query: "Image Search" },
+          });
+        }
+      } else {
+        console.log("Error response:", data);
+        toast.error(data.message || "Unable to search by image. Please try again.");
+      }
     } catch (err) {
-      toast.error(`Translation error: ${err.message}`);
-      return vietnameseText; // Nếu dịch thất bại, trả về nguyên văn bản gốc
+      toast.error(`Image search error: ${err.message}`);
+    }
+  };
+
+  const handleKeyPressSearch = async (event) => {
+    if (event.key === "Enter") {
+      const query = event.target.value;
+      searchProducts(query, language);
     }
   };
 
@@ -77,7 +158,6 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
         return;
       }
 
-      // Gửi yêu cầu tìm kiếm với ngôn ngữ được chọn
       const response = await fetch(
         `http://localhost:8080/tirashop/product?name=${encodeURIComponent(query)}&language=${searchLanguage}`,
         {
@@ -100,72 +180,10 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
         }
       } else {
         console.log("Error response:", data);
-        toast.error(
-          data.message || "Unable to search for products. Please try again."
-        );
+        toast.error(data.message || "Unable to search for products. Please try again.");
       }
     } catch (err) {
       toast.error(`Search error: ${err.message}`);
-    }
-  };
-
-  const handleImageSearch = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      toast.error("Please select an image to search.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(
-        "http://localhost:8080/tirashop/product/search-by-image?page=0&size=10&sort=createdAt",
-        {
-          method: "POST",
-          headers: {
-            "accept": "*/*",
-          },
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-      if (response.ok && data.status === "success") {
-        const products = data.data.elementList || [];
-        if (products.length === 0) {
-          toast.info("No matching products found for this image.");
-          navigate("/category/all", { state: { searchResults: [], query: "Image Search" } });
-        } else {
-          navigate("/category/all", {
-            state: { searchResults: products, query: "Image Search" },
-          });
-        }
-      } else {
-        console.log("Error response:", data);
-        toast.error(
-          data.message || "Unable to search by image. Please try again."
-        );
-      }
-    } catch (err) {
-      toast.error(`Image search error: ${err.message}`);
-    }
-  };
-
-  const handleKeyPressSearch = async (event) => {
-    if (event.key === "Enter") {
-      const query = event.target.value;
-      if (language === "vi") {
-        const translatedText = await translateToEnglish(query);
-        searchProducts(translatedText, "en"); // Dịch sang tiếng Anh nếu là tiếng Việt
-      } else {
-        searchProducts(query, language); // Gửi trực tiếp nếu là tiếng Anh
-      }
     }
   };
 
@@ -181,7 +199,6 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
       />
 
       <div className={styles.searchIcons}>
-        {/* Dropdown chọn ngôn ngữ */}
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
@@ -192,21 +209,15 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
         </select>
 
         <button
-          className={styles.iconButton}
+          className={`${styles.iconButton} ${isRecording ? styles.recording : ""}`}
           onClick={handleVoiceSearch}
-          disabled={isListening}
+          disabled={isRecording}
         >
           <img src={voiceIcon} alt="Voice Search" width="22" height="22" />
-          {isListening && <span>Listening...</span>}
         </button>
 
         <button className={styles.iconButton} onClick={handleImageSearch}>
-          <img
-            src={imageSearchIcon}
-            alt="Image Search"
-            width="22"
-            height="22"
-          />
+          <img src={imageSearchIcon} alt="Image Search" width="22" height="22" />
         </button>
 
         <input
@@ -224,6 +235,20 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
           ✖
         </button>
       </div>
+
+      {isRecording && (
+        <div className={styles.recordingOverlay}>
+          <div className={styles.recordingIndicator}>
+            <div className={styles.micContainer}>
+              <img src={voiceIcon} alt="Microphone" className={styles.micIcon} />
+              <div className={styles.wave}></div>
+              <div className={styles.wave}></div>
+              <div className={styles.wave}></div>
+            </div>
+            <p>Speak now...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

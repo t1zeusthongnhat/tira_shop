@@ -40,8 +40,18 @@ public class ProductService {
     BrandRepository brandRepository;
     ImageRepository imageRepository;
 
+
     private static final String UPLOAD_DIR =
             System.getProperty("user.dir") + "/uploads/product/image";
+
+
+    public List<ProductDTO> getAllBestSellerProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .filter(ProductDTO::getIsBestSeller)
+                .collect(Collectors.toList());
+    }
 
 
     public PagedData<ProductDTO> filterProducts(String word1, Pageable pageable) {
@@ -181,11 +191,12 @@ public class ProductService {
     }
 
 
-    public ProductResponse getProductById(Long id) {
+    public ProductDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot found product has id: " + id));
-        return toResponse(product);
+        return toDTO(product);
     }
+
 
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);

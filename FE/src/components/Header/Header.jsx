@@ -10,7 +10,7 @@ import closeIcon from "../../assets/icons/svgs/close.svg";
 import bannerGucci from "../../assets/icons/images/bannerGucci.png";
 import Cart from "../Cart/Cart";
 import FixedHeader from "./FixedHeader";
-import Search from "../Search/Search"; // Import Search component
+import Search from "../Search/Search";
 import { useAppContext } from "../../Context/AppContext";
 
 function MyHeader() {
@@ -116,10 +116,16 @@ function MyHeader() {
   const handleCartClick = () => {
     if (!isAuthenticated) {
       toast.error("Please log in to view your cart");
+      setIsMenuOpen(false); // Đóng menu trước khi chuyển hướng
       navigate("/auth");
       return;
     }
     setIsSidebarOpen(true);
+  };
+
+  const handleSignInClick = () => {
+    setIsMenuOpen(false); // Đóng menu trước khi chuyển hướng
+    navigate("/auth");
   };
 
   const toggleSearch = () => {
@@ -141,7 +147,7 @@ function MyHeader() {
                 src={userIcon}
                 alt="User Icon"
                 className={styles.headerIcon}
-                onClick={() => navigate("/auth")}
+                onClick={handleSignInClick} // Sử dụng hàm mới để đóng menu
               />
             )}
             <div className={styles.cartContainer} onClick={handleCartClick}>
@@ -167,7 +173,6 @@ function MyHeader() {
               onClick={() => setIsMenuOpen(true)}
             />
           </div>
-          {/* Hiển thị Search component khi chưa cuộn */}
           {isSearchOpen && !isScrolled && (
             <Search
               isSearchOpen={isSearchOpen}
@@ -220,7 +225,7 @@ function MyHeader() {
           <li onClick={() => navigate("/stores")}>Store System</li>
           <li>Voucher</li>
           {!isAuthenticated ? (
-            <li onClick={() => navigate("/auth")}>Sign In</li>
+            <li onClick={handleSignInClick}>Sign In</li> // Sử dụng hàm mới để đóng menu
           ) : (
             <li onClick={handleLogout}>Logout</li>
           )}
@@ -230,6 +235,7 @@ function MyHeader() {
                 navigate("/profile");
               } else {
                 toast.error("Please log in to view your profile");
+                setIsMenuOpen(false); // Đóng menu
                 navigate("/auth");
               }
               setIsMenuOpen(false);

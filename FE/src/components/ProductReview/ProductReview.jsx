@@ -287,7 +287,7 @@ function ProductReview() {
       )}
 
       {/* Tiêu đề */}
-      <h3 className={styles.reviewsTitle}>What Our Customers Say</h3>
+      <h3 className={styles.reviewsTitle}>Your Review</h3>
 
       {/* Form thêm review */}
       <div className={styles.reviewForm}>

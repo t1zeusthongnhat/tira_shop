@@ -1,4 +1,3 @@
-// AppContext.js
 import {
   createContext,
   useContext,
@@ -17,20 +16,69 @@ export const AppProvider = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFetchingCart, setIsFetchingCart] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null); // Thêm trạng thái danh mục
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const validateToken = async (token) => {
+    try {
+      const response = await fetch("http://localhost:8080/tirashop/auth/introspect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+      const data = await response.json();
+      return response.status === 200 && data.status === "success" && data.data.valid;
+    } catch (err) {
+      console.error("Token validation error:", err);
+      return false;
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+  
+      const response = await fetch("http://localhost:8080/tirashop/auth/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+  
+      const data = await response.json();
+      if (response.status === 200 && data.status === "success") {
+        localStorage.setItem("token", data.data.token);
+        localStorage.setItem("refreshToken", data.data.refreshToken);
+        return data.data.token;
+      } else {
+        throw new Error("Failed to refresh token");
+      }
+    } catch (err) {
+      console.error("Refresh token error:", err); // Sửa lỗi cú pháp
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      setIsAuthenticated(false);
+      return null;
+    }
+  };
 
   const fetchCart = useCallback(async () => {
     if (isFetchingCart || !isAuthenticated) return;
     setIsFetchingCart(true);
     try {
-      const token = localStorage.getItem("token");
+      let token = localStorage.getItem("token");
       if (!token) {
         setCart([]);
         setIsAuthenticated(false);
         return;
       }
 
-      const response = await fetch("http://localhost:8080/tirashop/cart/list", {
+      let response = await fetch("http://localhost:8080/tirashop/cart/list", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -39,11 +87,20 @@ export const AppProvider = ({ children }) => {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem("token");
-        setIsAuthenticated(false);
-        setCart([]);
-       
-        return;
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          response = await fetch("http://localhost:8080/tirashop/cart/list", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${newToken}`,
+            },
+          });
+        } else {
+          setCart([]);
+          setIsAuthenticated(false);
+          return;
+        }
       }
 
       const data = await response.json();
@@ -78,28 +135,14 @@ export const AppProvider = ({ children }) => {
     const validateAndSetAuth = async () => {
       const token = localStorage.getItem("token");
       if (token) {
-        try {
-          const response = await fetch(
-            "http://localhost:8080/tirashop/auth/validate-token",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          const data = await response.json();
-          if (response.status === 200 && data.status === "success") {
-            setIsAuthenticated(true);
-          } else {
-            localStorage.removeItem("token");
-            setIsAuthenticated(false);
-            setCart([]);
-          }
-        } catch (err) {
-          console.error("Token validation error:", err);
-          localStorage.removeItem("token");
+        let isValid = await validateToken(token);
+        if (!isValid) {
+          const newToken = await refreshAccessToken();
+          isValid = !!newToken;
+        }
+        if (isValid) {
+          setIsAuthenticated(true);
+        } else {
           setIsAuthenticated(false);
           setCart([]);
         }
@@ -117,13 +160,31 @@ export const AppProvider = ({ children }) => {
     }
   }, [isAuthenticated, fetchCart]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
-    setCart([]);
-    setIsSidebarOpen(false);
-    setIsMenuOpen(false);
-    toast.success("Logged out successfully!");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await fetch("http://localhost:8080/tirashop/auth/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        });
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("username");
+      setIsAuthenticated(false);
+      setCart([]);
+      setIsSidebarOpen(false);
+      setIsMenuOpen(false);
+      toast.success("Logged out successfully!");
+    }
   };
 
   return (
@@ -141,8 +202,8 @@ export const AppProvider = ({ children }) => {
         setIsSearchOpen,
         fetchCart,
         handleLogout,
-        selectedCategory, // Thêm vào context
-        setSelectedCategory, // Thêm vào context
+        selectedCategory,
+        setSelectedCategory,
       }}
     >
       {children}

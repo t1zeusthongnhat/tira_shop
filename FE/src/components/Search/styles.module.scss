@@ -1,25 +1,25 @@
+// Search Bar
 .searchBar {
   position: fixed;
-  top: 150px; /* Đưa lên cao */
-  right: 200px; /* Dịch sang phải */
-  width: 600px; /* Gọn gàng */
-  background: white; /* Chuyển sang màu trắng tinh */
+  top: 150px;
+  right: 200px;
+  width: 600px;
+  background: white;
   display: flex;
   align-items: center;
   padding: 12px;
-  border-radius: 5px; /* Không bo góc (hình vuông) */
+  border-radius: 5px;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
   z-index: 1002;
   transition: all 0.3s ease-in-out;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #aaa;
+  }
 }
 
-/* Hover tăng độ sáng */
-.searchBar:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid #aaa;
-}
-
-/* Input */
+// Input
 .searchInput {
   flex: 1;
   border: none;
@@ -28,14 +28,13 @@
   padding: 8px;
   background: transparent;
   color: #333;
+
+  &::placeholder {
+    color: #888;
+  }
 }
 
-.searchInput::placeholder {
-  color: #888;
-}
-
-/* Vùng chứa icon */
-/* Search Icons Container */
+// Search Icons Container
 .searchIcons {
   display: flex;
   align-items: center;
@@ -60,8 +59,8 @@
 
     &:focus {
       outline: none;
-      border-color: #4a90e2;
-      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+      border-color: #4285f4;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
     }
   }
 
@@ -147,18 +146,179 @@
   }
 }
 
+// Recording Overlay
+.recordingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1003;
+}
+
+// Recording Indicator
+.recordingIndicator {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+  p {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+// Microphone Container
+.micContainer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4285f4, #34a853, #fbbc05, #ea4335);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite ease-in-out;
+
+  .micIcon {
+    width: 50px;
+    height: 50px;
+    z-index: 2;
+  }
+
+  // Sound Waves
+  .wave {
+    position: absolute;
+    border: 2px solid #4285f4;
+    border-radius: 50%;
+    opacity: 0;
+    animation: wave 1.5s infinite ease-out;
+  }
+
+  .wave:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+
+  .wave:nth-child(3) {
+    animation-delay: 0.6s;
+  }
+}
+
+// Wave Animation
+@keyframes wave {
+  0% {
+    width: 100px;
+    height: 100px;
+    opacity: 0.7;
+  }
+  100% {
+    width: 150px;
+    height: 150px;
+    opacity: 0;
+  }
+}
+
+// Pulse Animation for Mic Container
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Highlight recording button
+.recording {
+  background: #4285f4 !important;
+
+  img {
+    filter: brightness(0) invert(1);
+  }
+
+  span {
+    opacity: 1 !important;
+  }
+}
+
 // Responsive Adjustments
 @media (max-width: 600px) {
+  .searchBar {
+    width: 90%;
+    right: 5%;
+  }
+
   .searchIcons {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
     padding: 8px;
 
-    .iconButton, .languageSelect {
+    .iconButton,
+    .languageSelect {
       width: 35px;
       height: 35px;
       font-size: 12px;
+    }
+  }
+
+  .recordingIndicator {
+    padding: 20px;
+
+    .micContainer {
+      width: 80px;
+      height: 80px;
+
+      .micIcon {
+        width: 40px;
+        height: 40px;
+      }
+
+      .wave {
+        animation: wave-mobile 1.5s infinite ease-out;
+      }
+
+      .wave:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+
+      .wave:nth-child(3) {
+        animation-delay: 0.6s;
+      }
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
+
+  @keyframes wave-mobile {
+    0% {
+      width: 80px;
+      height: 80px;
+      opacity: 0.7;
+    }
+    100% {
+      width: 120px;
+      height: 120px;
+      opacity: 0;
     }
   }
 }
