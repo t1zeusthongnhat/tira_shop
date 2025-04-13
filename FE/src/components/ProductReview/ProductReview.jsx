@@ -57,28 +57,15 @@ function ProductReview() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setReviews([]);
-          setLoading(false);
-          return;
-        }
-
         const response = await fetch(
           `http://localhost:8080/tirashop/reviews/product/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
           }
         );
-
-        if (response.status === 401) {
-          localStorage.removeItem("token");
-          navigate("/auth");
-          setLoading(false);
-          return;
-        }
 
         const data = await response.json();
 
