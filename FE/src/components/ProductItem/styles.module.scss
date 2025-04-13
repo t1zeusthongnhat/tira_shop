@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 .productListContainer {
-  padding: 60px 20px; /* Giảm padding để tiết kiệm không gian */
+  padding: 60px 20px;
   text-align: center;
   background-color: #ffffff;
   position: relative;
@@ -10,23 +10,23 @@
 }
 
 .bestProduct {
-  font-size: 2rem; /* Giảm từ 2.5rem để nhỏ gọn hơn */
+  font-size: 2rem;
   font-weight: 700;
   color: #222;
-  margin-bottom: 40px; /* Giảm từ 60px */
+  margin-bottom: 40px;
   text-transform: uppercase;
-  letter-spacing: 1.5px; /* Giảm từ 2px */
+  letter-spacing: 1.5px;
   position: relative;
   display: inline-block;
 
   &:after {
     content: "";
     position: absolute;
-    bottom: -10px; /* Giảm từ -12px */
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px; /* Giảm từ 80px */
-    height: 3px; /* Giảm từ 4px */
+    width: 60px;
+    height: 3px;
     background: #ff3e55;
   }
 
@@ -36,48 +36,48 @@
     bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 120px; /* Giảm từ 150px */
+    width: 120px;
     height: 1px;
     background: #f0f0f0;
   }
 }
 
 .container {
-  max-width: 1400px; /* Giảm từ 1600px để phù hợp với màn hình nhỏ hơn */
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .productGrid {
-  padding: 15px 0; /* Giảm từ 20px */
+  padding-bottom: 20px;
   z-index: 0;
 
   .productItem {
     background: #fff;
-    border-radius: 10px; /* Giảm từ 12px */
+    border-radius: 10px;
     overflow: hidden;
     transition: transform 0.4s ease, box-shadow 0.4s ease;
-    margin: 10px; /* Giảm từ 15px để các sản phẩm gần nhau hơn */
-    padding: 0x; /* Giảm từ 20px */
+    margin: 10px;
+    padding: 10px;
     border: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03); /* Giảm độ đổ bóng */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
     position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
-    justify-content: space-between; /* Đảm bảo các phần tử phân bố đều */
+    justify-content: space-between;
 
     &:hover {
-      transform: translateY(-8px); /* Giảm từ -10px */
+      transform: translateY(-8px);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
     }
 
     .boxImg {
       cursor: pointer;
       overflow: hidden;
-      border-radius: 8px; /* Giảm từ 10px */
+      border-radius: 8px;
       position: relative;
       background: #fafafa;
-      height: 250px; /* Giảm từ 300px để cân đối hơn */
+      height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -88,7 +88,7 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 30px; /* Giảm từ 40px */
+        height: 30px;
         background: linear-gradient(
           to bottom,
           rgba(250, 250, 250, 0.8),
@@ -120,30 +120,30 @@
       }
 
       img {
-        width: 85%; /* Giảm từ 90% */
-        height: 85%;
+        width: 90%;
+        height: 90%;
         object-fit: contain;
         transition: transform 0.6s ease, filter 0.3s ease;
         object-position: center;
-        border-radius: 4px; /* Giảm từ 6px */
-        filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.05));
+        border-radius: 4px;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
 
         &:hover {
-          transform: scale(1.03); /* Giảm từ 1.05 để hiệu ứng nhẹ nhàng hơn */
-          filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
+          transform: scale(1.05);
+          filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.12));
         }
       }
     }
 
     .title {
-      font-size: 1rem; /* Giảm từ 1.2rem */
+      font-size: 1rem;
       font-weight: 400;
       color: #222;
-      margin: 10px 0 4px; /* Giảm từ 15px 0 6px */
+      margin: 10px 0 4px;
       text-align: center;
       text-transform: uppercase;
-      letter-spacing: 0.6px; /* Giảm từ 0.8px */
-      min-height: 2.5rem; /* Giảm từ 3rem */
+      letter-spacing: 0.6px;
+      min-height: 2.5rem;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -152,50 +152,50 @@
     }
 
     .category {
-      font-size: 0.8rem; /* Giảm từ 0.85rem */
+      font-size: 0.8rem;
       color: #666;
       text-align: center;
-      margin-bottom: 8px; /* Giảm từ 12px */
+      margin-bottom: 8px;
       font-weight: 400;
-      min-height: 1.2rem; /* Giảm từ 1.5rem */
+      min-height: 1.2rem;
     }
 
     .priceCl {
-      font-size: 1.1rem; /* Giảm từ 1.2rem */
-      font-weight: 400;
+      font-size: 1.1rem;
+      font-weight: 600;
       color: #f34237;
       text-align: center;
-      margin-bottom: 10px; /* Giảm từ 15px */
-      letter-spacing: 0.6px; /* Giảm từ 0.8px */
-      min-height: 1.2rem; /* Giảm từ 1.5rem */
+      margin-bottom: 10px;
+      letter-spacing: 0.6px;
+      min-height: 1.2rem;
     }
 
     .sizeSelector {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 12px; /* Giảm từ 20px */
+      margin-bottom: 12px;
 
       label {
-        font-size: 0.8rem; /* Giảm từ 0.85rem */
+        font-size: 0.8rem;
         color: #333;
-        margin-right: 8px; /* Giảm từ 10px */
+        margin-right: 8px;
         text-transform: uppercase;
         font-weight: 500;
         letter-spacing: 0.6px;
       }
 
       select {
-        padding: 6px 12px; /* Giảm từ 8px 16px */
-        border-radius: 4px; /* Giảm từ 6px */
+        padding: 6px 12px;
+        border-radius: 4px;
         border: 1px solid #eeeeee;
-        font-size: 0.8rem; /* Giảm từ 0.85rem */
+        font-size: 0.8rem;
         cursor: pointer;
         transition: all 0.3s ease;
         background: #fff;
         color: #333;
         font-weight: 500;
-        min-width: 80px; /* Giảm từ 90px */
+        min-width: 80px;
         text-align: center;
 
         &:focus {
@@ -213,20 +213,20 @@
     .addToCartBtn {
       display: block;
       width: 100%;
-      padding: 10px; /* Giảm từ 12px */
+      padding: 10px;
       background-color: #cb0500;
       color: #fff;
       border: none;
-      border-radius: 6px; /* Giảm từ 8px */
-      font-size: 0.85rem; /* Giảm từ 0.9rem */
+      border-radius: 6px;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       text-transform: uppercase;
-      letter-spacing: 0.6px; /* Giảm từ 0.8px */
+      letter-spacing: 0.6px;
       position: relative;
       overflow: hidden;
-      margin-top: 8px; /* Giảm từ auto để kiểm soát khoảng cách */
+      margin-top: 8px;
 
       &:before {
         content: "";
@@ -242,7 +242,7 @@
 
       &:hover {
         background-color: #cb0500;
-        letter-spacing: 1.2px; /* Giảm từ 1.5px */
+        letter-spacing: 1.2px;
 
         &:before {
           transform: skewX(-20deg) translateX(200%);
@@ -260,20 +260,20 @@
 
 .buttonContainer {
   text-align: center;
-  margin-top: 30px; /* Giảm từ 50px */
+  margin-top: 30px;
 
   .button {
-    padding: 12px 30px; /* Giảm từ 15px 40px */
+    padding: 12px 30px;
     background-color: transparent;
     color: #333;
     border: 2px solid #cb0500;
-    border-radius: 6px; /* Giảm từ 8px */
-    font-size: 0.9rem; /* Giảm từ 1rem */
+    border-radius: 6px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.4s ease;
     text-transform: uppercase;
-    letter-spacing: 1.2px; /* Giảm từ 1.5px */
+    letter-spacing: 1.2px;
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -300,6 +300,39 @@
   }
 }
 
+/* Improved Bestseller Badge styling */
+.bestSellerBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #ff3e55, #cb0500);
+  color: white;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  z-index: 10;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: rotate(-5deg);
+  animation: pulse 2s infinite;
+}
+
+/* Animation for bestseller badge */
+@keyframes pulse {
+  0% {
+    transform: rotate(-5deg) scale(1);
+  }
+  50% {
+    transform: rotate(-5deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(-5deg) scale(1);
+  }
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {
@@ -315,70 +348,75 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .productListContainer {
-    padding: 40px 15px; /* Giảm padding trên mobile */
+    padding: 40px 15px;
   }
 
   .bestProduct {
-    font-size: 1.5rem; /* Giảm từ 2rem */
-    margin-bottom: 30px; /* Giảm từ 40px */
+    font-size: 1.5rem;
+    margin-bottom: 30px;
   }
 
   .productGrid .productItem {
-    margin: 5px; /* Giảm từ 8px */
-    padding: 10px; /* Giảm từ 12px */
+    margin: 5px;
+    padding: 10px;
 
     .boxImg {
-      height: 200px; /* Giảm từ 240px */
+      height: 220px;
     }
 
     .title {
-      font-size: 0.9rem; /* Giảm từ 1rem */
-      min-height: 2rem; /* Giảm từ 2.5rem */
+      font-size: 0.9rem;
+      min-height: 2rem;
     }
 
     .category {
-      font-size: 0.7rem; /* Giảm từ 0.75rem */
-      min-height: 1rem; /* Giảm từ 1.2rem */
+      font-size: 0.7rem;
+      min-height: 1rem;
     }
 
     .priceCl {
-      font-size: 1rem; /* Giảm từ 1.1rem */
-      min-height: 1rem; /* Giảm từ 1.2rem */
+      font-size: 1rem;
+      min-height: 1rem;
     }
 
     .sizeSelector {
-      margin-bottom: 8px; /* Giảm từ 12px */
+      margin-bottom: 8px;
       label {
-        font-size: 0.7rem; /* Giảm từ 0.75rem */
+        font-size: 0.7rem;
       }
       select {
         font-size: 0.7rem;
-        padding: 4px 8px; /* Giảm từ 6px 12px */
-        min-width: 70px; /* Giảm từ 80px */
+        padding: 4px 8px;
+        min-width: 70px;
       }
     }
 
     .addToCartBtn {
-      font-size: 0.75rem; /* Giảm từ 0.8rem */
-      padding: 8px; /* Giảm từ 10px */
-      margin-top: 6px; /* Giảm từ 8px */
+      font-size: 0.75rem;
+      padding: 8px;
+      margin-top: 6px;
     }
   }
 
   .buttonContainer {
-    margin-top: 20px; /* Giảm từ 30px */
+    margin-top: 20px;
     .button {
-      padding: 10px 25px; /* Giảm từ 12px 30px */
-      font-size: 0.8rem; /* Giảm từ 0.9rem */
+      padding: 10px 25px;
+      font-size: 0.8rem;
     }
+  }
+
+  .bestSellerBadge {
+    font-size: 10px;
+    padding: 4px 8px;
   }
 }
 
 .loadingContainer,
 .errorContainer {
   text-align: center;
-  padding: 15px; /* Giảm từ 20px */
-  font-size: 16px; /* Giảm từ 18px */
+  padding: 15px;
+  font-size: 16px;
 }
 
 .productImage {
@@ -389,9 +427,9 @@
 }
 
 .carousel-container {
-  padding: 0 5px; /* Giảm từ 0 10px */
+  padding: 0 5px;
 }
 
 .carousel-item {
-  padding: 0 3px; /* Giảm từ 0 5px */
+  padding: 0 3px;
 }

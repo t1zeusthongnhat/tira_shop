@@ -78,7 +78,7 @@ function BestsellerProductList({ isAuthenticated }) {
   const handleAddToCart = useCallback(
     async (product) => {
       const token = localStorage.getItem("token");
-      if (!token || !isAuthenticated) {
+      if (!token) {
         toast.error("Please log in to add to cart");
         navigate("/auth");
         return;
@@ -113,7 +113,7 @@ function BestsellerProductList({ isAuthenticated }) {
         toast.error("Error adding to cart. Please try again.");
       }
     },
-    [isAuthenticated, navigate, fetchCart, setIsSidebarOpen, selectedSizes]
+    [navigate, fetchCart, setIsSidebarOpen, selectedSizes]
   );
 
   const memoizedProducts = useMemo(() => products.slice(0, 7), [products]);
@@ -188,7 +188,7 @@ function BestsellerProductList({ isAuthenticated }) {
       </div>
       <div className={styles.buttonContainer}>
         <button className={styles.button} onClick={handleSeeMore}>
-          See More Bestsellers
+          See More Products 
         </button>
       </div>
     </div>
