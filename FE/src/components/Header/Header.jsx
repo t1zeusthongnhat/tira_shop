@@ -27,6 +27,7 @@ function MyHeader() {
     setIsMenuOpen,
     isSearchOpen,
     setIsSearchOpen,
+    handleLogout, // Sử dụng handleLogout từ AppContext
   } = useAppContext();
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -101,22 +102,10 @@ function MyHeader() {
     setIsMenuOpen(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
-    setIsMenuOpen(false);
-    setCart([]);
-    toast.success("Logged out successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-    });
-    navigate("/");
-  };
-
   const handleCartClick = () => {
     if (!isAuthenticated) {
       toast.error("Please log in to view your cart");
-      setIsMenuOpen(false); // Đóng menu trước khi chuyển hướng
+      setIsMenuOpen(false);
       navigate("/auth");
       return;
     }
@@ -124,12 +113,17 @@ function MyHeader() {
   };
 
   const handleSignInClick = () => {
-    setIsMenuOpen(false); // Đóng menu trước khi chuyển hướng
+    setIsMenuOpen(false);
     navigate("/auth");
   };
 
   const toggleSearch = () => {
     setIsSearchOpen((prev) => !prev);
+  };
+
+  const handleLogoutClick = () => {
+    setIsMenuOpen(false); // Đóng menu trước khi đăng xuất
+    handleLogout(); // Gọi handleLogout từ AppContext
   };
 
   const isHomepage = location.pathname === "/";
@@ -147,7 +141,7 @@ function MyHeader() {
                 src={userIcon}
                 alt="User Icon"
                 className={styles.headerIcon}
-                onClick={handleSignInClick} // Sử dụng hàm mới để đóng menu
+                onClick={handleSignInClick}
               />
             )}
             <div className={styles.cartContainer} onClick={handleCartClick}>
@@ -225,9 +219,9 @@ function MyHeader() {
           <li onClick={() => navigate("/stores")}>Store System</li>
           <li>Voucher</li>
           {!isAuthenticated ? (
-            <li onClick={handleSignInClick}>Sign In</li> // Sử dụng hàm mới để đóng menu
+            <li onClick={handleSignInClick}>Sign In</li>
           ) : (
-            <li onClick={handleLogout}>Logout</li>
+            <li onClick={handleLogoutClick}>Logout</li> // Sử dụng handleLogoutClick
           )}
           <li
             onClick={() => {
@@ -235,7 +229,7 @@ function MyHeader() {
                 navigate("/profile");
               } else {
                 toast.error("Please log in to view your profile");
-                setIsMenuOpen(false); // Đóng menu
+                setIsMenuOpen(false);
                 navigate("/auth");
               }
               setIsMenuOpen(false);

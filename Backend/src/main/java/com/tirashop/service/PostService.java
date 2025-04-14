@@ -116,7 +116,7 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
         String content = generateContentWithAI(topic, name,
-                shortDescription);  // AI generated content
+                shortDescription);
 
         Post post = new Post();
         post.setName(name);
@@ -125,7 +125,7 @@ public class PostService {
         post.setContent(content);
         post.setAuthor(author);
         post.setCreatedAt(LocalDate.now());
-        post.setStatus("DRAFT");  // Set status to "DRAFT" (String)
+        post.setStatus("DRAFT");
         post.setIsMarkdown(true);
 
         if (image != null && !image.isEmpty()) {

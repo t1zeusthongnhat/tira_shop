@@ -5,6 +5,24 @@ import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useAppContext } from "../../context/AppContext";
 import { useState, useEffect, useRef } from "react";
 
+// Hàm giải mã JWT để lấy payload
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1]; // Lấy phần payload
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+};
+
 function AuthPage() {
   const { setIsAuthenticated, isAuthenticated, setIsMenuOpen } = useAppContext();
   const [signIn, setSignIn] = useState(true);
@@ -52,8 +70,9 @@ function AuthPage() {
 
       if (data && data.token) {
         console.log("Token received:", data.token);
+        const decodedToken = decodeJWT(data.token); // Giải mã token
         localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.userId || "unknown");
+        localStorage.setItem("userId", decodedToken?.userId || "unknown"); // Lưu userId từ token
         localStorage.setItem("username", data.username || "social-user");
         setIsAuthenticated(true);
         setIsMenuOpen(false); // Đóng menu sau khi đăng nhập OAuth
@@ -207,8 +226,9 @@ function AuthPage() {
       if (response.status === 200 && data.status === "success") {
         if (signIn) {
           if (data.data?.token) {
+            const decodedToken = decodeJWT(data.data.token); // Giải mã token
             localStorage.setItem("token", data.data.token);
-            localStorage.setItem("userId", data.data.userId || "unknown");
+            localStorage.setItem("userId", decodedToken?.userId || "unknown"); // Lưu userId từ token
             localStorage.setItem("username", formData.username);
             setIsAuthenticated(true);
             setIsMenuOpen(false); // Đóng menu sau khi đăng nhập form
@@ -277,9 +297,9 @@ function AuthPage() {
             loginData.status === "success" &&
             loginData.data?.token
           ) {
-            const token = loginData.data.token;
-            localStorage.setItem("token", token);
-            localStorage.setItem("userId", loginData.data.userId || "unknown");
+            const decodedToken = decodeJWT(loginData.data.token); // Giải mã token
+            localStorage.setItem("token", loginData.data.token);
+            localStorage.setItem("userId", decodedToken?.userId || "unknown"); // Lưu userId từ token
             localStorage.setItem("username", formData.username);
             setIsAuthenticated(true);
             setIsMenuOpen(false); // Đóng menu sau khi đăng ký và đăng nhập

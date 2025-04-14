@@ -6,7 +6,7 @@ import { FiX } from "react-icons/fi";
 import styles from "./chatbot.module.scss";
 import { useAppContext } from "../../context/AppContext";
 
-const API_URL = "https://7c21-118-70-118-224.ngrok-free.app";
+const API_URL = "https://ffa3-42-113-16-185.ngrok-free.app";
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();
@@ -18,25 +18,69 @@ const ChatBox = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Lấy userId từ localStorage, mặc định là "guest" nếu không có
+  const userId = localStorage.getItem("userId") || "guest";
+
+  // Hàm tải lịch sử tin nhắn từ localStorage
+  const loadMessages = () => {
+    const savedMessages = localStorage.getItem(`chatMessages_${userId}`);
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        setMessages(parsedMessages);
+      } catch (error) {
+        console.error("Error parsing saved messages:", error);
+        setMessages([]);
+      }
+    } else {
+      setMessages([]);
+    }
+  };
+
+  // Tải lịch sử tin nhắn khi component mount hoặc userId thay đổi
   useEffect(() => {
-    if (messages.length === 0 && isOpen) {
+    loadMessages();
+  }, [userId]);
+
+  // Reset messages khi logout (isAuthenticated thay đổi thành false)
+  useEffect(() => {
+    if (!isAuthenticated && userId === "guest") {
+      // Nếu không còn xác thực và ở trạng thái guest, reset messages
+      setMessages([]);
+      localStorage.removeItem("chatMessages_guest");
+    }
+  }, [isAuthenticated, userId]);
+
+  // Lưu lịch sử tin nhắn vào localStorage mỗi khi messages thay đổi
+  useEffect(() => {
+    if (messages.length > 0) {
+      const limitedMessages = messages.slice(-100); // Lưu tối đa 100 tin nhắn cuối
+      localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(limitedMessages));
+    }
+  }, [messages, userId]);
+
+  // Khởi tạo tin nhắn chào mừng chỉ khi người dùng mở chatbot và chưa có tin nhắn
+  useEffect(() => {
+    if (isOpen && messages.length === 0 && isAuthenticated) {
+      // Chỉ tạo tin nhắn chào mừng nếu đã đăng nhập
       setIsTyping(true);
       setTimeout(() => {
-        setMessages([
-          {
-            role: "assistant",
-            content: "Hello! I'm Tira's virtual assistant. How can I help you today?",
-          },
-        ]);
+        const welcomeMessage = {
+          role: "assistant",
+          content: "Hello! I'm Tira's virtual assistant. How can I help you today?",
+        };
+        setMessages([welcomeMessage]);
         setIsTyping(false);
       }, 1000);
     }
-  }, [isOpen, messages.length]);
+  }, [isOpen, messages.length, isAuthenticated]);
 
+  // Cuộn xuống tin nhắn mới nhất
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Tập trung vào ô input khi chatbot mở
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -79,11 +123,15 @@ const ChatBox = () => {
         },
         body: JSON.stringify({ messages: updatedMessages }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       let botMessage;
 
-      // Kiểm tra nếu người dùng yêu cầu xem sản phẩm
       if (input.toLowerCase().includes("xem sản phẩm") || input.toLowerCase().includes("view products")) {
         if (!isAuthenticated) {
           botMessage = {
@@ -91,7 +139,6 @@ const ChatBox = () => {
             content: "Please log in to view product details. You can log in here.",
           };
         } else {
-          // Giả lập danh sách sản phẩm với hình ảnh (thay bằng dữ liệu từ API thực tế nếu có)
           const products = [
             { id: 1, name: "Product 1", image: "https://via.placeholder.com/240x240?text=Product+1" },
             { id: 2, name: "Product 2", image: "https://via.placeholder.com/240x240?text=Product+2" },
@@ -99,7 +146,7 @@ const ChatBox = () => {
           botMessage = {
             role: "assistant",
             content: "Here are some products:",
-            products: products, // Thêm danh sách sản phẩm với hình ảnh
+            products: products,
           };
         }
       } else {
@@ -114,13 +161,13 @@ const ChatBox = () => {
         setIsTyping(false);
       }, Math.random() * 1000 + 500);
     } catch (error) {
-      console.error("API Error:", error);
+      console.error("API Error:", error.message);
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: "Connection error. Please try again later!",
+            content: "Sorry, something went wrong. Please try again later!",
           },
         ]);
         setIsTyping(false);
@@ -168,7 +215,6 @@ const ChatBox = () => {
                     }
                   >
                     <span className={styles.messageText}>{msg.content}</span>
-                    {/* Hiển thị hình ảnh sản phẩm nếu có */}
                     {msg.products && (
                       <div className={styles.productList}>
                         {msg.products.map((product) => (

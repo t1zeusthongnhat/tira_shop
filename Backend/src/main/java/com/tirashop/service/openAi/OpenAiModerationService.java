@@ -42,13 +42,11 @@ public class OpenAiModerationService {
             if (response.getStatusCode() != HttpStatus.OK) {
                 System.out.println(
                         "API returns error with status code: " + response.getStatusCode());
-                return false; // if API not return success
+                return false;
             }
 
-            // Filter objects in returned results
             JsonArray detectedObjects = JsonParser.parseString(response.getBody()).getAsJsonArray();
 
-            // List of unwanted objects to be censored
             Set<String> bannedLabels = Set.of(
                     "sex", "sexual", "body", "weapons", "guns", "violence", "racism", "religion",
                     "extremism", "drugs", "hate", "abuse", "waste", "toilet", "naked","bikini","bra",
@@ -126,7 +124,7 @@ public class OpenAiModerationService {
                 }
             }
 
-            // Additional checks for specific words and phrases
+
             String[] forbiddenTerms = new String[] {
                     "nôn mửa", "buồn nôn", "bốc mùi", "vô giáo dục", "bạo lực", "phân biệt giới tính",
                     "phân biệt chủng tộc", "phân biệt tôn giáo", "đả kích","muốn mửa"

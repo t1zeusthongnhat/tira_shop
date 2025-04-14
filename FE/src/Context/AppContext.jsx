@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 
 const AppContext = createContext();
@@ -41,7 +35,7 @@ export const AppProvider = ({ children }) => {
       if (!refreshToken) {
         throw new Error("No refresh token available");
       }
-  
+
       const response = await fetch("http://localhost:8080/tirashop/auth/refresh", {
         method: "POST",
         headers: {
@@ -49,7 +43,7 @@ export const AppProvider = ({ children }) => {
         },
         body: JSON.stringify({ refreshToken }),
       });
-  
+
       const data = await response.json();
       if (response.status === 200 && data.status === "success") {
         localStorage.setItem("token", data.data.token);
@@ -59,7 +53,7 @@ export const AppProvider = ({ children }) => {
         throw new Error("Failed to refresh token");
       }
     } catch (err) {
-      console.error("Refresh token error:", err); // Sửa lỗi cú pháp
+      console.error("Refresh token error:", err);
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       setIsAuthenticated(false);
@@ -161,6 +155,7 @@ export const AppProvider = ({ children }) => {
   }, [isAuthenticated, fetchCart]);
 
   const handleLogout = async () => {
+    console.log("handleLogout called");
     try {
       const token = localStorage.getItem("token");
       if (token) {
@@ -175,10 +170,19 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      const userId = localStorage.getItem("userId");
+      // Xóa lịch sử chatbot của user hiện tại (nếu có)
+      if (userId) {
+        localStorage.removeItem(`chatMessages_${userId}`);
+      }
+      // Xóa lịch sử chatbot của guest
+      localStorage.removeItem("chatMessages_guest");
+      // Xóa các thông tin người dùng khác
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
+      // Reset trạng thái trong context
       setIsAuthenticated(false);
       setCart([]);
       setIsSidebarOpen(false);
