@@ -15,10 +15,10 @@ function CheckoutPage() {
   const [error, setError] = useState(null);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [step, setStep] = useState(1); // 1: shipping, 2: payment
-  const [pendingItems, setPendingItems] = useState([]); // Lưu danh sách sản phẩm PENDING
-  const [orderId, setOrderId] = useState(null); // Lưu orderId sau khi tạo đơn hàng
-  const [shipmentId, setShipmentId] = useState(null); // Lưu shipmentId
+  const [step, setStep] = useState(1);
+  const [pendingItems, setPendingItems] = useState([]);
+  // Thêm state cho phần trăm giảm giá
+  const [discountPercentage, setDiscountPercentage] = useState(0);
   const shippingFee = 0;
 
   useEffect(() => {
@@ -29,10 +29,9 @@ function CheckoutPage() {
       return;
     }
     fetchCart();
-    fetchPendingItems(); // Lấy danh sách sản phẩm PENDING
+    fetchPendingItems();
   }, [navigate, fetchCart]);
 
-  // Lấy danh sách sản phẩm PENDING
   const fetchPendingItems = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -69,58 +68,6 @@ function CheckoutPage() {
 
   const handlePreviousStep = () => {
     setStep(1);
-  };
-
-  // Cập nhật trạng thái đơn hàng thành CONFIRMED
-  const updateOrderStatus = async (shipmentId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/tirashop/orders/shipments/${shipmentId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            status: "CONFIRMED",
-          }),
-        }
-      );
-      const data = await response.json();
-      if (data.status === "success") {
-        toast.success("Order status updated to CONFIRMED!");
-      } else {
-        toast.error(data.message || "Failed to update order status");
-      }
-    } catch (err) {
-      toast.error("Error updating order status: " + err.message);
-    }
-  };
-
-  // Xác nhận giao hàng (giả sử người dùng xác nhận khi nhận hàng COD)
-  const confirmDelivery = async (shipmentId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/tirashop/orders/shipments/${shipmentId}/confirm`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      if (data.status === "success") {
-        toast.success("Delivery confirmed successfully!");
-      } else {
-        toast.error(data.message || "Failed to confirm delivery");
-      }
-    } catch (err) {
-      toast.error("Error confirming delivery: " + err.message);
-    }
   };
 
   const handleCheckout = async (e) => {
@@ -160,26 +107,22 @@ function CheckoutPage() {
         },
         body: JSON.stringify({
           shippingAddress,
-          voucherCode: voucherDiscount > 0 ? voucherCode : null,
-          totalAmount: total,
+          voucherCode: voucherCode || null,
           paymentMethod,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error("Checkout API request failed");
+      }
+
       const data = await response.json();
       if (data.status === "success") {
         toast.success("Order placed successfully!");
         setCart([]);
-
-        // Giả sử API trả về orderId và shipmentId sau khi tạo đơn hàng
-        const newOrderId = data.orderId || "12345"; // Thay bằng giá trị thực từ API
-        const newShipmentId = data.shipmentId || "67890"; // Thay bằng giá trị thực từ API
-        setOrderId(newOrderId);
-        setShipmentId(newShipmentId);
-
-        // Cập nhật trạng thái đơn hàng thành CONFIRMED
-        await updateOrderStatus(newShipmentId);
-
-        // Với COD, không cần redirect đến cổng thanh toán
+        setVoucherCode("");
+        setVoucherDiscount(0);
+        setDiscountPercentage(0); // Reset phần trăm sau khi checkout
         setTimeout(() => navigate("/order-success"), 1500);
       } else {
         setError(data.message || "Checkout failed");
@@ -187,24 +130,13 @@ function CheckoutPage() {
       }
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.error("Checkout failed: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Giả sử người dùng xác nhận giao hàng (cho COD)
-  const handleConfirmDelivery = async () => {
-    if (!shipmentId) {
-      toast.error("No shipment ID available to confirm delivery");
-      return;
-    }
-    await confirmDelivery(shipmentId);
-  };
-
-  const paymentMethods = [
-    { id: "cod", name: "Cash on Delivery (COD)"},
-  ];
+  const paymentMethods = [{ id: "cod", name: "Cash on Delivery (COD)" }];
 
   return (
     <div className={styles.checkoutPageWrapper}>
@@ -337,7 +269,6 @@ function CheckoutPage() {
                           />
                           <span className={styles.radioCheckmark}></span>
                         </div>
-                        
                         <label htmlFor={method.id}>{method.name}</label>
                       </div>
                     ))}
@@ -350,6 +281,7 @@ function CheckoutPage() {
                       setVoucherDiscount={setVoucherDiscount}
                       voucherCode={voucherCode}
                       setVoucherCode={setVoucherCode}
+                      setDiscountPercentage={setDiscountPercentage} // Truyền prop mới
                     />
                   </div>
 
@@ -372,19 +304,6 @@ function CheckoutPage() {
                       {loading ? "Processing..." : "Place Order"}
                     </button>
                   </div>
-
-                  {/* Nút giả lập xác nhận giao hàng (cho COD) */}
-                  {shipmentId && (
-                    <div className={styles.confirmDelivery}>
-                      <button
-                        type="button"
-                        className={styles.confirmDeliveryBtn}
-                        onClick={handleConfirmDelivery}
-                      >
-                        Confirm Delivery (COD)
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -413,9 +332,7 @@ function CheckoutPage() {
                       </p>
                     </div>
                     <p className={styles.itemPrice}>
-                      $
-                      {(
-                        (item.productPrice * item.quantity).toLocaleString("en-US"))}
+                      ${(item.productPrice * item.quantity).toLocaleString("en-US")}
                     </p>
                   </div>
                 ))}
@@ -430,26 +347,26 @@ function CheckoutPage() {
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Shipping Fee:</span>
-                  <span>{shippingFee === 0 ? "Free" : `{shippingFee.toLocaleString("en-US")} $`}</span>
+                  <span>{shippingFee === 0 ? "Free" : `${shippingFee.toLocaleString("en-US")} $`}</span>
                 </div>
                 {voucherDiscount > 0 && (
                   <div className={styles.summaryRow}>
-                    <span>Discount:</span>
+                    <span>
+                      Discount ({voucherCode || "Voucher"}
+                      {discountPercentage > 0 ? ` - ${discountPercentage}%` : ""}):
+                    </span>
                     <span className={styles.discountValue}>
-                    {voucherDiscount.toLocaleString("en-US")} $
+                      -{voucherDiscount.toLocaleString("en-US")} $
                     </span>
                   </div>
                 )}
-
                 <div className={styles.divider}></div>
-
                 <div className={`${styles.summaryRow} ${styles.totalRow}`}>
                   <span>Total:</span>
                   <span className={styles.totalAmount}>
-                  {total.toLocaleString("en-US")} $
+                    {total.toLocaleString("en-US")} $
                   </span>
                 </div>
-
                 <div className={styles.taxNote}>
                   <p>Includes VAT (if applicable)</p>
                 </div>

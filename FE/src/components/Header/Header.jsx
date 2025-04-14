@@ -215,8 +215,13 @@ function MyHeader() {
           <img src={closeIcon} alt="Close" />
         </button>
         <ul className={styles.menuList}>
-          <li onClick={() => navigate("/category/all")}>Shop</li>
-          <li onClick={() => navigate("/stores")}>Store System</li>
+          <li onClick={() => {
+            setIsMenuOpen(false)
+            navigate("/category/all")
+          }}>Shop</li>
+          <li onClick={() => {
+            setIsMenuOpen(false)
+          navigate("/stores")}}>Store System</li>
           <li>Voucher</li>
           {!isAuthenticated ? (
             <li onClick={handleSignInClick}>Sign In</li>
@@ -237,7 +242,10 @@ function MyHeader() {
           >
             My Account
           </li>
-          <li onClick={() => navigate("/orders")}>My Orders</li>
+          <li onClick={() => {
+             setIsMenuOpen(false)
+            navigate("/orders")
+          }}>My Orders</li>
         </ul>
       </div>
     </>

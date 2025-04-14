@@ -126,22 +126,19 @@ function AuthPage() {
 
   const validateToken = async (token) => {
     try {
-      console.log("Validating token:", token);
-      const response = await fetch(
-        "http://localhost:8080/tirashop/auth/validate-token",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      console.log("Validating token with /introspect:", token);
+      const response = await fetch("http://localhost:8080/tirashop/auth/introspect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
       const data = await response.json();
-      console.log("Validate token response:", response.status, data);
-      return response.status === 200 && data.status === "success";
+      console.log("Introspect token response:", response.status, data);
+      return response.status === 200 && data.status === "success" && data.data?.valid;
     } catch (err) {
-      console.error("Token validation error:", err);
+      console.error("Token introspection error:", err);
       return false;
     }
   };

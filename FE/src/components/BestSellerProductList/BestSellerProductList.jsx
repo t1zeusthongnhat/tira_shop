@@ -38,13 +38,33 @@ const renderStars = (rating) => {
   );
 };
 
+// Hàm kiểm tra token hợp lệ
+const validateToken = async (token) => {
+  try {
+    console.log("Validating token with /introspect:", token);
+    const response = await fetch("http://localhost:8080/tirashop/auth/introspect", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    });
+    const data = await response.json();
+    console.log("Introspect token response:", response.status, data);
+    return response.status === 200 && data.status === "success" && data.data?.valid;
+  } catch (err) {
+    console.error("Token introspection error:", err);
+    return false;
+  }
+};
+
 function BestsellerProductList({ isAuthenticated }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSizes, setSelectedSizes] = useState({});
   const navigate = useNavigate();
-  const { fetchCart, setIsSidebarOpen } = useAppContext();
+  const { fetchCart, setIsSidebarOpen, setIsAuthenticated } = useAppContext();
 
   const fetchBestsellers = useCallback(async () => {
     setLoading(true);
@@ -66,7 +86,7 @@ function BestsellerProductList({ isAuthenticated }) {
         setProducts(bestSellerProducts);
         setSelectedSizes(
           bestSellerProducts.reduce((acc, product) => {
-            acc[product.id] = product.size; // Chỉ gán trực tiếp size từ API
+            acc[product.id] = product.size;
             return acc;
           }, {})
         );
@@ -94,11 +114,23 @@ function BestsellerProductList({ isAuthenticated }) {
   const handleAddToCart = useCallback(
     async (product) => {
       const token = localStorage.getItem("token");
-      if (!token || !isAuthenticated) {
+      if (!token) {
         toast.error("Please log in to add to cart");
         navigate("/auth");
         return;
       }
+
+      const isTokenValid = await validateToken(token);
+      if (!isTokenValid) {
+        toast.error("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("username");
+        setIsAuthenticated(false);
+        navigate("/auth");
+        return;
+      }
+
       try {
         const response = await fetch("http://localhost:8080/tirashop/cart/add", {
           method: "POST",
@@ -112,19 +144,31 @@ function BestsellerProductList({ isAuthenticated }) {
             productSize: selectedSizes[product.id] || "M",
           }),
         });
+
         const data = await response.json();
+        console.log("Add to cart response:", response.status, data);
         if (response.ok && data.status === "success") {
           toast.success("Added to cart successfully!");
           await fetchCart();
           setIsSidebarOpen(true);
         } else {
-          toast.error(`Unable to add to cart: ${data.message || "Unknown error"}`);
+          if (response.status === 401) {
+            toast.error("Unauthorized. Please log in again.");
+            localStorage.removeItem("token");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("username");
+            setIsAuthenticated(false);
+            navigate("/auth");
+          } else {
+            toast.error(`Unable to add to cart: ${data.message || "Unknown error"}`);
+          }
         }
       } catch (error) {
+        console.error("Error adding to cart:", error);
         toast.error("Error adding to cart. Please try again.");
       }
     },
-    [isAuthenticated, navigate, fetchCart, setIsSidebarOpen, selectedSizes]
+    [navigate, fetchCart, setIsSidebarOpen, selectedSizes, setIsAuthenticated]
   );
 
   const memoizedProducts = useMemo(() => products.slice(0, 7), [products]);

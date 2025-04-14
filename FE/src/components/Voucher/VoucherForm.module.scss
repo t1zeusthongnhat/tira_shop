@@ -7,7 +7,11 @@
     margin-bottom: 0.5rem;
     color: #333;
   }
-
+  .discountInfo {
+    color: #2ecc71; // Màu xanh để thông báo áp dụng thành công
+    font-size: 14px;
+    margin-top: 8px;
+  }
   .voucherInput {
     display: flex;
     gap: 0.5rem;

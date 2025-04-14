@@ -11,6 +11,7 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
     price: "",
     originalPrice: "",
     inventory: "",
+    size: "XL",
     status: "",
     categoryId: "",
     brandId: "",
@@ -28,6 +29,7 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
         price: product.price,
         originalPrice: product.originalPrice,
         inventory: product.inventory,
+        size: product.size || "XL",
         status: product.status,
         categoryId: product.categoryId,
         brandId: product.brandId,
@@ -72,6 +74,7 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
         price: parseFloat(productData.price),
         originalPrice: parseFloat(productData.originalPrice),
         inventory: parseInt(productData.inventory),
+        size: productData.size,
         status: productData.status,
         categoryId: Number(productData.categoryId),
         brandId: Number(productData.brandId),
@@ -188,6 +191,14 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
               className="w-full px-3 py-1 border rounded-lg"
               required
             />
+          </div>
+          <div className="mb-1">
+            <label className="block text-gray-700 text-sm font-medium">Size</label>
+            <select name="size" value={productData.size} onChange={handleChange} className="w-full px-3 py-1 border rounded-lg">
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
           </div>
 
           <div className="mb-1">

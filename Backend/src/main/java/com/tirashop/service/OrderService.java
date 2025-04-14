@@ -2,29 +2,16 @@ package com.tirashop.service;
 
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
+import com.tirashop.dto.response.OrderProductResponseDTO;
 import com.tirashop.dto.response.RevenueResponse;
 import com.tirashop.dto.response.RevenueResponse.ProductPerformance;
 import com.tirashop.dto.response.SearchOrderItem;
 import com.tirashop.model.PagedData;
-import com.tirashop.persitence.entity.Order;
-import com.tirashop.persitence.entity.OrderItem;
-import com.tirashop.persitence.entity.Product;
-import com.tirashop.persitence.entity.Shipment;
-import com.tirashop.persitence.entity.User;
+import com.tirashop.persitence.entity.*;
 import com.tirashop.persitence.repository.OrderRepository;
 import com.tirashop.persitence.repository.ShipmentRepository;
 import com.tirashop.persitence.specification.OrderSpecification;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -45,9 +33,58 @@ import java.util.stream.Collectors;
 public class OrderService {
 
 
-    //Quản lý Shipment
     ShipmentRepository shipmentRepository;
     OrderRepository orderRepository;
+
+    public PagedData<OrderProductResponseDTO> getPurchasedProductsWithPagination(String username, Pageable pageable) {
+        Page<Order> ordersPage = orderRepository.findByUser_UsernameAndStatus(username, Order.OrderStatus.COMPLETED, pageable);
+
+        List<OrderProductResponseDTO> orderProductResponseList = ordersPage.stream()
+                .flatMap(order -> order.getOrderItems().stream().map(orderItem -> {
+                    double totalPrice = orderItem.getPrice() * orderItem.getQuantity();
+
+
+                    double discount = 0;
+                    if (order.getVoucher() != null) {
+                        if (order.getVoucher().getDiscountType() == Voucher.DiscountType.PERCENTAGE) {
+                            discount = totalPrice * (order.getVoucher().getDiscountValue() / 100);
+                        } else if (order.getVoucher().getDiscountType() == Voucher.DiscountType.FIXED) {
+                            discount = order.getVoucher().getDiscountValue();
+                        }
+                    }
+
+                    double priceAfterDiscount = totalPrice - discount;
+
+                    String voucherCode = order.getVoucher() != null ? order.getVoucher().getCode() : "No voucher";
+
+                    return new OrderProductResponseDTO(
+                            orderItem.getProduct().getName(),
+                            orderItem.getProduct().getImages() != null && !orderItem.getProduct().getImages().isEmpty()
+                                    ? orderItem.getProduct().getImages().get(0).getUrl() : null,
+                            orderItem.getProduct().getBrand() != null ? orderItem.getProduct().getBrand().getName() : null,
+                            orderItem.getProduct().getCategory() != null ? orderItem.getProduct().getCategory().getName() : null,
+                            orderItem.getProduct().getSize(),
+                            priceAfterDiscount, // Hiển thị giá sau khi trừ voucher
+                            orderItem.getQuantity(),
+                            order.getShippingAddress(), // Assuming `getShippingAddress()` is a method in `Order` entity
+                            order.getPayments() != null && !order.getPayments().isEmpty() ? order.getPayments().get(0).getPaymentMethod().name() : null,
+                            voucherCode, // Sử dụng voucherCode đã kiểm tra null
+                            order.getStatus().name()
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        // Trả về PagedData với các thông tin phân trang
+        return new PagedData<>(
+                ordersPage.getNumber(),                  // pageNo
+                ordersPage.getSize(),                    // elementPerPage
+                ordersPage.getTotalElements(),           // totalElements
+                ordersPage.getTotalPages(),              // totalPages
+                orderProductResponseList                 // elementList
+        );
+    }
+
+
 
     public RevenueResponse getRevenueAndProductPerformance() {
         // Fetch all completed orders

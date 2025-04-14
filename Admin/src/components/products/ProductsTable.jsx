@@ -215,6 +215,7 @@ const ProductsTable = () => {
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Price</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Original Price</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Inventory</th>
+                            <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Size</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Status</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Brand</th>
                             <th className='py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider'>Category</th>
@@ -257,7 +258,7 @@ const ProductsTable = () => {
                                     ${product.originalPrice.toLocaleString()}
                                 </td>
                                 <td className='py-4 text-sm text-gray-700 min-w-[200px]'>{product.inventory}</td>
-
+                                <td className='py-4 text-sm text-gray-700 min-w-[200px]'>{product.size}</td>       
                                 <td className='py-4 text-sm text-gray-700 min-w-[200px]'>{product.status}</td>
                                 <td className='py-4 text-sm text-gray-700 min-w-[200px]'>{product.brandName}</td>
                                 <td className='py-4 text-sm text-gray-700 min-w-[200px]'>{product.categoryName}</td>

@@ -3,6 +3,7 @@ package com.tirashop.controller;
 import com.tirashop.dto.OrderItemDTO;
 import com.tirashop.dto.ShipmentDetailDTO;
 import com.tirashop.dto.response.ApiResponse;
+import com.tirashop.dto.response.OrderProductResponseDTO;
 import com.tirashop.dto.response.RevenueResponse;
 import com.tirashop.dto.response.SearchOrderItem;
 import com.tirashop.model.PagedData;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,22 @@ public class OrderController {
 
     OrderService orderService;
 
+    @GetMapping("/orders/products")
+    @Operation(summary = "Get all purchased products by user with pagination", description = "Retrieve all purchased products by the user with pagination")
+    public ApiResponse<PagedData<OrderProductResponseDTO>> getPurchasedProductsWithPagination(
+            Authentication authentication,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        String username = authentication != null ? authentication.getName() : null;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdAt")));
+
+        PagedData<OrderProductResponseDTO> response = orderService.getPurchasedProductsWithPagination(username, pageable);
+
+        return new ApiResponse<>("success", 200, "Purchased products retrieved", response);
+    }
+
+
     @GetMapping("/revenue")
     @Operation(summary = "Get all revenue", description = "Retrieve all revenue in orders")
     public ApiResponse<RevenueResponse> getRevenueAndProductPerformance() {
@@ -38,7 +57,7 @@ public class OrderController {
 
     @GetMapping("")
     @Operation(summary = "Get all orders", description = "Retrieve all products in orders")
-    public ApiResponse<PagedData<SearchOrderItem>> getPendingProducts(
+    public ApiResponse<PagedData<SearchOrderItem>> getAllOrder(
             @RequestParam(required = false) String keyword,
             @PageableDefault(page = 0, size = 25, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {

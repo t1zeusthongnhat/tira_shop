@@ -1,4 +1,3 @@
-// src/components/Voucher/VoucherForm.jsx
 import { useState } from "react";
 import { toast } from "react-toastify";
 import styles from "./VoucherForm.module.scss";
@@ -8,66 +7,75 @@ const VoucherForm = ({
   setVoucherDiscount,
   voucherCode,
   setVoucherCode,
+  setDiscountPercentage, // Nhận từ props
 }) => {
   const [loading, setLoading] = useState(false);
+  const [isVoucherValid, setIsVoucherValid] = useState(false);
+  const [discountPercentage, setLocalDiscountPercentage] = useState(0); // Đổi tên để tránh xung đột
+
+  // Hàm parse ngày từ định dạng dd-MM-yyyy
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
 
   const applyVoucher = async () => {
     if (!voucherCode) {
       toast.error("Please enter a voucher code");
+      setIsVoucherValid(false);
       return;
     }
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to apply a voucher");
-        return;
-      }
-
-      // Gọi API để lấy danh sách voucher
       const response = await fetch(
-        "http://localhost:8080/tirashop/voucher/list",
+        `http://localhost:8080/tirashop/voucher/validate?code=${voucherCode}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
 
       const data = await response.json();
       if (data.status === "success" && data.data) {
-        // Tìm voucher khớp với mã người dùng nhập
-        const voucher = data.data.find(
-          (v) =>
-            v.code.toLowerCase() === voucherCode.toLowerCase() &&
-            v.status === "ACTIVE" &&
-            new Date(v.startDate) <= new Date() &&
-            new Date(v.endDate) >= new Date()
-        );
+        const voucher = data.data;
+        const currentDate = new Date();
+        const startDate = parseDate(voucher.startDate);
+        const endDate = parseDate(voucher.endDate);
 
-        if (voucher) {
+        if (
+          voucher.status === "ACTIVE" &&
+          startDate <= currentDate &&
+          endDate >= currentDate
+        ) {
           let discount = 0;
           if (voucher.discountType === "PERCENTAGE") {
             discount = (subtotal * voucher.discountValue) / 100;
-            discount = Math.min(discount, subtotal); // Giới hạn giảm giá tối đa bằng subtotal
+            discount = Math.min(discount, subtotal);
+            setDiscountPercentage(voucher.discountValue); // Sử dụng setDiscountPercentage từ props
+            setLocalDiscountPercentage(voucher.discountValue); // Cập nhật state nội bộ để hiển thị
           } else {
             discount = voucher.discountValue || 0;
+            setDiscountPercentage(0); // Sử dụng từ props
+            setLocalDiscountPercentage(0);
           }
           setVoucherDiscount(discount);
+          setIsVoucherValid(true);
           toast.success("Voucher applied successfully!");
         } else {
-          setVoucherDiscount(0);
-          toast.error("Invalid or expired voucher code");
+          throw new Error("Invalid or expired voucher");
         }
       } else {
-        setVoucherDiscount(0);
-        toast.error(data.message || "Failed to fetch vouchers");
+        throw new Error(data.message || "Invalid voucher code");
       }
     } catch (err) {
       setVoucherDiscount(0);
-      toast.error("Error applying voucher");
+      setIsVoucherValid(false);
+      setDiscountPercentage(0); // Sử dụng từ props
+      setLocalDiscountPercentage(0);
+      setVoucherCode("");
+      toast.error(err.message || "Error applying voucher");
     } finally {
       setLoading(false);
     }
@@ -80,7 +88,12 @@ const VoucherForm = ({
         <input
           type="text"
           value={voucherCode}
-          onChange={(e) => setVoucherCode(e.target.value)}
+          onChange={(e) => {
+            setVoucherCode(e.target.value);
+            setIsVoucherValid(false);
+            setDiscountPercentage(0); // Sử dụng từ props
+            setLocalDiscountPercentage(0);
+          }}
           placeholder="Enter voucher code"
           className={styles.voucherField}
         />
@@ -93,6 +106,11 @@ const VoucherForm = ({
           {loading ? "Applying..." : "Apply"}
         </button>
       </div>
+      {isVoucherValid && discountPercentage > 0 && (
+        <p className={styles.discountInfo}>
+          Applied {discountPercentage}% discount
+        </p>
+      )}
     </div>
   );
 };

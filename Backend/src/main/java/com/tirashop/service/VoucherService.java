@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +23,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class VoucherService {
 
-
     VoucherRepository voucherRepository;
-
 
     public PagedData<VoucherDTO> seachVoucher(String code, String status, Pageable pageable) {
 
@@ -43,6 +42,7 @@ public class VoucherService {
                 .elementList(voucherItem)
                 .build();
     }
+
 
     public List<VoucherDTO> getAllVouchers() {
         return voucherRepository.findAll()
@@ -88,6 +88,37 @@ public class VoucherService {
         return mapToDto(voucher);
     }
 
+
+    public VoucherDTO validateVoucherByCode(String code) {
+        var voucherOptional = voucherRepository.findByCode(code);
+
+        if (!voucherOptional.isPresent()) {
+            throw new RuntimeException("Voucher not found");
+        }
+
+        Voucher voucher = voucherOptional.get();
+
+        if (voucher.getStatus() == Voucher.VoucherStatus.EXPIRED || voucher.getStatus() == Voucher.VoucherStatus.USED) {
+            throw new RuntimeException("Voucher is expired or already used");
+        }
+
+        if (LocalDate.now().isBefore(voucher.getStartDate()) || LocalDate.now().isAfter(voucher.getEndDate())) {
+            throw new RuntimeException("Voucher is not valid yet or has expired");
+        }
+
+        return new VoucherDTO(
+                voucher.getId(),
+                voucher.getCode(),
+                voucher.getDiscountType(),
+                voucher.getDiscountValue(),
+                voucher.getStartDate(),
+                voucher.getEndDate(),
+                voucher.getStatus(),
+                voucher.getCreatedAt(),
+                voucher.getUpdatedAt()
+        );
+    }
+
     private VoucherDTO mapToDto(Voucher voucher) {
         if (voucher == null) {
             return null;
@@ -104,6 +135,7 @@ public class VoucherService {
                 voucher.getUpdatedAt()
         );
     }
+
 
     private Voucher mapToEntity(VoucherDTO voucherDTO, boolean isCreate) {
         if (voucherDTO == null) {

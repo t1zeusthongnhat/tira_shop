@@ -6,27 +6,30 @@ import Footer from "../Footer/Footer";
 
 function OrderHistoryPage() {
   const navigate = useNavigate();
-  const [purchasedItems, setPurchasedItems] = useState([]); 
-  const [pendingItems, setPendingItems] = useState([]); 
-  const [cancelledItems, setCancelledItems] = useState([]); 
+  const [orderItems, setOrderItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 10;
 
-  // Hàm để xử lý URL hình ảnh
+  // Function to construct image URL
   const getImageUrl = (imageUrl) => {
-    // Nếu không có URL, trả về ảnh placeholder
     if (!imageUrl) {
       return "https://via.placeholder.com/150";
     }
-
-    // Nếu là URL tuyệt đối, trả về trực tiếp
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
       return imageUrl;
     }
-
-    // Nếu là URL tương đối, thêm base URL của backend
     return `http://localhost:8080${imageUrl}`;
   };
 
+  // Function to format price (e.g., 6437 -> 6,437 $)
+  const formatPrice = (price) => {
+    if (!price) return "0 $";
+    return `${Math.round(price).toLocaleString("en-US")} $`;
+  };
+
+  // Fetch order history on component mount or page change
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -34,101 +37,109 @@ function OrderHistoryPage() {
       navigate("/auth");
       return;
     }
-    fetchOrderHistory();
-  }, [navigate]);
+    fetchOrderHistory(page);
+  }, [navigate, page]);
 
-  // Lấy dữ liệu đơn hàng từ các endpoint
-  const fetchOrderHistory = async () => {
+  // Fetch order history from the API with pagination
+  const fetchOrderHistory = async (pageNumber) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-
-      // Lấy danh sách đơn hàng hoàn tất (purchased)
-      const purchasedResponse = await fetch("http://localhost:8080/tirashop/orders/purchased", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const purchasedData = await purchasedResponse.json();
-      if (purchasedData.status === "success") {
-        setPurchasedItems(purchasedData.data || []);
-      } else {
-        toast.error(purchasedData.message || "Failed to fetch purchased items");
+      if (!token) {
+        throw new Error("No token found in localStorage");
       }
 
-      // Lấy danh sách đơn hàng đang chờ (pending)
-      const pendingResponse = await fetch("http://localhost:8080/tirashop/orders/pending", {
+      const url = `http://localhost:8080/tirashop/orders/orders/products?page=${pageNumber}&size=${pageSize}`;
+      console.log("Fetching orders from:", url);
+      console.log("Using token:", token);
+
+      const response = await fetch(url, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
+          Accept: "*/*",
+          "Content-Type": "application/json",
         },
       });
-      const pendingData = await pendingResponse.json();
-      if (pendingData.status === "success") {
-        setPendingItems(pendingData.data || []);
-      } else {
-        toast.error(pendingData.message || "Failed to fetch pending items");
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/auth");
+          toast.error("Session expired. Please log in again.");
+          return;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `HTTP error! Status: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
-      // Lấy danh sách đơn hàng đã hủy (cancelled)
-      const cancelledResponse = await fetch("http://localhost:8080/tirashop/orders/cancelled", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const cancelledData = await cancelledResponse.json();
-      if (cancelledData.status === "success") {
-        setCancelledItems(cancelledData.data || []);
+      const data = await response.json();
+      console.log("Order history response:", data);
+
+      if (data.status === "success") {
+        setOrderItems(data.data.elementList || []);
+        setTotalPages(data.data.totalPages || 1);
       } else {
-        toast.error(cancelledData.message || "Failed to fetch cancelled items");
+        throw new Error(data.message || "Failed to fetch order history");
       }
     } catch (err) {
-      toast.error("Error fetching order history: " + err.message);
+      console.error("Error fetching order history:", err);
+      toast.error(`Error fetching order history: ${err.message}`);
+      setOrderItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Hàm hiển thị danh sách sản phẩm
-  const renderOrderItems = (items, title) => (
+  // Handle page navigation
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  // Render the list of orders
+  const renderOrderItems = () => (
     <div className={styles.orderSection}>
-      <h2>{title}</h2>
-      {items.length === 0 ? (
-        <p>No items found in this category.</p>
+      <h2>Your Orders</h2>
+      {orderItems.length === 0 ? (
+        <p>No orders found.</p>
       ) : (
         <div className={styles.orderItems}>
-          {items.map((item) => {
-            // Log để debug
-            console.log('Item Image:', item.productImage);
-            
-            return (
-              <div key={item.productId} className={styles.orderItem}>
-                <div className={styles.itemImageContainer}>
-                  <img
-                    src={getImageUrl(item.productImage)}
-                    alt={item.productName || "Product"}
-                    className={styles.itemImage}
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/150";
-                      console.error('Image load error:', item.productImage);
-                    }}
-                  />
-                  <span className={styles.itemQuantity}>{item.quantity}</span>
-                </div>
-                <div className={styles.itemDetails}>
-                  <h3>{item.productName || "Unknown Product"}</h3>
-                  <p>Brand: {item.brandName || "N/A"}</p>
-                  <p>Category: {item.categoryName || "N/A"}</p>
-                  <p>Size: {item.size || "N/A"}</p>
-                  <p>Price: ${item.price?.toFixed(2) || "0.00"}</p>
-                  <p>Quantity: {item.quantity || 0}</p>
-                  <p>Purchased on: {new Date(item.createdAt).toLocaleString()}</p>
-                </div>
+          {orderItems.map((item, index) => (
+            <div
+              key={`${item.productName}-${index}`}
+              className={styles.orderItem}
+            >
+              <div className={styles.itemImageContainer}>
+                <img
+                  src={getImageUrl(item.productImage)}
+                  alt={item.productName || "Product"}
+                  className={styles.itemImage}
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/150";
+                    console.error("Image load error:", item.productImage);
+                  }}
+                />
+                <span className={styles.itemQuantity}>{item.quantity}</span>
               </div>
-            );
-          })}
+              <div className={styles.itemDetails}>
+                <h3>{item.productName || "Unknown Product"}</h3>
+                <p>Brand: {item.brand || "N/A"}</p>
+                <p>Category: {item.category || "N/A"}</p>
+                <p>Size: {item.size || "N/A"}</p>
+                <p className={styles.price}>
+                  Price: {formatPrice(item.totalPrice)}
+                </p>
+                <p>Quantity: {item.quantity || 0}</p>
+                <p>Address: {item.shipmentAddress || "N/A"}</p>
+                <p>Payment: {item.paymentMethod || "N/A"}</p>
+                <p>Voucher: {item.voucherCode || "None"}</p>
+                <p>Status: {item.orderStatus || "N/A"}</p>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -143,9 +154,26 @@ function OrderHistoryPage() {
           <p>Loading your order history...</p>
         ) : (
           <>
-            {renderOrderItems(pendingItems, "Pending Orders")}
-            {renderOrderItems(purchasedItems, "Purchased")}
-          
+            {renderOrderItems()}
+            <div className={styles.pagination}>
+              <button
+                className={styles.pageBtn}
+                disabled={page === 0}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                Previous
+              </button>
+              <span className={styles.pageInfo}>
+                Page {page + 1} of {totalPages}
+              </span>
+              <button
+                className={styles.pageBtn}
+                disabled={page >= totalPages - 1}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                Next
+              </button>
+            </div>
           </>
         )}
 

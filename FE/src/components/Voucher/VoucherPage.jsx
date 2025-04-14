@@ -1,4 +1,3 @@
-// src/components/Voucher/VoucherPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -11,23 +10,39 @@ const VoucherPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const parseDate = (dateStr) => {
+    try {
+      const [day, month, year] = dateStr.split("-");
+      const date = new Date(`${year}-${month}-${day}`);
+      if (isNaN(date.getTime())) {
+        return "Invalid Date";
+      }
+
+      const formattedDay = String(date.getDate()).padStart(2, "0");
+      const formattedMonth = String(date.getMonth() + 1).padStart(2, "0");
+      const formattedYear = date.getFullYear();
+
+      return `${formattedDay}/${formattedMonth}/${formattedYear}`;
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+
   const fetchVouchers = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        "http://localhost:8080/tirashop/voucher/list",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch("http://localhost:8080/tirashop/voucher", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       const data = await response.json();
-      if (data.status === "success" && data.data) {
-        setVouchers(data.data);
+      if (data.status === "success" && data.data?.elementList) {
+        setVouchers(data.data.elementList);
       } else {
         setError(data.message || "Failed to fetch vouchers");
         toast.error(data.message || "Failed to fetch vouchers");
@@ -78,11 +93,11 @@ const VoucherPage = () => {
                   </p>
                   <p>
                     <strong>Start Date: </strong>
-                    {new Date(voucher.startDate).toLocaleDateString()}
+                    {parseDate(voucher.startDate)}
                   </p>
                   <p>
                     <strong>End Date: </strong>
-                    {new Date(voucher.endDate).toLocaleDateString()}
+                    {parseDate(voucher.endDate)}
                   </p>
                   <p>
                     <strong>Status: </strong>
@@ -122,7 +137,7 @@ const VoucherPage = () => {
           </>
         )}
       </div>
-      <Footer></Footer>
+      <Footer />
     </>
   );
 };

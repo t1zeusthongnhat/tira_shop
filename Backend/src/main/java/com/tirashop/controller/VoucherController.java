@@ -28,6 +28,17 @@ public class VoucherController {
 
     VoucherService voucherService;
 
+    @GetMapping("/validate")
+    @Operation(summary = "Validate voucher by code", description = "Retrieve and validate voucher details by its code")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<VoucherDTO> validateVoucherByCode(@RequestParam(value = "code") String code) {
+        try {
+            VoucherDTO response = voucherService.validateVoucherByCode(code);
+            return new ApiResponse<>("success", 200, "Voucher is valid", response);
+        } catch (RuntimeException e) {
+            return new ApiResponse<>("error", 400, e.getMessage(), null);
+        }
+    }
 
     @GetMapping()
     @Operation(summary = "Get list and filter voucher by code and status")

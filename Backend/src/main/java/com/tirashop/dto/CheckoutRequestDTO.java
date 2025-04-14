@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CheckoutRequestDTO {
-    private String shippingAddress; // Địa chỉ nhận hàng
-    private String paymentMethod;   // COD, PAYPAL, VNPay
-    private Long voucherId;         // Mã voucher (nếu có)
+    private String shippingAddress;
+    private String paymentMethod;
+    private String voucherCode;
 }
 

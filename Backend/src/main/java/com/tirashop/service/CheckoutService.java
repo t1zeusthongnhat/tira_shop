@@ -33,11 +33,9 @@ public class CheckoutService {
     VoucherRepository voucherRepository;
 
     public OrderDTO checkout(String username, CheckoutRequestDTO request) {
-        // 1. Lấy người dùng từ username
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
 
-        // 2. Lấy giỏ hàng ACTIVE của người dùng
         Cart cart = cartRepository.findByUserIdAndStatus(user.getId(), Cart.CartStatus.ACTIVE)
                 .orElseThrow(() -> new RuntimeException("No active cart found for user: " + username));
 
@@ -45,7 +43,6 @@ public class CheckoutService {
             throw new RuntimeException("Cart is empty, cannot proceed to checkout.");
         }
 
-        // 3. Tính tổng giá trị đơn hàng
         double totalPrice = 0;
         for (CartItem cartItem : cart.getCartItems()) {
             Product product = cartItem.getProduct();
@@ -56,12 +53,10 @@ public class CheckoutService {
 
             totalPrice += cartItem.getQuantity() * product.getPrice();
         }
-
-        // 4. Áp dụng voucher nếu có
         Voucher voucher = null;
-        if (request.getVoucherId() != null) {
-            voucher = voucherRepository.findById(request.getVoucherId())
-                    .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + request.getVoucherId()));
+        if (request.getVoucherCode() != null) {
+            voucher = voucherRepository.findByCode(request.getVoucherCode())
+                    .orElseThrow(() -> new RuntimeException("Voucher not found"));
 
             if (voucher.getStatus() != Voucher.VoucherStatus.ACTIVE) {
                 throw new RuntimeException("Voucher is not active.");
@@ -80,18 +75,16 @@ public class CheckoutService {
             totalPrice = Math.max(totalPrice, 0);
         }
 
-        // 5. Tạo đơn hàng (Order)
         Order order = new Order();
         order.setUser(user);
         order.setShippingAddress(request.getShippingAddress());
         order.setTotalPrice(totalPrice);
-        order.setStatus(Order.OrderStatus.COMPLETED); // Đặt OrderStatus là COMPLETED
-        order.setPaymentStatus(Order.PaymentStatus.PENDING); // Đặt PaymentStatus là PENDING
+        order.setStatus(Order.OrderStatus.COMPLETED);
+        order.setPaymentStatus(Order.PaymentStatus.PENDING);
         order.setVoucher(voucher);
         order.setOrderItems(new ArrayList<>());
         orderRepository.save(order);
 
-        // 6. Tạo OrderItem cho từng sản phẩm
         for (CartItem cartItem : cart.getCartItems()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
@@ -108,35 +101,31 @@ public class CheckoutService {
             productRepository.save(product);
         }
 
-        // 7. Xử lý thanh toán
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentMethod(Payment.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()));
         payment.setAmount(totalPrice);
         payment.setPaymentMethod(Payment.PaymentMethod.COD);
-        payment.setStatus(Payment.PaymentStatus.PENDING); // Đặt PaymentStatus là PENDING
+        payment.setStatus(Payment.PaymentStatus.PENDING);
         payment.setCreatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
 
-        // 8. Tạo vận chuyển (Shipment) cho từng OrderItem
         for (OrderItem orderItem : order.getOrderItems()) {
             Shipment shipment = new Shipment();
             shipment.setOrder(order);
             shipment.setOrderItem(orderItem);
             shipment.setTrackingNumber(UUID.randomUUID().toString());
             shipment.setShippingMethod("Standard Shipping");
-            shipment.setStatus(Shipment.ShipmentStatus.SHIPPED); // Đặt ShipmentStatus là SHIPPED
+            shipment.setStatus(Shipment.ShipmentStatus.SHIPPED);
             shipment.setCreatedAt(LocalDateTime.now());
 
             shipmentRepository.save(shipment);
         }
 
-        // 9. Dọn dẹp giỏ hàng
         cart.getCartItems().clear();
         cart.setStatus(Cart.CartStatus.CHECKED_OUT);
         cartRepository.save(cart);
 
-        // 10. Trả về thông tin đơn hàng qua DTO
         return toOrderDTO(order);
     }
 

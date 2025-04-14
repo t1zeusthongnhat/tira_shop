@@ -9,14 +9,13 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
     description: "",
     price: "",
     inventory: "",
+    size: "XL",
     categoryId: "",
     brandId: "",
-    image: null,
   });
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -25,12 +24,11 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         description: "",
         price: "",
         inventory: "",
+        size: "XL",
         status: "Available", // Giá trị mặc định
         categoryId: null,
         brandId: null,
-        image: null,
       });
-      setPreviewImage(null);
     }
   }, [isOpen]);
 
@@ -61,14 +59,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProductData({ ...productData, image: file });
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -81,6 +71,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         price: parseFloat(productData.price),
         originalPrice: parseFloat(productData.originalPrice),
         inventory: parseInt(productData.inventory),
+        size: productData.size, 
         status: productData.status,
         categoryId: Number(productData.categoryId),
         brandId: Number(productData.brandId),
@@ -95,39 +86,15 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
       );
 
       const newProductId = productResponse.data.data.id;
-      console.log("✅ Product Created:", newProductId);
+      console.log("✅ Product Created:", newProductId); 
 
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // 2Kiểm tra nếu có ảnh thì tải lên
-      if (productData.image) {
-        console.log("📸 Preparing to upload image:", productData.image);
-
-        const formData = new FormData();
-        formData.append("file", productData.image); // 👈 Kiểm tra backend yêu cầu "file" hay "image"
-
-        const uploadResponse = await axios.post(
-          `http://localhost:8080/tirashop/product/${newProductId}/images/upload`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        console.log("Image Upload Response:", uploadResponse.data);
-      } else {
-        console.log("No image selected!");
-      }
 
       showToast("Product added successfully!", "success");
       onProductAdded(productResponse.data.data);
       onClose();
     } catch (err) {
-      console.error("Error uploading image:", err.response?.data || err);
-      showToast("Failed to add product or upload image.", "error");
+      
     }
 
     setLoading(false);
@@ -170,6 +137,21 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
           </div>
 
           <div className="mb-1">
+            <label className="block text-gray-700 text-sm font-medium">Size</label>
+            <select
+              name="size"
+              value={productData.size}
+              onChange={handleChange}
+              className="w-full px-3 py-1 border rounded-lg"
+            >
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
+          </div>
+
+
+          <div className="mb-1">
             <label className="block text-gray-700 text-sm font-medium">Status</label>
             <select
               name="status"
@@ -200,12 +182,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
                 <option key={brand.id} value={brand.id}>{brand.name}</option>
               ))}
             </select>
-          </div>
-
-          <div className="mb-3">
-            <label className="block text-gray-700 text-sm font-medium">Product Image</label>
-            <input type="file" accept="image/*" onChange={handleImageChange} className="w-full px-3 py-1 border rounded-lg" />
-            {previewImage && <img src={previewImage} alt="Preview" className="mt-2 w-20 h-20 object-cover rounded-lg" />}
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
