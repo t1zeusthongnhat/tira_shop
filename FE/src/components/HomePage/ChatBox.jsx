@@ -1,12 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaRegCommentDots } from "react-icons/fa";
-import { IoMdSend } from "react-icons/io";
 import { FiX } from "react-icons/fi";
 import styles from "./chatbot.module.scss";
 import { useAppContext } from "../../context/AppContext";
+import ChatInput from "./ChatInput";
+import ChatMessages from "./ChatMessages";
 
-const API_URL = "https://9d58-42-113-16-185.ngrok-free.app";
+
+const API_URL = "https://7c05-42-113-16-185.ngrok-free.app";
+
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();
@@ -15,8 +18,8 @@ const ChatBox = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
 
   // Lấy userId từ localStorage, mặc định là "guest" nếu không có
   const userId = localStorage.getItem("userId") || "guest";
@@ -77,26 +80,20 @@ const ChatBox = () => {
 
   // Cuộn xuống tin nhắn mới nhất
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
-  // Tập trung vào ô input khi chatbot mở
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 300);
+    if (messages.length > 0 && !isInputFocused) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [isOpen]);
+  }, [messages.length, isTyping, isInputFocused]);
 
-  const handleLinkClick = (productId) => {
+  const handleLinkClick = useCallback((productId) => {
     if (!isAuthenticated) {
       navigate("/auth");
       return;
     }
     navigate(`/product/${productId}`);
     setIsOpen(false);
-  };
+  }, [isAuthenticated, navigate]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -132,28 +129,19 @@ const ChatBox = () => {
 
       let botMessage;
 
-      if (input.toLowerCase().includes("xem sản phẩm") || input.toLowerCase().includes("view products")) {
-        if (!isAuthenticated) {
-          botMessage = {
-            role: "assistant",
-            content: "Please log in to view product details. You can log in here.",
-          };
-        } else {
-          const products = [
-            { id: 1, name: "Product 1", image: "https://via.placeholder.com/240x240?text=Product+1" },
-            { id: 2, name: "Product 2", image: "https://via.placeholder.com/240x240?text=Product+2" },
-          ];
-          botMessage = {
-            role: "assistant",
-            content: "Here are some products:",
-            products: products,
-          };
-        }
-      } else {
+      if (!isAuthenticated) {
         botMessage = {
           role: "assistant",
-          content: data.content || "Sorry, I didn't understand that.",
+          content: "Please log in to view product details. You can log in [here](/auth).",
         };
+      } else {
+        const contentWithLinks = data.replace(
+          /http:\/\/localhost:5173\/product\/(\d+)/g,
+          (match, productId) => {
+            return `[View Product ${productId}](#product-${productId})`;
+          }
+        );
+        botMessage = { role: "assistant", content: contentWithLinks };
       }
 
       setTimeout(() => {
@@ -175,13 +163,6 @@ const ChatBox = () => {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
   return (
     <div className={styles.chatContainer}>
       {isOpen && (
@@ -197,72 +178,20 @@ const ChatBox = () => {
             </button>
           </div>
 
-          <div className={styles.chatMessages}>
-            {messages.length === 0 ? (
-              <p className={styles.placeholderText}>Hello! Type your message...</p>
-            ) : (
-              messages.map((msg, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: "flex",
-                    justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-                  }}
-                >
-                  <div
-                    className={
-                      msg.role === "user" ? styles.userMessage : styles.assistantMessage
-                    }
-                  >
-                    <span className={styles.messageText}>{msg.content}</span>
-                    {msg.products && (
-                      <div className={styles.productList}>
-                        {msg.products.map((product) => (
-                          <div key={product.id} className={styles.productItem}>
-                            <img src={product.image} alt={product.name} />
-                            <span>{product.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-            {isTyping && (
-              <div className={styles.messageRow} style={{ justifyContent: "flex-start" }}>
-                <div className={styles.assistantMessage}>
-                  <div className={styles.typingIndicator}>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className={styles.inputContainer}>
-            <input
-              type="text"
-              placeholder="Type your message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className={styles.inputField}
-              ref={inputRef}
-              disabled={isTyping}
-            />
-            <button
-              onClick={sendMessage}
-              className={styles.sendButton}
-              disabled={!input.trim() || isTyping}
-              aria-label="Send message"
-            >
-              <IoMdSend />
-            </button>
-          </div>
+          <ChatMessages
+            messages={messages}
+            isTyping={isTyping}
+            messagesEndRef={messagesEndRef}
+            handleLinkClick={handleLinkClick}
+          />
+          <ChatInput
+            input={input}
+            setInput={setInput}
+            sendMessage={sendMessage}
+            isTyping={isTyping}
+            onFocus={() => setIsInputFocused(true)}
+            onBlur={() => setIsInputFocused(false)}
+          />
         </div>
       )}
       <button

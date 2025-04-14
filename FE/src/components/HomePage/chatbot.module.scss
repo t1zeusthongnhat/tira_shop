@@ -5,41 +5,6 @@
   z-index: 1000;
 }
 
-.typingIndicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.typingIndicator span {
-  width: 8px;
-  height: 8px;
-  background-color: #ff6b8b;
-  border-radius: 50%;
-  display: inline-block;
-  animation: typing 0.8s infinite ease-in-out;
-}
-
-.typingIndicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typingIndicator span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-  50% {
-    transform: translateY(-4px);
-    opacity: 1;
-  }
-}
-
 .chatBox {
   width: 380px;
   height: 600px;
@@ -143,16 +108,15 @@
 }
 
 .chatMessages img {
-  width: 100%;
-  max-width: 200px;
+  width: 100%;              // Chiếm tối đa chiều ngang container
+  max-width: 200px;         // ✅ Giới hạn chiều ngang ảnh
   height: auto;
   border-radius: 12px;
-  object-fit: contain;
+  object-fit: contain;      // Tránh bị méo ảnh
   display: block;
   margin: 8px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 .chatMessages img:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
@@ -160,7 +124,7 @@
 
 .messageRow {
   display: flex;
-  margin-bottom: 54px; /* Tăng khoảng cách giữa các hàng tin nhắn từ 16px lên 24px */
+  margin-bottom: 16px;
   position: relative;
   animation: fadeIn 0.3s ease-out;
 }
@@ -177,24 +141,22 @@
 }
 
 .userMessage {
-  background: linear-gradient(135deg, #f98ea6, #f9b0c9);
+  background: linear-gradient(135deg, #f98ea6, #f9b0c9); // ✅ dịu hơn
   color: white;
   border-radius: 18px 18px 4px 18px;
   padding: 8px 14px;
   max-width: 70%;
   font-size: 14px;
-  margin: 15px 0px;
-  line-height: 1.8;
+  line-height: 1.4;
   word-break: break-word;
   white-space: pre-wrap;
   display: inline-block;
   width: fit-content;
   box-shadow: 0 2px 8px rgba(249, 142, 166, 0.25);
-  margin-left: 12px; /* Tăng khoảng cách bên trái để tin nhắn của user không sát mép */
 }
 
 .assistantMessage {
-  background: #fef2f5;
+  background: #fef2f5; // ✅ sáng và dễ chịu hơn
   color: #333333;
   border-radius: 18px 18px 18px 4px;
   padding: 10px 14px;
@@ -202,7 +164,6 @@
   font-size: 14px;
   line-height: 1.5;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-right: 12px; /* Tăng khoảng cách bên phải để tin nhắn của assistant không sát mép */
 }
 
 .userMessage a,
@@ -259,7 +220,7 @@
   line-height: 1.4;
 }
 
-.productList { /* Đổi tên class từ product-list thành productList để khớp với JSX */
+.product-list {
   background: #fff5f7;
   padding: 16px;
   border-radius: 16px;
@@ -270,7 +231,7 @@
   gap: 16px;
 }
 
-.productItem { /* Đổi tên class từ product-item thành productItem để khớp với JSX */
+.product-item {
   background: white;
   padding: 12px;
   border-radius: 12px;
@@ -279,25 +240,25 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.productItem:hover {
+.product-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.productList h3 {
+.product-list h3 {
   color: #ff6b8b;
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
-.productList p {
+.product-list p {
   margin: 5px 0;
   font-size: 13px;
   color: #555555;
 }
 
-.productList img {
+.product-list img {
   width: 100%;
   height: 110px;
   object-fit: cover;
@@ -306,12 +267,13 @@
 }
 
 .inputContainer {
-  background: #ffffff;
+  background: #ffffff;               // ✅ đổi từ đen → trắng
   border-top: 1px solid #eeeeee;
   padding: 16px 20px;
   display: flex;
   align-items: center;
 }
+
 
 .inputField {
   flex: 1;
@@ -334,7 +296,6 @@
 .inputField::placeholder {
   color: #bdbdbd;
 }
-
 @media (prefers-color-scheme: dark) {
   /* Ép phần nhập luôn trắng */
   .inputContainer {
@@ -372,6 +333,7 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
 }
+
 
 .sendButton:hover {
   background: #ff4d6d;
@@ -423,19 +385,21 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .chatBox {
-    background: #ffffff;
+    background: #ffffff; // ✅ Nền trắng
     color: #111111;
   }
-
+  
   .chatMessages {
-    background: #ffffff;
+    background: #ffffff; // ✅ trắng toàn phần
   }
+  
 
   .assistantMessage {
-    background: #f8f8f8;
+    background: #f8f8f8; // ✅ Trắng nhẹ, phân biệt với nền
     color: #333333;
     border: 1px solid #e0e0e0;
   }
+  
 
   .inputContainer {
     background: #1e1e2c;
@@ -457,16 +421,16 @@
     color: #8e8e9a;
   }
 
-  .productList {
+  .product-list {
     background: #2e2a33;
     border-color: #3d2a33;
   }
 
-  .productItem {
+  .product-item {
     background: #2a2a38;
   }
 
-  .productList p {
+  .product-list p {
     color: #b0b0ba;
   }
 

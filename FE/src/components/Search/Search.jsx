@@ -3,21 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
 import micIcon from "../../assets/images/mic.png";
-import imageSearchIcon from "../../assets/icons/images/imageSearch.png";
 
 const Search = ({ isSearchOpen, setIsSearchOpen }) => {
-  const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(false);
   const [language, setLanguage] = useState("en");
-  const [isImageSearching, setIsImageSearching] = useState(false); // Fixed: Changed setIsRecording to setIsImageSearching
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timeoutRef = useRef(null);
-  const debounceTimeoutRef = useRef(null);
 
-  const RECORDING_DURATION = 1500;
-  const MAX_RETRIES = 2; // Number of retries for voice search
+  const RECORDING_DURATION = 2000;
+  const MAX_RETRIES = 2;
 
   const startRecording = () => {
     navigator.mediaDevices
@@ -100,10 +96,9 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
           navigate("/category/all", { state: { searchResults: products, query: "Voice Search" } });
         }
       } else {
-        // Handle Deepgram-specific error messages
         if (data.message && data.message.includes("NoHttpResponseException") && retryCount < MAX_RETRIES) {
           toast.warn(`Voice search failed due to network issue. Retrying (${retryCount + 1}/${MAX_RETRIES})...`);
-          await new Promise((resolve) => setTimeout(resolve, 2000 * (retryCount + 1))); // Exponential backoff
+          await new Promise((resolve) => setTimeout(resolve, 2000 * (retryCount + 1)));
           return sendVoiceSearch(audioBlob, retryCount + 1);
         }
         toast.error(data.message || "Please speak again, more clearly.");
@@ -126,88 +121,8 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
     };
   }, []);
-
-  const handleImageSearch = () => {
-    fileInputRef.current.click();
-  };
-
-  const debounce = (func, delay) => {
-    return (...args) => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-      debounceTimeoutRef.current = setTimeout(() => func(...args), delay);
-    };
-  };
-
-  const handleFileChange = debounce(async (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      toast.error("Please select an image to search.");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size must be less than 5MB.");
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file.");
-      return;
-    }
-
-    setIsImageSearching(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-      const response = await fetch(
-        "http://localhost:8080/tirashop/product/search-by-image?page=0&size=10&sort=createdAt",
-        {
-          method: "POST",
-          headers: {
-            accept: "*/*",
-          },
-          body: formData,
-          signal: controller.signal,
-        }
-      );
-
-      clearTimeout(timeoutId);
-      const data = await response.json();
-
-      if (response.ok && data.status === "success") {
-        const products = data.data.elementList || [];
-        if (products.length === 0) {
-          toast.info("No matching products found for this image.");
-          navigate("/category/all", { state: { searchResults: [], query: "Image Search" } });
-        } else {
-          navigate("/category/all", {
-            state: { searchResults: products, query: "Image Search" },
-          });
-        }
-      } else {
-        console.log("Error response:", data);
-        toast.error(data.message || "Unable to search by image. Please try again.");
-      }
-    } catch (err) {
-      if (err.name === "AbortError") {
-        toast.error("Image search timed out. Please try again.");
-      } else {
-        toast.error(`Image search error: ${err.message}`);
-      }
-    } finally {
-      setIsImageSearching(false);
-    }
-  }, 300);
 
   const handleKeyPressSearch = async (event) => {
     if (event.key === "Enter") {
@@ -281,29 +196,6 @@ const Search = ({ isSearchOpen, setIsSearchOpen }) => {
           <img src={micIcon} alt="Voice Search" width="24" height="24" />
           <span>Voice Search</span>
         </button>
-
-        <button
-          className={styles.iconButton}
-          onClick={handleImageSearch}
-          disabled={isImageSearching}
-        >
-          {isImageSearching ? (
-            <span className={styles.spinner}></span>
-          ) : (
-            <>
-              <img src={imageSearchIcon} alt="Image Search" width="24" height="24" />
-              <span>Image Search</span>
-            </>
-          )}
-        </button>
-
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          className={styles.hiddenFileInput}
-          onChange={handleFileChange}
-        />
 
         <button
           className={styles.closeSearch}
