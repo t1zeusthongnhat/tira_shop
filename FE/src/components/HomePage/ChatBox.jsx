@@ -7,7 +7,7 @@ import { useAppContext } from "../../context/AppContext";
 import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";
 
-const API_URL = "https://23b0-42-113-16-185.ngrok-free.app";
+const API_URL = "https://5d5c-118-70-133-195.ngrok-free.app";
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();

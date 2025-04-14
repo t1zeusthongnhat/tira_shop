@@ -1,10 +1,9 @@
-import { useRef } from "react";
+// import { useRef } from "react";
+import PropTypes from "prop-types"; // Import PropTypes
 import styles from "./chatbot.module.scss";
 import { IoMdSend } from "react-icons/io";
 
-const ChatInput = ({ input, setInput, sendMessage, isTyping }) => {
-  const inputRef = useRef(null);
-
+const ChatInput = ({ input, setInput, sendMessage, isTyping, inputRef, onFocus, onBlur }) => {
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -20,6 +19,8 @@ const ChatInput = ({ input, setInput, sendMessage, isTyping }) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
         className={styles.inputField}
         ref={inputRef}
         disabled={isTyping}
@@ -34,6 +35,19 @@ const ChatInput = ({ input, setInput, sendMessage, isTyping }) => {
       </button>
     </div>
   );
+};
+
+// Define PropTypes for the component
+ChatInput.propTypes = {
+  input: PropTypes.string.isRequired,
+  setInput: PropTypes.func.isRequired,
+  sendMessage: PropTypes.func.isRequired,
+  isTyping: PropTypes.bool.isRequired,
+  inputRef: PropTypes.shape({
+    current: PropTypes.instanceOf(Element),
+  }),
+  onFocus: PropTypes.func.isRequired,
+  onBlur: PropTypes.func.isRequired,
 };
 
 export default ChatInput;

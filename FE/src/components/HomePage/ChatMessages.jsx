@@ -1,5 +1,6 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import ReactMarkdown from "react-markdown";
+import PropTypes from "prop-types"; // Import PropTypes
 import styles from "./chatbot.module.scss";
 
 // Define the component with a display name
@@ -69,7 +70,6 @@ const ChatMessages = memo(
       </div>
     );
   },
-  // Custom comparison function for React.memo to prevent unnecessary renders
   (prevProps, nextProps) => {
     return (
       prevProps.messages === nextProps.messages &&
@@ -81,5 +81,27 @@ const ChatMessages = memo(
 
 // Set the display name for better debugging
 ChatMessages.displayName = "ChatMessages";
+
+// Define PropTypes for the component
+ChatMessages.propTypes = {
+  messages: PropTypes.arrayOf(
+    PropTypes.shape({
+      role: PropTypes.string.isRequired,
+      content: PropTypes.string.isRequired,
+      products: PropTypes.arrayOf(
+        PropTypes.shape({
+          id: PropTypes.number.isRequired,
+          name: PropTypes.string.isRequired,
+          image: PropTypes.string.isRequired,
+        })
+      ),
+    })
+  ).isRequired,
+  isTyping: PropTypes.bool.isRequired,
+  messagesEndRef: PropTypes.shape({
+    current: PropTypes.instanceOf(Element),
+  }),
+  handleLinkClick: PropTypes.func.isRequired,
+};
 
 export default ChatMessages;
