@@ -6,7 +6,7 @@ import { FiX } from "react-icons/fi";
 import styles from "./chatbot.module.scss";
 import { useAppContext } from "../../context/AppContext";
 
-const API_URL = "https://ffa3-42-113-16-185.ngrok-free.app";
+const API_URL = "https://9d58-42-113-16-185.ngrok-free.app";
 
 const ChatBox = () => {
   const { isAuthenticated } = useAppContext();

@@ -4,8 +4,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import io.github.cdimascio.dotenv.Dotenv;
+
 import java.io.IOException;
 import java.util.Set;
+
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,8 +51,8 @@ public class OpenAiModerationService {
 
             Set<String> bannedLabels = Set.of(
                     "sex", "sexual", "body", "weapons", "guns", "violence", "racism", "religion",
-                    "extremism", "drugs", "hate", "abuse", "waste", "toilet", "naked","bikini","bra",
-                    "breast","nipple","nates", "pussy", "dick","remote","scissors","handbag"
+                    "extremism", "drugs", "hate", "abuse", "waste", "toilet", "naked", "bikini", "bra",
+                    "breast", "nipple", "nates", "pussy", "dick", "remote", "scissors", "handbag"
             );
 
             for (int i = 0; i < detectedObjects.size(); i++) {
@@ -80,6 +82,17 @@ public class OpenAiModerationService {
 
     public boolean isContentSafe(String text) {
         try {
+            String prompt = "Evaluate the following text to determine if it contains any of the following characteristics: \n" +
+                    "- Offensive (insulting, derogatory, or disrespectful language)\n" +
+                    "- Harmful (promoting violence, hate, or discrimination)\n" +
+                    "- Explicit (containing profanity, vulgarity, or sexually suggestive content)\n" +
+                    "- Inappropriate (content that is unsuitable for a general audience, including crude or distasteful remarks)\n" +
+                    "- Negative (excessively critical, disparaging, or demoralizing comments, especially about products, services, or individuals)\n" +
+                    "- Abusive (personal attacks, bullying, or harassment)\n" +
+                    "- Exaggerated or inflammatory (overly dramatic or sensationalized negativity that may mislead or provoke)\n" +
+                    "The text may be in any language (e.g., English, Vietnamese, Chinese, Spanish). If the text exhibits any of these traits, answer 'NO'. If the text is neutral, positive, or otherwise safe, answer 'YES'. Answer strictly with 'YES' or 'NO':\n" +
+                    text;
+
             String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL_NAME
                     + ":generateContent?key=" + API_KEY;
 
@@ -91,9 +104,7 @@ public class OpenAiModerationService {
             JsonObject contentObject = new JsonObject();
             JsonArray partsArray = new JsonArray();
             JsonObject textObject = new JsonObject();
-            textObject.addProperty("text",
-                    "Is this text offensive, harmful, explicit, or inappropriate? Answer strictly with 'YES' or 'NO': "
-                            + text);
+            textObject.addProperty("text", prompt);
             partsArray.add(textObject);
             contentObject.add("parts", partsArray);
             contentsArray.add(contentObject);
@@ -101,10 +112,7 @@ public class OpenAiModerationService {
 
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<String> requestEntity = new HttpEntity<>(requestBody.toString(), headers);
-            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST,
-                    requestEntity, String.class);
-
-            System.out.println("API Response: " + response.getBody());
+            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, requestEntity, String.class);
 
             JsonObject responseJson = JsonParser.parseString(response.getBody()).getAsJsonObject();
             if (responseJson.has("candidates")) {
@@ -115,8 +123,8 @@ public class OpenAiModerationService {
                         JsonArray parts = candidate.getAsJsonObject("content").getAsJsonArray("parts");
                         for (int j = 0; j < parts.size(); j++) {
                             String responseText = parts.get(j).getAsJsonObject().get("text").getAsString().toLowerCase();
-                            if (responseText.contains("yes")) {
-                                System.out.println("This content is prohibited by Gemini AI!");
+                            if (responseText.contains("no")) {
+                                System.out.println("Content flagged as unsafe by Gemini AI: " + text);
                                 return false;
                             }
                         }
@@ -124,23 +132,10 @@ public class OpenAiModerationService {
                 }
             }
 
-
-            String[] forbiddenTerms = new String[] {
-                    "nôn mửa", "buồn nôn", "bốc mùi", "vô giáo dục", "bạo lực", "phân biệt giới tính",
-                    "phân biệt chủng tộc", "phân biệt tôn giáo", "đả kích","muốn mửa"
-            };
-
-            for (String term : forbiddenTerms) {
-                if (text.toLowerCase().contains(term)) {
-                    System.out.println("Text contains prohibited term: " + term);
-                    return false;
-                }
-            }
-
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error processing content: " + e.getMessage());
             return false;
         }
     }
