@@ -8,7 +8,7 @@ import ChatInput from "./ChatInput";
 import ChatMessages from "./ChatMessages";
 
 
-const API_URL = "https://7c05-42-113-16-185.ngrok-free.app";
+const API_URL = " https://e218-118-70-99-236.ngrok-free.app";
 
 
 const ChatBox = () => {
